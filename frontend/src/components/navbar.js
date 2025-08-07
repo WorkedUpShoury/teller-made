@@ -13,7 +13,6 @@ function AppNavbar() {
           <Nav className="ms-auto"> {/* Align to right */}
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/upload">Resume</Nav.Link>
-            <Nav.Link as={Link} to="/smart-editor">Editor</Nav.Link>
             <Nav.Link as={Link} to="/chat-assistant">AI Assist</Nav.Link>
 
             <NavDropdown title="Account" id="account-dropdown">
@@ -28,3 +27,4 @@ function AppNavbar() {
 }
 
 export default AppNavbar;
+
