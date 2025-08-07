@@ -1,0 +1,147 @@
+:root {
+  --primary-color: #9c27b0;  /* Purple */
+  --secondary-color: #e91e63; /* Pink */
+  --accent-color: #c2185b;   /* Crimson */
+  --dark-color: #4a148c;     /* Dark Purple */
+  --light-color: #f3e5f5;    /* Light Purple */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+/* Update button colors */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(93, 60, 139, 0.3);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(93, 60, 139, 0.2);
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-link {
+  color: var(--dark-color) !important;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--secondary-color) !important;
+}
+.nav-link-item.active {
+  color: #5d3c8b !important;
+  font-weight: 600;
+}
+
+/* Hero section */
+.hero-section {
+  background: linear-gradient(135deg, var(--light-color) 0%, white 100%);
+}
+.hero-section .free-forever-text {
+  text-align: left;
+  margin-left: 80px;
+  padding-left: 0;
+}
+
+/* Navbar Styles */
+.custom-navbar {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.nav-link-item {
+  color: #555555 !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link-item:hover {
+  color: #5d3c8b !important;
+  background-color: rgba(93, 60, 139, 0.05) !important;
+}
+
+.nav-icon {
+  color: #7a5b9a;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.nav-link-item:hover .nav-icon {
+  color: #5d3c8b;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none !important;
+}
+
+/* Active state */
+.nav-link-item.active {
+  color: #5d3c8b !important;
+  font-weight: 600;
+}
+
+/* Auth Tabs */
+.nav-tabs {
+  border-bottom: 2px solid var(--light-color);
+}
+
+.nav-tabs .nav-link {
+  color: var(--dark-color);
+  border: none;
+  padding: 12px 20px;
+  font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: transparent;
+  color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+/* Auth form transitions */
+.tab-content {
+  transition: all 0.3s ease;
+}
+
+/* Fix for smooth scrolling with tabs */
+.tab-pane {
+  padding-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .auth-form {
+    padding: 1.5rem;
+  }
+}
