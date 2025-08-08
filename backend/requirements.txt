@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+python-docx
+PyMuPDF
+spacy
+openai
+werkzeug
