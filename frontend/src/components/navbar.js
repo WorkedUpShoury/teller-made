@@ -14,7 +14,7 @@ function AppNavbar() {
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/upload">Resume</Nav.Link>
             <Nav.Link as={Link} to="/chat-assistant">AI Assist</Nav.Link>
-
+            <Nav.Link as={Link} to="/smart-editor">Editor</Nav.Link>
             <NavDropdown title="Account" id="account-dropdown">
               <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/register">Register</NavDropdown.Item>
@@ -27,4 +27,5 @@ function AppNavbar() {
 }
 
 export default AppNavbar;
+
 
