@@ -2,142 +2,213 @@ import React, { useState, useRef, useEffect } from 'react';
 
 function ResumeUploadPage() {
   const [resumeFile, setResumeFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
   const [jobDesc, setJobDesc] = useState('');
   const [loading, setLoading] = useState(false);
-  const [chat, setChat] = useState([]);
-  const chatEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setResumeFile(file);
-    if (file) {
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
-    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current.click();
   };
 
   const handleSubmit = async () => {
     if (!resumeFile || !jobDesc) {
-      alert('Please upload resume and enter job description.');
+      alert('Please upload your resume and paste the job description.');
       return;
     }
 
-    // Simulated AI response (Replace with actual API later)
-    const userMessage = `Please optimize my resume based on this job description:\n${jobDesc}`;
-    const aiResponse = `✅ Your resume has been optimized based on the job description! Click below to download.`;
-
     setLoading(true);
-    setChat((prev) => [...prev, { sender: 'user', text: userMessage }]);
 
-    setTimeout(() => {
-      setChat((prev) => [...prev, { sender: 'ai', text: aiResponse }]);
+    // Use FormData to send the file and text to the backend
+    const formData = new FormData();
+    formData.append('resumeFile', resumeFile);
+    formData.append('jobDesc', jobDesc);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/optimize', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        // Try to get error message from backend, or use default
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `HTTP error! Status: ${response.status}`);
+      }
+
+      // Handle the file download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'optimized_resume.docx'); // Set the filename
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert('✅ Your resume has been optimized! The download has started.');
+
+    } catch (error) {
+      console.error('Error optimizing resume:', error);
+      alert(`❌ Optimization failed: ${error.message}`);
+    } finally {
       setLoading(false);
-    }, 2000); // Simulated 2 sec delay
-  };
-
-  const handleDownload = () => {
-    // Simulated download logic
-    alert('🔽 Resume download started!');
-  };
-
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [chat]);
+  };
 
   return (
-    <div className="container py-5">
-      <h2 className="mb-4">Resume and Job Description Upload</h2>
+    <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      <div className="row justify-content-center py-5">
+        <div className="col-md-8 col-lg-6 text-center">
+          {/* Header Section */}
+          <h1 className="mb-4" style={{ color: '#2c3e50', fontWeight: '700' }}>
+            <>
+            Tailor Your Resume with{' '}
+            <span style={{
+              background: 'linear-gradient(#A326A9, #D9529A)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              AI Precision
+            </span>
+          </>
 
-      {/* Upload Section */}
-      <div className="mb-3">
-        <label className="form-label fw-bold">Upload Resume (PDF)</label>
-        <input
-          type="file"
-          accept=".pdf"
-          className="form-control"
-          onChange={handleFileChange}
-        />
-      </div>
 
-      {/* Preview Button */}
-      {previewUrl && (
-        <div className="mb-4">
-          <button
-            className="btn btn-outline-secondary btn-sm mb-2"
-            onClick={() => window.open(previewUrl, '_blank')}
-          >
-            Preview Resume
-          </button>
-        </div>
-      )}
+          </h1>
+          <p className="lead mb-5" style={{ color: '#7f8c8d' }}>
+            Upload your resume, optimize keywords, and pass ATS filters to land your dream job.
+          </p>
 
-      {/* JD Entry */}
-      <div className="mb-3">
-        <label className="form-label fw-bold">Job Description</label>
-        <textarea
-          className="form-control"
-          rows="6"
-          value={jobDesc}
-          onChange={(e) => setJobDesc(e.target.value)}
-          placeholder="Paste the job description here..."
-        />
-      </div>
-
-      {/* Analyze Button */}
-      <button className="btn btn-primary" onClick={handleSubmit}>
-        Analyze
-      </button>
-
-      {/* Loading Spinner */}
-      {loading && (
-        <div className="mt-4 text-center">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2">Analyzing with AI...</p>
-        </div>
-      )}
-
-      {/* AI Chat Section */}
-      {chat.length > 0 && (
-        <div className="mt-5">
-          <h4 className="mb-3">💬 AI Assistant</h4>
-
-          <div
-            className="chat-box p-3 mb-3 bg-light rounded shadow-sm"
-            style={{ maxHeight: '300px', overflowY: 'auto' }}
-          >
-            {chat.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`mb-3 p-2 rounded ${msg.sender === 'ai' ? 'bg-primary text-white' : 'bg-white border'}`}
+          {/* Upload Card */}
+          <div className="card shadow-sm p-4 mb-5 bg-white rounded" style={{ border: 'none' }}>
+            {/* Upload Button */}
+            <div className="mb-4">
+              <div 
+                className="d-flex flex-column align-items-center justify-content-center p-5 border rounded"
+                style={{ 
+                  backgroundColor: '#f0f7fd', 
+                  border: '2px dashed #db00b6 !important',
+                  cursor: 'pointer'
+                }}
+                onClick={handleUploadClick}
               >
-                <strong>{msg.sender === 'ai' ? 'AI Assistant' : 'You'}:</strong>
-                <div className="mt-1">{msg.text}</div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".pdf,.doc,.docx"
+                  className="d-none"
+                  onChange={handleFileChange}
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#db00b6" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                </svg>
+                <h5 className="mt-3" style={{ color: '#db00b6' }}>
+                  {resumeFile ? resumeFile.name : 'Upload Your Resume'}
+                </h5>
+                <p className="text-muted">PDF, DOC, DOCX (Max 5MB)</p>
               </div>
-            ))}
-            <div ref={chatEndRef} />
+            </div>
+
+            {/* Job Description Textarea */}
+            <div className="mb-4">
+              <label className="form-label fw-bold" style={{ color: '#db00b6' }}>Job Description</label>
+              <textarea
+                className="form-control"
+                rows="8"
+                value={jobDesc}
+                onChange={(e) => setJobDesc(e.target.value)}
+                placeholder="Paste the job description here..."
+                style={{ borderColor: '#dfe6e9' }}
+              />
+            </div>
+
+            {/* Analyze Button */}
+            <button 
+              className="btn btn-primary w-100 py-3 fw-bold" 
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{ 
+                background: 'linear-gradient(45deg, #A326A9, #D9529A)', 
+                border: 'none',
+                fontSize: '1.1rem'
+              }}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Optimizing...
+                </>
+              ) : (
+                'Optimize My Resume'
+              )}
+            </button>
           </div>
 
-          {/* Chat input (disabled for now) */}
-          <textarea
-            className="form-control"
-            placeholder="AI Assistant will respond here after analysis..."
-            rows="2"
-            disabled
-          />
-
-          {/* Download Button (after AI reply) */}
-          {chat.some((msg) => msg.sender === 'ai') && (
-            <div className="mt-3 text-end">
-              <button className="btn btn-success" onClick={handleDownload}>
-                Download Optimized Resume
-              </button>
+          {/* Features Section */}
+          <div className="row mt-5">
+            <div className="col-md-4 mb-4">
+              <div className="p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-magic" viewBox="0 0 16 16">
+                  <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0v1.829zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707L14 2.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707L7.293 4zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1h1.829zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1h1.829zM13.293 10a.5.5 0 1 0 .707 0L14 8.707a.5.5 0 0 0-.707-.707L13.293 10zm-7.171 0a.5.5 0 1 0 .707 0L8 8.707a.5.5 0 0 0-.707-.707L6.293 10zM4.5 13.157a.5.5 0 1 0 1 0v-1.829a.5.5 0 1 0-1 0v1.829zm10.5-.035a.5.5 0 0 0 .707-.707L14 12.707a.5.5 0 0 0-.707.707l1.293 1.293zm-8.486 0a.5.5 0 0 0 .707-.707L6 12.707a.5.5 0 0 0-.707.707l1.293 1.293z"/>
+                  <path d="M8 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                </svg>
+                <h5 className="mt-2" style={{ color: '#2c3e50' }}>AI Optimization</h5>
+                <p className="text-muted">Smart keyword matching for ATS systems</p>
+              </div>
             </div>
-          )}
+            <div className="col-md-4 mb-4">
+              <div className="p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-chat-square-text" viewBox="0 0 16 16">
+                  <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                  <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                <h5 className="mt-2" style={{ color: '#2c3e50' }}>ATS Friendly</h5>
+                <p className="text-muted">Format optimized for applicant tracking systems</p>
+              </div>
+            </div>
+            <div className="col-md-4 mb-4">
+              <div className="p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-lightning-charge" viewBox="0 0 16 16">
+                  <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09zM4.157 8.5H7a.5.5 0 0 1 .478.647L6.11 13.59l5.732-6.09H9a.5.5 0 0 1-.478-.647L9.89 2.41 4.157 8.5z"/>
+                </svg>
+                <h5 className="mt-2" style={{ color: '#2c3e50' }}>Fast Results</h5>
+                <p className="text-muted">Get an optimized resume in seconds</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer CTA */}
+          <div 
+            className="mt-4 p-4 text-white rounded"
+            style={{
+              background: 'linear-gradient(45deg, #A326A9, #D9529A)'
+            }}
+          >
+            <h4>Ready to transform your job search?</h4>
+            <p>Free forever • No credit card required</p>
+            <button 
+              className="px-4 py-2 fw-bold"
+              style={{
+                background: 'white',
+                color: '#A326A9',
+                border: 'none',
+                borderRadius: '4px'
+              }}
+            >
+              Try it Now
+            </button>
+          </div>
+
         </div>
-      )}
+      </div>
     </div>
   );
 }
