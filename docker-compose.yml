@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:15
+    container_name: tellermade_db
+    environment:
+      POSTGRES_USER: tellermade
+      POSTGRES_PASSWORD: tellermade
+      POSTGRES_DB: tellermade
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
