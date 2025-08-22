@@ -1,216 +1,306 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
+import "./ResumeUploadPage.css";
 
-function ResumeUploadPage() {
+const MAX_MB = 5;
+const ACCEPTED = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
+export default function ResumeUploadPage() {
   const [resumeFile, setResumeFile] = useState(null);
-  const [jobDesc, setJobDesc] = useState('');
+  const [jobDesc, setJobDesc] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const fileInputRef = useRef(null);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setResumeFile(file);
+  const step = !resumeFile ? 1 : jobDesc.trim() ? 3 : 2;
+
+  useEffect(() => {
+    if (error) {
+      const t = setTimeout(() => setError(""), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [error]);
+
+  const clickFilePicker = () => fileInputRef.current?.click();
+
+  const validateFile = (file) => {
+    if (!file) return "No file selected.";
+    if (!ACCEPTED.includes(file.type)) return "Please upload a PDF or Word document (.pdf, .doc, .docx).";
+    if (file.size > MAX_MB * 1024 * 1024) return `File is too large (max ${MAX_MB}MB).`;
+    return "";
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current.click();
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    const err = validateFile(file);
+    if (err) {
+      setError(err);
+      setResumeFile(null);
+    } else {
+      setResumeFile(file);
+      setSuccess("");
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    const err = validateFile(file);
+    if (err) {
+      setError(err);
+      setResumeFile(null);
+    } else {
+      setResumeFile(file);
+      setSuccess("");
+    }
   };
 
   const handleSubmit = async () => {
-    if (!resumeFile || !jobDesc) {
-      alert('Please upload your resume and paste the job description.');
+    setSuccess("");
+    setError("");
+    if (!resumeFile || !jobDesc.trim()) {
+      setError("Please upload your resume and paste the job description.");
       return;
     }
 
     setLoading(true);
 
-    // Use FormData to send the file and text to the backend
     const formData = new FormData();
-    formData.append('resumeFile', resumeFile);
-    formData.append('jobDesc', jobDesc);
+    formData.append("resumeFile", resumeFile);
+    formData.append("jobDesc", jobDesc);
 
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/optimize', {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:5001/api/optimize", {
+        method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        // Try to get error message from backend, or use default
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.error || `HTTP error! Status: ${response.status}`);
       }
 
-      // Handle the file download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', 'optimized_resume.docx'); // Set the filename
+      link.setAttribute("download", "optimized_resume.docx");
       document.body.appendChild(link);
       link.click();
-      
-      // Clean up
-      link.parentNode.removeChild(link);
+      link.remove();
       window.URL.revokeObjectURL(url);
 
-      alert('✅ Your resume has been optimized! The download has started.');
-
-    } catch (error) {
-      console.error('Error optimizing resume:', error);
-      alert(`❌ Optimization failed: ${error.message}`);
+      setSuccess("Your resume has been optimized! The download has started.");
+    } catch (err) {
+      console.error("Error optimizing resume:", err);
+      setError(`Optimization failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
+  const removeFile = () => setResumeFile(null);
+
   return (
-    <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <div className="row justify-content-center py-5">
-        <div className="col-md-8 col-lg-6 text-center">
-          {/* Header Section */}
-          <h1 className="mb-4" style={{ color: '#2c3e50', fontWeight: '700' }}>
-            <>
-            Tailor Your Resume with{' '}
-            <span style={{
-              background: 'linear-gradient(#A326A9, #D9529A)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              AI Precision
-            </span>
-          </>
+    <div className="ru-root">
+      <div className="ru-bg" aria-hidden />
 
+      <section className="ru-hero">
+        <h1 className="ru-title">
+          Tailor Your Resume with <span className="ru-grad">AI Precision</span>
+        </h1>
+        <p className="ru-subtitle">
+          Upload your resume, optimize keywords, and pass ATS filters to land your dream job.
+        </p>
+      </section>
 
-          </h1>
-          <p className="lead mb-5" style={{ color: '#7f8c8d' }}>
-            Upload your resume, optimize keywords, and pass ATS filters to land your dream job.
-          </p>
+      <div className="ru-layout">
+        {/* Main */}
+        <div className="ru-main">
+          <div className="ru-card" aria-busy={loading}>
+            <div className="ru-ribbon" aria-hidden />
 
-          {/* Upload Card */}
-          <div className="card shadow-sm p-4 mb-5 bg-white rounded" style={{ border: 'none' }}>
-            {/* Upload Button */}
-            <div className="mb-4">
-              <div 
-                className="d-flex flex-column align-items-center justify-content-center p-5 border rounded"
-                style={{ 
-                  backgroundColor: '#f0f7fd', 
-                  border: '2px dashed #db00b6 !important',
-                  cursor: 'pointer'
-                }}
-                onClick={handleUploadClick}
-              >
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept=".pdf,.doc,.docx"
-                  className="d-none"
-                  onChange={handleFileChange}
-                />
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#db00b6" viewBox="0 0 16 16">
-                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
-                </svg>
-                <h5 className="mt-3" style={{ color: '#db00b6' }}>
-                  {resumeFile ? resumeFile.name : 'Upload Your Resume'}
-                </h5>
-                <p className="text-muted">PDF, DOC, DOCX (Max 5MB)</p>
+            {/* Stepper */}
+            <ol className="ru-steps" aria-label="Progress">
+              <li className={step >= 1 ? "is-active" : ""}>
+                <span>1</span> Upload
+              </li>
+              <li className={step >= 2 ? "is-active" : ""}>
+                <span>2</span> Paste JD
+              </li>
+              <li className={step >= 3 ? "is-active" : ""}>
+                <span>3</span> Optimize
+              </li>
+            </ol>
+
+            {error && (
+              <div className="ru-alert ru-alert-error" role="alert">
+                {error}
               </div>
+            )}
+            {success && (
+              <div className="ru-alert ru-alert-success" role="status">
+                {success}
+              </div>
+            )}
+
+            {/* Dropzone */}
+            <div
+              className={`ru-drop ${dragActive ? "is-drag" : ""} ${resumeFile ? "has-file" : ""}`}
+              onClick={clickFilePicker}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                setDragActive(true);
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+              }}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && clickFilePicker()}
+              aria-label="Upload resume"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="ru-file"
+                onChange={handleFileChange}
+              />
+
+              {!resumeFile ? (
+                <div className="ru-drop-inner">
+                  <div className="ru-drop-icon" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="44" height="44">
+                      <path fill="currentColor" opacity=".25" d="M12 3l3 3-3 3-3-3 3-3z" />
+                      <path fill="currentColor" d="M11 6h2v8h-2z" />
+                    </svg>
+                  </div>
+                  <div className="ru-drop-text">
+                    <strong>Drag & drop your resume</strong> or{" "}
+                    <span className="ru-link">browse files</span>
+                  </div>
+                  <div className="ru-hint">PDF, DOC, DOCX — max {MAX_MB}MB</div>
+                </div>
+              ) : (
+                <div className="ru-filechip" onClick={(e) => e.stopPropagation()}>
+                  <div className="ru-filemeta">
+                    <span className="ru-filename">{resumeFile.name}</span>
+                    <span className="ru-filesize">
+                      {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </span>
+                  </div>
+                  <button className="ru-remove" onClick={removeFile} aria-label="Remove file">
+                    ×
+                  </button>
+                </div>
+              )}
+              <div className="ru-drop-pattern" aria-hidden />
             </div>
 
-            {/* Job Description Textarea */}
-            <div className="mb-4">
-              <label className="form-label fw-bold" style={{ color: '#db00b6' }}>Job Description</label>
+            {/* Divider */}
+            <div className="ru-divider" aria-hidden />
+
+            {/* Job description */}
+            <div className="ru-field">
+              <label htmlFor="jd" className="ru-label">Job Description</label>
               <textarea
-                className="form-control"
-                rows="8"
+                id="jd"
+                rows={8}
+                className="ru-textarea"
+                placeholder="Paste the job description here…"
                 value={jobDesc}
                 onChange={(e) => setJobDesc(e.target.value)}
-                placeholder="Paste the job description here..."
-                style={{ borderColor: '#dfe6e9' }}
               />
+              <div className="ru-counter">{jobDesc.length.toLocaleString()} characters</div>
             </div>
 
-            {/* Analyze Button */}
-            <button 
-              className="btn btn-primary w-100 py-3 fw-bold" 
+            <button
+              className="ru-btn ru-btn-primary"
               onClick={handleSubmit}
-              disabled={loading}
-              style={{ 
-                background: 'linear-gradient(45deg, #A326A9, #D9529A)', 
-                border: 'none',
-                fontSize: '1.1rem'
-              }}
+              disabled={loading || !resumeFile || !jobDesc.trim()}
             >
-              {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Optimizing...
-                </>
-              ) : (
-                'Optimize My Resume'
-              )}
+              {loading ? <span className="ru-spinner" aria-hidden /> : null}
+              {loading ? "Optimizing…" : "Optimize My Resume"}
             </button>
           </div>
 
-          {/* Features Section */}
-          <div className="row mt-5">
-            <div className="col-md-4 mb-4">
-              <div className="p-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-magic" viewBox="0 0 16 16">
-                  <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0v1.829zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707L14 2.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707L7.293 4zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1h1.829zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1h1.829zM13.293 10a.5.5 0 1 0 .707 0L14 8.707a.5.5 0 0 0-.707-.707L13.293 10zm-7.171 0a.5.5 0 1 0 .707 0L8 8.707a.5.5 0 0 0-.707-.707L6.293 10zM4.5 13.157a.5.5 0 1 0 1 0v-1.829a.5.5 0 1 0-1 0v1.829zm10.5-.035a.5.5 0 0 0 .707-.707L14 12.707a.5.5 0 0 0-.707.707l1.293 1.293zm-8.486 0a.5.5 0 0 0 .707-.707L6 12.707a.5.5 0 0 0-.707.707l1.293 1.293z"/>
-                  <path d="M8 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
-                </svg>
-                <h5 className="mt-2" style={{ color: '#2c3e50' }}>AI Optimization</h5>
-                <p className="text-muted">Smart keyword matching for ATS systems</p>
+          {/* Feature band with pattern */}
+          <div className="ru-band">
+            <div className="ru-feature">
+              <div className="ru-feature-emblem">✨</div>
+              <div>
+                <h3>AI Optimization</h3>
+                <p>Smart keyword alignment to your target role.</p>
               </div>
             </div>
-            <div className="col-md-4 mb-4">
-              <div className="p-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-chat-square-text" viewBox="0 0 16 16">
-                  <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                  <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
-                </svg>
-                <h5 className="mt-2" style={{ color: '#2c3e50' }}>ATS Friendly</h5>
-                <p className="text-muted">Format optimized for applicant tracking systems</p>
+            <div className="ru-feature">
+              <div className="ru-feature-emblem">📄</div>
+              <div>
+                <h3>ATS Friendly</h3>
+                <p>Formatting that passes modern tracking systems.</p>
               </div>
             </div>
-            <div className="col-md-4 mb-4">
-              <div className="p-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#db00b6" className="bi bi-lightning-charge" viewBox="0 0 16 16">
-                  <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09zM4.157 8.5H7a.5.5 0 0 1 .478.647L6.11 13.59l5.732-6.09H9a.5.5 0 0 1-.478-.647L9.89 2.41 4.157 8.5z"/>
-                </svg>
-                <h5 className="mt-2" style={{ color: '#2c3e50' }}>Fast Results</h5>
-                <p className="text-muted">Get an optimized resume in seconds</p>
+            <div className="ru-feature">
+              <div className="ru-feature-emblem">⚡</div>
+              <div>
+                <h3>Fast Results</h3>
+                <p>Get an optimized resume in seconds.</p>
               </div>
             </div>
+            <div className="ru-band-pattern" aria-hidden />
           </div>
 
-          {/* Footer CTA */}
-          <div 
-            className="mt-4 p-4 text-white rounded"
-            style={{
-              background: 'linear-gradient(45deg, #A326A9, #D9529A)'
-            }}
-          >
-            <h4>Ready to transform your job search?</h4>
-            <p>Free forever • No credit card required</p>
-            <button 
-              className="px-4 py-2 fw-bold"
-              style={{
-                background: 'white',
-                color: '#A326A9',
-                border: 'none',
-                borderRadius: '4px'
-              }}
-            >
-              Try it Now
-            </button>
+          {/* CTA */}
+          <div className="ru-cta">
+            <div>
+              <h4>Ready to transform your job search?</h4>
+              <p>Free forever • No credit card required</p>
+            </div>
+            <button className="ru-btn ru-btn-light" onClick={clickFilePicker}>Try it now</button>
           </div>
-
         </div>
+
+        {/* Sidebar */}
+        <aside className="ru-side">
+          <div className="ru-sidecard">
+            <h4 className="ru-side-title">Pro tips</h4>
+            <ul className="ru-tips">
+              <li><span>🧠</span> Paste the full JD (responsibilities + requirements) for best matching.</li>
+              <li><span>🎯</span> Mention impact with numbers (e.g., “reduced costs by 18%”).</li>
+              <li><span>🔑</span> Include domain terms (cloud, NLP, compliance, etc.).</li>
+            </ul>
+          </div>
+
+          <div className="ru-sidecard">
+            <h4 className="ru-side-title">Shortcuts</h4>
+            <div className="ru-shortcuts">
+              <kbd>Ctrl</kbd> + <kbd>V</kbd> <span>Paste JD</span>
+              <kbd>Enter</kbd> <span>Optimize</span>
+            </div>
+          </div>
+
+          <div className="ru-sidecard ru-sidecard-accent">
+            <h4 className="ru-side-title">Private & Secure</h4>
+            <p className="ru-side-text">We only process your file to generate the optimized version you download.</p>
+          </div>
+        </aside>
       </div>
+
+      {loading && (
+        <div className="ru-overlay" aria-hidden>
+          <div className="ru-loader" />
+        </div>
+      )}
     </div>
   );
 }
-
-export default ResumeUploadPage;
