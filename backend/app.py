@@ -9,6 +9,22 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "http://192.168.1.104:3001",  # your LAN address shown by React
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],  # so the browser can read filename header
+)
+
+
 # --- Configuration ---
 app = Flask(__name__)
 # Enable Cross-Origin Resource Sharing to allow your React app to communicate with this server
@@ -33,7 +49,7 @@ except OSError:
 # Configure Google Gemini API Key
 # IMPORTANT: Set your Google API key in an environment variable named 'GOOGLE_API_KEY'
 try:
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 except Exception as e:
      print(f"Error configuring Google API: {e}")
 
@@ -142,7 +158,7 @@ def optimize_resume_endpoint():
     if resume_file.filename == '' or job_desc.strip() == '':
         return jsonify({"error": "Missing resume file or job description"}), 400
         
-    if not os.getenv("GOOGLE_API_KEY"):
+    if not os.getenv("GEMINI_API_KEY"):
         return jsonify({"error": "Server is not configured for AI processing. Missing GOOGLE_API_KEY."}), 503
 
     file_path = None
