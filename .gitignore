@@ -33,7 +33,7 @@ coverage/
 htmlcov/
 build/
 dist/
-
+node_modules/
 # Vector/DB caches
 /backend/chromadb_store/**
 

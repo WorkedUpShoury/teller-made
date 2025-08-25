@@ -8,6 +8,8 @@ from docx import Document
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from db import get_db_connection
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -198,7 +200,60 @@ def optimize_resume_endpoint():
         if file_path and os.path.exists(file_path):
              os.remove(file_path)
 
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")  # later we’ll hash it
+
+    if not username or not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                    (username, email, password))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"message": "User registered successfully"})
+    except Exception as e:
+        print("Error in register:", str(e))  # Logs to terminal
+        return jsonify({"error": str(e)}), 500  # Sends real error to frontend
+
+
+# new code added here for handling registration and login
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")  # later we’ll hash it
+
+    if not username or not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                    (username, email, password))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"message": "User registered successfully"})
+    except Exception as e:
+        # 👇 Print AND return the actual database error
+        print("Error in register:", e)
+        return jsonify({"error": str(e)}), 500
+
+#  ends here
+
 # --- Main Execution ---
 if __name__ == '__main__':
     # Running on port 5001 to avoid conflicts with React's default port 3000
     app.run(debug=True, port=5001)
+
+    
