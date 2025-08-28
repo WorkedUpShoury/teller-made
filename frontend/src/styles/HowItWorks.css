@@ -1,0 +1,33 @@
+/* Fade-in staggered animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card hover effect */
+.howitworks-card > div {
+  transition: all 0.35s ease;
+}
+
+.howitworks-card > div:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* Icon animation */
+.howitworks-icon {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.howitworks-card:hover .howitworks-icon {
+  transform: scale(1.2) rotate(5deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}

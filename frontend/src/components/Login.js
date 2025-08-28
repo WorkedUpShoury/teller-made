@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./Login.css";
+import "./signin.css"; // dedicated CSS only for Login
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,6 +23,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -30,10 +31,10 @@ export default function Login() {
       }
 
       // Save token/user info if backend returns it
-      localStorage.setItem("token", data.token || "");
-      localStorage.setItem("user", JSON.stringify(data.user || {}));
+      if (data.token) localStorage.setItem("token", data.token);
+      if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard"); // Redirect after login
+      navigate("/"); // Redirect after login
     } catch (err) {
       console.error(err);
       setError("Failed to log in. Please check your credentials.");
@@ -43,10 +44,10 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-root">
-      <div className="auth-card" aria-busy={loading}>
-        <header className="auth-head">
-          <span className="auth-badge" aria-hidden>
+    <div className="login-root">
+      <div className="login-card" aria-busy={loading}>
+        <header className="login-head">
+          <span className="login-badge" aria-hidden>
             <svg
               viewBox="0 0 24 24"
               width="18"
@@ -60,14 +61,14 @@ export default function Login() {
             </svg>
           </span>
           <div>
-            <h1 className="auth-title">Welcome back</h1>
-            <p className="auth-subtitle">Sign in to TellerMade</p>
+            <h1 className="login-title">Welcome back</h1>
+            <p className="login-subtitle">Sign in to TellerMade</p>
           </div>
         </header>
 
-        <form onSubmit={handleLogin} className="auth-form" noValidate>
+        <form onSubmit={handleLogin} className="login-form" noValidate>
           {error && (
-            <div role="alert" className="auth-alert">
+            <div role="alert" className="login-alert">
               {error}
             </div>
           )}
@@ -106,7 +107,30 @@ export default function Login() {
                 aria-label={showPw ? "Hide password" : "Show password"}
                 tabIndex={-1}
               >
-                {showPw ? "🙈" : "👁️"}
+                {showPw ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5.05 0-9.33-3.2-11-8 1.05-2.99 3.2-5.47 6-7m3-1a9.77 9.77 0 0 1 2-.2c5.05 0 9.33 3.2 11 8a10.94 10.94 0 0 1-2.06 3.34M1 1l22 22" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    stroke="currentColor"
+                    fill="none"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M2.1 12.9A10.94 10.94 0 0 1 12 4c5.05 0 9.33 3.2 11 8-1.67 4.8-5.95 8-11 8a10.94 10.94 0 0 1-9.9-7.1z" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
@@ -121,13 +145,12 @@ export default function Login() {
             </Link>
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? <span className="spinner" aria-hidden /> : null}
+          <button type="submit" className="btn-login" disabled={loading}>
             {loading ? "Logging in…" : "Login"}
           </button>
         </form>
 
-        <p className="auth-foot">
+        <p className="login-foot">
           New to TellerMade?{" "}
           <Link to="/register" className="link-strong">
             Create an account
@@ -137,4 +160,3 @@ export default function Login() {
     </div>
   );
 }
-

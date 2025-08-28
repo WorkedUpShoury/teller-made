@@ -9,7 +9,7 @@ import Testimonials from './components/Testimonials';
 import Auth from './components/Auth';
 import Footer from './components/Footer';
 import ResumeUploadPage from './components/ResumeUpload';
-import Login from './components/Login';
+import Login from './components/login';
 import Register from './components/Register';
 import ChatAssistant from './components/ChatAssistant';
 

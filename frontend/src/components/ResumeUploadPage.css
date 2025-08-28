@@ -180,7 +180,7 @@
   box-shadow:var(--shadow-1);
   transition:transform .12s ease, background .12s ease, opacity .12s ease;
 }
-.ru-btn:hover{background:#F2F4F7}
+.ru-btn:hover{background:#F2F4F7;color:#e863f1 }
 .ru-btn:disabled{opacity:.6;cursor:not-allowed}
 
 .ru-btn-primary{
@@ -188,7 +188,7 @@
   background:linear-gradient(135deg,var(--violet),var(--fuchsia));
   box-shadow:0 10px 24px rgba(99,102,241,.28);
 }
-.ru-btn-primary:hover{transform:translateY(-1px)}
+.ru-btn-primary:hover{transform:translateY(-1px);color:#e863f1}
 .ru-btn-light{
   width:auto;background:#fff;border:1.5px solid var(--border-strong);padding:10px 14px
 }

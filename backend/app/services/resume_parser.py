@@ -1,17 +1,20 @@
-from PyPDF2 import PdfReader
-import tempfile
+import os, tempfile
+from pdfminer.high_level import extract_text
+from fastapi import UploadFile
 
-async def parse_pdf(file):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        contents = await file.read()
-        tmp.write(contents)
+async def parse_pdf(file: UploadFile) -> str:
+    # Save to a temp file because pdfminer needs a file path
+    suffix = os.path.splitext(file.filename or "")[-1] or ".pdf"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp.flush()
         tmp_path = tmp.name
-
-    reader = PdfReader(tmp_path)
-    text = ""
-    for page in reader.pages:
-        page_text = page.extract_text()
-        if page_text:
-            text += page_text + "\n"
-
-    return text.strip()
+    try:
+        text = extract_text(tmp_path)
+        return text or ""
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass

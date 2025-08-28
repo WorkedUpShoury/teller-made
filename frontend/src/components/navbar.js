@@ -2,15 +2,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import logo from '../styles/logo.png';
+import '../styles/Navbar.css';
 
 function AppNavbar() {
   return (
-    <Navbar bg="light" expand="lg" className="shadow-sm">
+    <Navbar expand="lg" className="shadow-sm navbar-custom">
       <Container>
-        <Navbar.Brand as={Link} to="/">TellerMade</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/">
+          <img
+            src={logo}
+            alt="TellerMade Logo"
+            className="brand-logo d-inline-block align-top"
+          />
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
-          <Nav className="ms-auto"> {/* Align to right */}
+          <Nav className="ms-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/upload">Resume</Nav.Link>
             <Nav.Link as={Link} to="/chat-assistant">AI Assist</Nav.Link>
@@ -27,5 +35,3 @@ function AppNavbar() {
 }
 
 export default AppNavbar;
-
-

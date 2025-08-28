@@ -212,7 +212,6 @@ def optimize_resume_endpoint():
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    """Register a new user. Requires db.get_db_connection() to be implemented."""
     data = request.get_json(silent=True) or {}
     username = data.get("username")
     email = data.get("email")
@@ -234,6 +233,43 @@ def register():
         return jsonify({"message": "User registered successfully"})
     except Exception as e:
         print("Error in register:", e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json(silent=True) or {}
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, username, email, password FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 401
+
+        # Compare hashed password here!
+        if password != user[3]:  # Replace with hash check
+            return jsonify({"error": "Invalid credentials"}), 401
+
+        # Return user profile (omit password)
+        return jsonify({
+            "user": {
+                "id": user[0],
+                "username": user[1],
+                "email": user[2]
+            },
+            "token": "dummy-token"  # Replace with JWT if needed
+        })
+    except Exception as e:
+        print("Error in login:", e)
         return jsonify({"error": str(e)}), 500
 
 # --- Main Execution ---

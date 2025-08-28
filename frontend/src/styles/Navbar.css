@@ -1,0 +1,78 @@
+/* General Navbar styling */
+.navbar-custom {
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Brand Logo */
+.brand-logo {
+  height: 40px;
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.brand-logo:hover {
+  transform: scale(1.1);
+}
+
+/* Nav links */
+.navbar-custom .nav-link {
+  color: #cb11af !important;
+  font-weight: 500;
+  margin-left: 1rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #5e0fac !important; /* golden highlight */
+  transform: translateY(-2px);
+}
+
+/* Active link */
+.navbar-custom .nav-link.active {
+  color: #ffe600 !important;
+  border-bottom: 2px solid #ffe600;
+  padding-bottom: 2px;
+}
+
+/* Dropdown */
+.navbar-custom .dropdown-menu {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.navbar-custom .dropdown-item {
+  color: #333;
+  font-weight: 500;
+  border-radius: 5px;
+}
+
+.navbar-custom .dropdown-item:hover {
+  background-color: #2575fc;
+  color: #fff;
+}
+
+/* Toggle button (hamburger) */
+.navbar-toggler {
+  border: none;
+  background: none;
+}
+
+.navbar-toggler-icon {
+  filter: brightness(0) invert(1); /* make icon white */
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .navbar-custom .nav-link {
+    margin-left: 0;
+    padding: 0.5rem 0;
+    text-align: center;
+  }
+
+  .navbar-custom .dropdown-menu {
+    text-align: center;
+  }
+}

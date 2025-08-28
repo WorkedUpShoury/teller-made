@@ -1,0 +1,71 @@
+/* Fade-in animations */
+.fade-in-left {
+  animation: fadeInLeft 1s ease-in-out;
+}
+
+.fade-in-right {
+  animation: fadeInRight 1s ease-in-out;
+}
+
+.fade-in-up {
+  animation: fadeInUp 1.2s ease-in-out;
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Button hover animations */
+.btn-animate {
+  transition: all 0.4s ease;
+  transform: scale(1);
+  background: var(--primary-color); /* your palette */
+  border: none;
+  color: #fff;
+}
+
+.btn-animate:hover {
+  transform: scale(1.07);
+  background: linear-gradient(135deg,#8a2be2, #ff00b7); /* neon blue → purple → violet */
+  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6); /* glowing purple shadow */
+  color: #fff !important;
+}
+
+
+/* Outline button */
+.btn-animate-outline {
+  transition: all 0.4s ease;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  background: transparent;
+}
+
+.btn-animate-outline:hover {
+  background: linear-gradient(135deg,#8a2be2, #ff00b7);
+  color: #fff !important;
+  border-color: transparent;
+  transform: scale(1.07);
+  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6); /* neon blue glow */
+}
+
+/* Hero Illustration hover */
+.hero-illustration {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.hero-illustration:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
