@@ -412,20 +412,152 @@ def merge_structured(original: Dict[str, Any], optimized: Dict[str, Any]) -> Dic
 # ---------------------------
 # Skills generation (3-row layout)
 # ---------------------------
+# ---------------------------
+# Skills generation (Languages, Tools & Platforms, Concepts)
+# ---------------------------
 SEED_SKILLS = {
-    "Design Tools": [
-        "Adobe Photoshop", "Photoshop", "Adobe Illustrator", "Illustrator",
-        "InDesign", "Premiere Pro", "After Effects", "Lightroom", "XD",
-        "Adobe XD", "CorelDRAW", "Canva", "Figma"
+    "Languages": [
+        # General purpose
+        "Python", "Java", "C", "C++", "C#", "Go", "Rust", "Kotlin", "Swift", "Ruby",
+        # Web / scripting
+        "JavaScript", "TypeScript", "PHP", "Shell", "Bash", "PowerShell",
+        # Data / scientific
+        "R", "Julia", "MATLAB", "SAS",
+        # Query / markup
+        "SQL", "PL/SQL", "T-SQL", "NoSQL", "GraphQL",
+        "HTML", "CSS", "SASS", "SCSS",
+        # JVM / functional
+        "Scala", "Groovy", "Clojure", "Haskell", "Elixir", "Erlang",
+        # Systems / embedded
+        "Assembly", "VHDL", "Verilog",
+        # Mobile
+        "Objective-C", "Dart",
+        # Other
+        "LaTeX"
     ],
-    "Web/Tech Skills": [
-        "HTML", "CSS", "JavaScript", "Python", "MySQL", "Git", "GitHub", "WordPress"
+
+    "Tools and Platforms": [
+        # VCS / Dev productivity
+        "Git", "GitHub", "GitLab", "Bitbucket", "SVN", "Jira", "Confluence", "Slack",
+        "VS Code", "IntelliJ IDEA", "PyCharm", "WebStorm", "Xcode", "Android Studio",
+        "Postman", "Insomnia", "Fiddler", "Charles Proxy",
+        # Build / CI
+        "Maven", "Gradle", "SBT", "Make", "CMake", "Ninja",
+        "Jenkins", "GitHub Actions", "GitLab CI", "CircleCI", "Travis CI", "TeamCity", "Azure DevOps",
+        "SonarQube", "Snyk", "Dependabot",
+        # Containers / Orchestration
+        "Docker", "Docker Compose", "Podman", "Kubernetes", "Helm", "Kustomize",
+        # Cloud
+        "AWS", "Amazon EC2", "S3", "RDS", "ECS", "EKS", "Lambda", "CloudFormation", "CDK",
+        "GCP", "GKE", "Cloud Run", "Cloud Functions", "BigQuery", "Cloud Build",
+        "Azure", "AKS", "App Service", "Functions", "Cosmos DB", "DevOps Pipelines",
+        # Infra as Code / Config
+        "Terraform", "Pulumi", "Ansible", "Chef", "Puppet", "Packer", "Vagrant",
+        # Databases
+        "PostgreSQL", "MySQL", "MariaDB", "SQLite", "SQL Server", "Oracle",
+        "MongoDB", "Cassandra", "DynamoDB", "Redis", "Elasticsearch", "Neo4j",
+        # Streaming / MLOps / Data
+        "Kafka", "RabbitMQ", "Kinesis", "Flink", "Spark", "Airflow", "dbt",
+        "MLflow", "Weights & Biases",
+        # Web frameworks / runtimes
+        "Node.js", "Deno", "Express", "NestJS", "FastAPI", "Django", "Flask",
+        "Spring", "Spring Boot", "Micronaut", "Quarkus",
+        "Rails", "Laravel",
+        "React", "Next.js", "Vue", "Nuxt", "Angular", "Svelte", "SvelteKit",
+        # Testing
+        "JUnit", "TestNG", "pytest", "unittest", "Cypress", "Playwright", "Jest",
+        "Mocha", "Chai", "Vitest", "Selenium",
+        # Security / Observability
+        "OWASP ZAP", "Burp Suite",
+        "Prometheus", "Grafana", "ELK Stack", "OpenTelemetry", "Datadog", "New Relic",
+        # OS
+        "Linux", "Ubuntu", "Debian", "Red Hat", "Windows", "macOS",
+        # Design (if applicable)
+        "Figma", "Adobe XD", "Adobe Photoshop", "Illustrator"
     ],
-    "Content Expertise": [
-        "Logo Design", "Branding", "Banners", "Thumbnails", "Reels", "Video Editing",
-        "UI/UX Design", "Social Media Graphics", "Product Mockups", "Motion Graphics"
+
+    "Concepts": [
+        # Fundamentals
+        "Data Structures", "Algorithms", "Object-Oriented Programming", "Functional Programming",
+        "Design Patterns", "Clean Code", "Refactoring", "SOLID Principles",
+        # Architecture
+        "Microservices", "Monolith to Microservices", "Event-Driven Architecture",
+        "REST", "GraphQL", "gRPC", "Message Queues",
+        "Domain-Driven Design", "Hexagonal Architecture", "CQRS", "Event Sourcing",
+        # Delivery / SDLC
+        "Agile", "Scrum", "Kanban", "CI/CD", "TDD", "BDD",
+        # Cloud & Infra
+        "Cloud Computing", "Scalability", "High Availability", "Resilience",
+        "Caching", "Load Balancing", "Auto Scaling", "Blue/Green Deployments",
+        # Security
+        "Authentication", "Authorization", "OAuth 2.0", "OIDC", "JWT",
+        "OWASP Top 10", "Secure Coding", "Secrets Management", "Zero Trust",
+        # Data / ML
+        "ETL", "Streaming", "Batch Processing", "Data Warehousing",
+        "Machine Learning", "Deep Learning", "Feature Engineering", "Model Serving",
+        # Performance / Reliability
+        "Observability", "Monitoring", "Tracing", "Logging",
+        "Performance Tuning", "SRE", "SLI/SLO/SLA",
+        # Web
+        "Accessibility (a11y)", "SEO", "Responsive Design", "Progressive Web Apps",
+        # Other
+        "API Design", "Versioning", "Documentation", "Code Review"
     ],
 }
+def _try_parse_json_blob(blob: str) -> Dict[str, Any]:
+    blob = (blob or "").strip()
+    m = re.search(r'(\{.*\})', blob, flags=re.DOTALL)
+    txt = m.group(1) if m else blob
+    try:
+        return json.loads(txt)
+    except Exception:
+        return {}
+
+def gemini_generate_skill_rows(raw_text: str, job_desc: Optional[str]) -> Tuple[str, str, str, List[str]]:
+    """
+    Ask Gemini to propose Languages, Tools and Platforms, and Concepts.
+    No local fallback — if Gemini doesn't return usable lists, we return empties.
+    """
+    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    prompt = f"""
+You are preparing a resume skills section split into three rows:
+1) Languages
+2) Tools and Platforms
+3) Concepts
+
+Given the RESUME TEXT and (optionally) the JOB DESCRIPTION:
+- Only include items clearly supported by the resume, or logical specializations/extensions.
+- Prefer job description items that don't contradict the resume.
+- Keep each list concise and highly relevant.
+- Return strict JSON with exactly these keys:
+{{
+  "languages": ["..."],
+  "tools_platforms": ["..."],
+  "concepts": ["..."]
+}}
+
+RESUME TEXT:
+{raw_text}
+
+JOB DESCRIPTION (optional):
+{job_desc or "(none provided)"}
+"""
+    try:
+        resp = model.generate_content(prompt)
+        data = _try_parse_json_blob(getattr(resp, "text", "") or "")
+    except Exception:
+        data = {}
+
+    langs = [ensure_text(x) for x in (data.get("languages") or []) if ensure_text(x)]
+    tools = [ensure_text(x) for x in (data.get("tools_platforms") or []) if ensure_text(x)]
+    conc  = [ensure_text(x) for x in (data.get("concepts") or []) if ensure_text(x)]
+
+    row1 = _join_until(90, langs)
+    row2 = _join_until(90, tools)
+    row3 = _join_until(90, conc)
+    flat = (langs + tools + conc)[:MAX_SKILLS_DEFAULT]
+    return row1, row2, row3, flat
+
 
 def _find_keywords(text: str, candidates: List[str]) -> List[str]:
     text_low = text.lower(); found = []
@@ -449,30 +581,24 @@ def _join_until(chars_limit: int, items: List[str]) -> str:
             break
     return ", ".join(out)
 
-def generate_three_skill_rows(raw_text: str, data: Dict[str, Any]) -> Tuple[str, str, str, List[str]]:
+def generate_three_skill_rows(raw_text: str,
+                              data: Dict[str, Any],
+                              job_desc: Optional[str] = None) -> Tuple[str, str, str, List[str]]:
+    """
+    Gemini-only: build three skill rows (Languages, Tools & Platforms, Concepts)
+    using Gemini results exclusively. No seed- or regex-based fallback.
+    """
     text = ensure_text(raw_text)
-    existing = [ensure_text(s) for s in (data.get("skills") or []) if ensure_text(s)]
-    rows: Dict[str, List[str]] = {}
-    for cat, seeds in SEED_SKILLS.items():
-        rows[cat] = []
-        rows[cat] += _from_existing_list(existing, seeds)
-        for k in _find_keywords(text, seeds):
-            if k not in rows[cat]: rows[cat].append(k)
-        if not rows[cat]:
-            rows[cat] = seeds[:]
-    def dedup(seq: List[str]) -> List[str]:
-        seen=set(); out=[]
-        for x in seq:
-            if x not in seen: out.append(x); seen.add(x)
-        return out
-    row1_items = dedup(rows["Design Tools"])
-    row2_items = dedup(rows["Web/Tech Skills"])
-    row3_items = dedup(rows["Content Expertise"])
-    row1 = _join_until(90, row1_items)
-    row2 = _join_until(90, row2_items)
-    row3 = _join_until(90, row3_items)
-    flat = dedup(row1_items + row2_items + row3_items)[:MAX_SKILLS_DEFAULT]
+    row1, row2, row3, flat = gemini_generate_skill_rows(text, job_desc)
+
+    # Hard rule: do not fallback to seeds. If Gemini yields nothing, return empties.
+    # Optionally keep existing data.skills (flat) for ATS if already present.
+    if not (row1 or row2 or row3):
+        existing_flat = [ensure_text(s) for s in (data.get("skills") or []) if ensure_text(s)]
+        flat = existing_flat[:MAX_SKILLS_DEFAULT] if existing_flat else []
+
     return row1, row2, row3, flat
+
 
 # ---------------------------
 # Sizing & content measurement
@@ -664,19 +790,42 @@ def expand_sparse_content(data: Dict[str, Any], raw_text: str) -> Dict[str, Any]
     d = dict(data or {})
     base_chars = _approx_char_count(d)
 
-    def top_up_bullets(container: List[Dict[str, Any]], target: int, kind: str):
-        for item in container or []:
+    def top_up_bullets(
+        container: Optional[List[Dict[str, Any]]],
+        target: int,
+        kind: str
+    ) -> None:
+        """Mutates items in-place to top up bullets to a target count."""
+        if not container:
+            return
+
+        for item in container:
             bullets = list(item.get("bullets") or [])
             need = max(0, target - len(bullets))
             if need <= 0:
                 continue
+
             if kind == "exp":
-                ctx = f"TITLE: {item.get('title','')}\nCOMPANY: {item.get('company','')}\nSUMMARY: {item.get('summary','')}\nEXISTING BULLETS:\n- " + "\n- ".join(bullets) + f"\n\nFULL RESUME TEXT:\n{raw_text}"
+                ctx = (
+                    f"TITLE: {item.get('title','')}\n"
+                    f"COMPANY: {item.get('company','')}\n"
+                    f"SUMMARY: {item.get('summary','')}\n"
+                    "EXISTING BULLETS:\n- " + "\n- ".join(bullets) +
+                    f"\n\nFULL RESUME TEXT:\n{raw_text}"
+                )
             else:
-                ctx = f"PROJECT: {item.get('name','')}\nTECH: {item.get('tech','')}\nSUMMARY: {item.get('summary','')}\nEXISTING BULLETS:\n- " + "\n- ".join(bullets) + f"\n\nFULL RESUME TEXT:\n{raw_text}"
+                ctx = (
+                    f"PROJECT: {item.get('name','')}\n"
+                    f"TECH: {item.get('tech','')}\n"
+                    f"SUMMARY: {item.get('summary','')}\n"
+                    "EXISTING BULLETS:\n- " + "\n- ".join(bullets) +
+                    f"\n\nFULL RESUME TEXT:\n{raw_text}"
+                )
+
             add = _llm_generate_extra_bullets(ctx, need)
             if not add and ensure_text(item.get("summary")).strip():
-                add = _fallback_bullets_from_summary(item.get("summary",""), need)
+                add = _fallback_bullets_from_summary(item.get("summary", ""), need)
+
             item["bullets"] = bullets + add
 
     # Short band: top up to 4 bullets
@@ -724,14 +873,14 @@ def expand_sparse_content(data: Dict[str, Any], raw_text: str) -> Dict[str, Any]
     return d
 
 # ---------------------------
-# Compression (final one-page fit)
+# Compression (final one-page fit, static shaping)
 # ---------------------------
 def compress_payload_for_one_page(data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Final shaping to ~1 page.
-    - If SHORT  : allow more items and cap bullets at 4.
-    - If MID    : cap bullets at 3.
-    - If LONG   : cap bullets at 2 and trim more.
+    Final shaping to ~1 page (pre-compile).
+    - SHORT  : allow more items & cap bullets at 4
+    - MID    : cap bullets at 3
+    - LONG   : cap bullets at 2 and trim more
     """
     d = sanitize_struct(data)
 
@@ -825,14 +974,30 @@ def compress_payload_for_one_page(data: Dict[str, Any]) -> Dict[str, Any]:
 # ---------------------------
 # Ensure 3-row skills for template
 # ---------------------------
-def ensure_skill_rows(data: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
-    row1, row2, row3, flat = generate_three_skill_rows(raw_text, data)
-    if not data.get("skills"):
+def ensure_skill_rows(data: Dict[str, Any],
+                      raw_text: str,
+                      job_desc: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Gemini-only population of skills rows.
+    If Gemini returns nothing, we keep rows empty and preserve existing flat skills if present.
+    """
+    row1, row2, row3, flat = generate_three_skill_rows(
+        raw_text=raw_text,
+        data=data,
+        job_desc=job_desc,
+    )
+
+    # Preserve any existing flat skills if Gemini produced no flat list
+    if not flat and data.get("skills"):
+        flat = [ensure_text(s) for s in (data.get("skills") or []) if ensure_text(s)][:MAX_SKILLS_DEFAULT]
+
+    if flat:
         data["skills"] = flat
-    data["skills_row1"] = row1
-    data["skills_row2"] = row2
-    data["skills_row3"] = row3
+    data["skills_row1"] = row1  # may be empty
+    data["skills_row2"] = row2  # may be empty
+    data["skills_row3"] = row3  # may be empty
     return data
+
 
 # ---------------------------
 # LLM optimization (Gemini)
@@ -865,15 +1030,171 @@ Return ONLY the optimized resume text (no commentary).
     return (getattr(resp, "text", "") or "").strip()
 
 # ---------------------------
-# Compile LaTeX -> PDF bytes
+# Section order & final hard squeeze  (NEW)
 # ---------------------------
-def compile_latex_to_pdf_bytes(tex_str: str) -> bytes:
+WANTED_SECTION_ORDER = ["summary", "education", "projects", "skills", "certifications"]
+
+def enforce_section_order(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    - Enforce the requested order.
+    - Remove sections not requested (experience, publications) from render path.
+    - Provide section_order for the template to iterate.
+    """
+    d = dict(data or {})
+
+    # Remove sections not in desired order
+    d.pop("experience", None)
+    d.pop("publications", None)
+
+    # Ensure booleans/fields exist
+    d["show_summary"] = bool(d.get("summary"))
+
+    # Normalize presence
+    d.setdefault("summary", d.get("summary", ""))
+    d.setdefault("education", d.get("education", []))
+    d.setdefault("projects", d.get("projects", []))
+    d.setdefault("skills", d.get("skills", []))
+    d.setdefault("certifications", d.get("certifications", []))
+
+    # Order hint for template
+    d["section_order"] = WANTED_SECTION_ORDER[:]
+    return d
+
+def _ultra_squeeze_to_one_page(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Nuclear option to guarantee one page.
+    Keeps only target sections with very small counts.
+    """
+    d = enforce_section_order(dict(data or {}))
+
+    # Summary
+    d["summary"] = shorten_text(d.get("summary", ""), 110)
+    d["show_summary"] = bool(d["summary"])
+
+    # Education: 1 item, 1 short detail
+    edu = (d.get("education") or [])[:1]
+    for e in edu:
+        e["details"] = (e.get("details") or [])[:1]
+        if e["details"]:
+            e["details"][0] = shorten_text(e["details"][0], 90)
+    d["education"] = edu
+
+    # Projects: 1 item, 1 bullet, short summary
+    projs = (d.get("projects") or [])[:1]
+    for p in projs:
+        p["summary"] = shorten_text(p.get("summary", ""), 90)
+        p["bullets"] = (p.get("bullets") or [])[:1]
+        if p["bullets"]:
+            p["bullets"][0] = shorten_text(p["bullets"][0], 90)
+    d["projects"] = projs
+
+    # Skills: max 6; if using rows, lightly trim strings
+    d["skills"] = (d.get("skills") or [])[:6]
+    if isinstance(d.get("skills_row1"), str):
+        d["skills_row1"] = d["skills_row1"][:70]
+    if isinstance(d.get("skills_row2"), str):
+        d["skills_row2"] = d["skills_row2"][:70]
+    if isinstance(d.get("skills_row3"), str):
+        d["skills_row3"] = d["skills_row3"][:70]
+
+    # Certifications: up to 2, omit descriptions
+    certs = []
+    for c in (d.get("certifications") or [])[:2]:
+        certs.append({
+            "name": shorten_text(ensure_text(c.get("name")), 50),
+            "issuer": shorten_text(ensure_text(c.get("issuer")), 40),
+            "date": ensure_text(c.get("date"))[:4],
+            "link": ensure_text(c.get("link")),
+            "description": ""
+        })
+    d["certifications"] = certs
+
+    return d
+
+# ---------------------------
+# One-page fitting helpers
+# ---------------------------
+def _apply_shrink_pass(data: Dict[str, Any], pass_no: int) -> Dict[str, Any]:
+    """
+    Progressively reduce content each pass until it fits on 1 page.
+    Pass 1: tighten bullets/summaries, cap skills/certs
+    Pass 2: reduce counts of sections (exp/proj/edu)
+    Pass 3: aggressive (hide summary, drop certs/pubs)
+    Pass 4: single-bullet projects, even tighter summaries
+    """
+    d = dict(data)
+
+    def cap_bullets(container_key: str, n: int):
+        arr = d.get(container_key) or []
+        for it in arr:
+            it["bullets"] = (it.get("bullets") or [])[:max(0, n)]
+
+    def shorten_summaries(limit_exp: int, limit_proj: int):
+        for e in d.get("experience") or []:
+            e["summary"] = shorten_text(e.get("summary"), limit_exp)
+        for p in d.get("projects") or []:
+            p["summary"] = shorten_text(p.get("summary"), limit_proj)
+
+    # PASS 1 – tighten text, keep structure
+    if pass_no == 1:
+        cap_bullets("experience", 2)
+        cap_bullets("projects", 2)
+        shorten_summaries(180, 160)
+        d["skills"] = (d.get("skills") or [])[:10]
+        d["certifications"] = (d.get("certifications") or [])[:3]
+
+    # PASS 2 – reduce section counts
+    elif pass_no == 2:
+        cap_bullets("experience", 2)
+        cap_bullets("projects", 2)
+        shorten_summaries(160, 140)
+        d["experience"] = (d.get("experience") or [])[:2]
+        d["projects"]   = (d.get("projects") or [])[:1]
+        d["education"]  = (d.get("education") or [])[:1]
+        d["certifications"] = (d.get("certifications") or [])[:2]
+        d["skills"] = (d.get("skills") or [])[:9]
+
+    # PASS 3 – aggressive: hide summary, drop extras
+    elif pass_no == 3:
+        cap_bullets("experience", 2)
+        cap_bullets("projects", 1)
+        shorten_summaries(140, 120)
+        d["show_summary"] = False
+        d["certifications"] = []
+        d["publications"] = []
+        d["projects"] = (d.get("projects") or [])[:1]
+        d["experience"] = (d.get("experience") or [])[:2]
+        d["education"] = (d.get("education") or [])[:1]
+        d["skills"] = (d.get("skills") or [])[:8]
+
+    # PASS 4 – final squeeze
+    else:
+        cap_bullets("experience", 1)
+        cap_bullets("projects", 1)
+        shorten_summaries(120, 100)
+        d["projects"] = (d.get("projects") or [])[:1]
+        d["experience"] = (d.get("experience") or [])[:2]
+        d["education"] = (d.get("education") or [])[:1]
+        d["skills"] = (d.get("skills") or [])[:6]
+        d["certifications"] = []
+        d["publications"] = []
+        d["show_summary"] = False
+
+    return d
+
+def _compile_with_page_count(tex_str: str) -> Tuple[bytes, int]:
+    """
+    Compile LaTeX and return (pdf_bytes, pages) by parsing pdflatex stdout like:
+    'Output written on resume.pdf (1 page, 12345 bytes).'
+    """
     try:
         with tempfile.TemporaryDirectory() as tmpdir:
             tex_path = os.path.join(tmpdir, "resume.tex")
             with open(tex_path, "w", encoding="utf-8") as f:
                 f.write(tex_str)
 
+            last_stdout = b""
+            # Typical two passes
             for _ in range(2):
                 proc = subprocess.run(
                     ["pdflatex", "-interaction=nonstopmode", "resume.tex"],
@@ -881,20 +1202,61 @@ def compile_latex_to_pdf_bytes(tex_str: str) -> bytes:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                 )
+                last_stdout = proc.stdout
                 if proc.returncode != 0:
                     raise RuntimeError(
                         "LaTeX compilation failed:\n" + proc.stdout.decode("utf-8", "ignore")
                     )
+
+            m = re.search(rb"\((\d+)\s+pages?\)", last_stdout)
+            pages = int(m.group(1)) if m else 1
 
             pdf_path = os.path.join(tmpdir, "resume.pdf")
             if not os.path.exists(pdf_path):
                 raise RuntimeError("LaTeX did not produce resume.pdf")
 
             with open(pdf_path, "rb") as pf:
-                return pf.read()
+                return pf.read(), pages
 
     except FileNotFoundError:
         raise HTTPException(status_code=500, detail="pdflatex is not installed or not in PATH")
+
+def render_and_compile_one_page(env: Environment, data: Dict[str, Any]) -> bytes:
+    """
+    Render the template and compile. If >1 page, progressively shrink and retry.
+    After standard passes, run an 'ultra squeeze' that *forces* one page,
+    or raise a clear 400 error if somehow still too long.
+    """
+    try:
+        template = env.get_template("resume.tex.jinja")
+    except TemplateSyntaxError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Template syntax error (resume.tex.jinja:{e.lineno}): {e.message}",
+        )
+
+    # Always enforce section order before attempts
+    working = enforce_section_order(dict(data))
+
+    # Standard shrinking passes
+    for pass_no in (1, 2, 3, 4):
+        tex_str = template.render(resume=working)
+        pdf_bytes, pages = _compile_with_page_count(tex_str)
+        if pages <= 1:
+            return pdf_bytes
+        # shrink and keep order
+        working = enforce_section_order(_apply_shrink_pass(working, pass_no))
+
+    # Ultra squeeze loop – guarantee single page
+    for _ in range(3):
+        working = _ultra_squeeze_to_one_page(working)
+        tex_str = template.render(resume=working)
+        pdf_bytes, pages = _compile_with_page_count(tex_str)
+        if pages <= 1:
+            return pdf_bytes
+
+    # If we still can't get to 1 page, bail with a clear error
+    raise HTTPException(status_code=400, detail="Content could not be constrained to one page.")
 
 # ---------------------------
 # Health
@@ -928,7 +1290,10 @@ async def extract_resume_data(file: UploadFile = File(...)):
         cleaned = compress_payload_for_one_page(resume.dict())
 
         # Ensure 3-row technical skills
-        cleaned = ensure_skill_rows(cleaned, text)
+        cleaned = ensure_skill_rows(cleaned, text, job_desc=None)  # Gemini on resume text alone
+
+        # Enforce final order for clients that rely on a fixed order
+        cleaned = enforce_section_order(cleaned)
 
         return {"filename": file.filename, "data": cleaned}
     except Exception as e:
@@ -977,27 +1342,24 @@ async def generate_resume_pdf_latex(
         merged = _ensure_education_details(merged, text)
         merged = expand_sparse_content(merged, text)
 
-        # F) Compress for one page
+        # F) Compress for one page (static shaping)
         resume = ResumeInfo(**merged)
         data = compress_payload_for_one_page(resume.dict())
 
         # G) Ensure 3-row skills
-        data = ensure_skill_rows(data, text)
+        data = ensure_skill_rows(data, text, job_desc=jd)  # Gemini with JD
 
-        # H) Render LaTeX
-        try:
-            template = env.get_template("resume.tex.jinja")
-            tex_str = template.render(resume=data)
-        except TemplateSyntaxError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Template syntax error (resume.tex.jinja:{e.lineno}): {e.message}",
-            )
+        # NEW: enforce the requested section order
+        data = enforce_section_order(data)
 
-        # I) Compile & stream
-        pdf_bytes = compile_latex_to_pdf_bytes(tex_str)
-        suggested = f"{data.get('first_name','Candidate')}_{data.get('last_name','Resume')}.pdf"
+        # H/I) Render + compile with strict one-page enforcement
+        pdf_bytes = render_and_compile_one_page(env, data)
+        # Use input file name + "_tellermade"
+        filename = file.filename or "resume.pdf"
+        base, ext = os.path.splitext(filename)
+        suggested = f"{base}_tellermade.pdf"
         headers = {"Content-Disposition": f'attachment; filename="{suggested}"'}
+
         return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers=headers)
 
     except HTTPException:
@@ -1055,19 +1417,16 @@ async def generate_resume_pdf_json(req: ResumePdfRequest):
 
         resume = ResumeInfo(**merged)
         data = compress_payload_for_one_page(resume.dict())
-        data = ensure_skill_rows(data, text)
+        data = ensure_skill_rows(data, text, job_desc=req.job_desc)  # Gemini with JD
 
-        try:
-            template = env.get_template("resume.tex.jinja")
-            tex_str = template.render(resume=data)
-        except TemplateSyntaxError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Template syntax error (resume.tex.jinja:{e.lineno}): {e.message}",
-            )
+        # NEW: enforce requested order
+        data = enforce_section_order(data)
 
-        pdf_bytes = compile_latex_to_pdf_bytes(tex_str)
-        suggested = f"{data.get('first_name','Candidate')}_{data.get('last_name','Resume')}.pdf"
+        # Render + compile with strict one-page enforcement
+        pdf_bytes = render_and_compile_one_page(env, data)
+        # Use default name since no file upload; base it on resume content
+        base = f"{data.get('first_name','Candidate')}_{data.get('last_name','Resume')}"
+        suggested = f"{base}_tellermade.pdf"
         headers = {"Content-Disposition": f'attachment; filename="{suggested}"'}
         return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers=headers)
 

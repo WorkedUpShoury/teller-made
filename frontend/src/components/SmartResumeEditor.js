@@ -1,112 +1,472 @@
+// =============================
+// ResumeBuilder.jsx (FULL, updated + syntax fixes)
+// =============================
 import React, { useMemo, useState } from "react";
 import "./ResumeBuilder.css";
 
+// Preset options for categorized skills
+const SKILL_OPTIONS = {
+  languages: ["Python", "TypeScript", "Java", "C++", "Go", "Rust", "SQL", "R", "Scala", "Kotlin"],
+  soft: ["Leadership", "Communication", "Mentoring", "Collaboration", "Problem-Solving", "Time Management"],
+  concepts: ["OOP", "Functional Programming", "Distributed Systems", "ML", "DL", "NLP", "Data Engineering"],
+  tools: ["Git", "Docker", "Kubernetes", "Terraform", "Jenkins", "Airflow", "Snowflake", "Spark"],
+  platforms: ["AWS", "GCP", "Azure", "Linux", "iOS", "Android", "Salesforce"],
+};
+
+// --- Section templates ------------------------------------------------------
+// Each template defines the fields for an item inside a section and
+// how it should render to Markdown (for preview) and LaTeX (via backend).
+const SECTION_TEMPLATES = {
+  experience: {
+    name: "Experience",
+    itemFields: [
+      { key: "company", label: "Company", type: "text" },
+      { key: "role", label: "Role / Title", type: "text" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "start", label: "Start", type: "month" },
+      { key: "end", label: "End", type: "month", dependsOn: { key: "current", value: false } },
+      { key: "current", label: "Current", type: "checkbox" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!(it.company || it.role)) return null;
+      const dates = formatDates(it.start, it.end, it.current);
+      return `**${it.role || ""}**, ${it.company || ""}${it.location ? " — " + it.location : ""}  _${dates}_`;
+    },
+  },
+  projects: {
+    name: "Projects",
+    itemFields: [
+      { key: "name", label: "Name", type: "text" },
+      { key: "link", label: "Link", type: "url" },
+      { key: "summary", label: "One-line summary", type: "text" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!(it.name || it.summary)) return null;
+      const title = it.link ? `[${it.name || "Project"}](${it.link})` : it.name || "Project";
+      return `**${title}** — ${it.summary || ""}`;
+    },
+  },
+  education: {
+    name: "Education",
+    itemFields: [
+      { key: "school", label: "School", type: "text" },
+      { key: "degree", label: "Degree", type: "text" },
+      { key: "field", label: "Field", type: "text" },
+      { key: "start", label: "Start", type: "month" },
+      { key: "end", label: "End", type: "month" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "score", label: "Score (GPA/%)", type: "text" },
+    ],
+    bullets: false,
+    md: (it) => {
+      if (!(it.school || it.degree)) return null;
+      const dates = [it.start, it.end].filter(Boolean).join(" — ");
+      return `**${it.degree || ""}${it.field ? " in " + it.field : ""}**, ${it.school || ""}${it.location ? " — " + it.location : ""}  _${dates}_${it.score ? `
+- Score: ${it.score}` : ""}`;
+    },
+  },
+  certifications: {
+    name: "Certifications",
+    itemFields: [
+      { key: "name", label: "Name", type: "text" },
+      { key: "authority", label: "Authority", type: "text" },
+      { key: "id", label: "Credential ID", type: "text" },
+      { key: "url", label: "Verify URL", type: "url" },
+      { key: "date", label: "Date", type: "month" },
+    ],
+    bullets: false,
+    md: (it) => {
+      if (!it.name) return null;
+      const left = it.url ? `[${it.name}](${it.url})` : it.name;
+      const right = [it.authority, it.id, it.date].filter(Boolean).join(" • ");
+      return `${left}${right ? ` — ${right}` : ""}`;
+    },
+  },
+  awards: {
+    name: "Awards",
+    itemFields: [
+      { key: "name", label: "Name", type: "text" },
+      { key: "issuer", label: "Issuer", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "url", label: "Link", type: "url" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!it.name) return null;
+      const title = it.url ? `[${it.name}](${it.url})` : it.name;
+      const meta = [it.issuer, it.location, it.date].filter(Boolean).join(" • ");
+      return `**${title}**${meta ? ` — ${meta}` : ""}`;
+    },
+  },
+  publications: {
+    name: "Publications",
+    itemFields: [
+      { key: "title", label: "Title", type: "text" },
+      { key: "venue", label: "Journal / Venue", type: "text" },
+      { key: "authors", label: "Authors", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "link", label: "Link", type: "url" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!it.title) return null;
+      const left = it.link ? `[${it.title}](${it.link})` : it.title;
+      const meta = [it.authors, it.venue, it.date].filter(Boolean).join(" • ");
+      return `**${left}**${meta ? ` — ${meta}` : ""}`;
+    },
+  },
+  volunteer: {
+    name: "Volunteer",
+    itemFields: [
+      { key: "organization", label: "Organization", type: "text" },
+      { key: "role", label: "Role", type: "text" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "start", label: "Start", type: "month" },
+      { key: "end", label: "End", type: "month", dependsOn: { key: "current", value: false } },
+      { key: "current", label: "Current", type: "checkbox" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!(it.organization || it.role)) return null;
+      const dates = formatDates(it.start, it.end, it.current);
+      return `**${it.role || ""}**, ${it.organization || ""}${it.location ? " — " + it.location : ""}  _${dates}_`;
+    },
+  },
+  courses: {
+    name: "Courses",
+    itemFields: [
+      { key: "name", label: "Course", type: "text" },
+      { key: "provider", label: "Provider", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "link", label: "Link", type: "url" },
+    ],
+    bullets: false,
+    md: (it) => {
+      if (!it.name) return null;
+      const left = it.link ? `[${it.name}](${it.link})` : it.name;
+      const meta = [it.provider, it.date].filter(Boolean).join(" • ");
+      return `${left}${meta ? ` — ${meta}` : ""}`;
+    },
+  },
+  languages: {
+    name: "Languages",
+    itemFields: [
+      { key: "name", label: "Language", type: "text" },
+      { key: "proficiency", label: "Proficiency", type: "text" },
+    ],
+    bullets: false,
+    md: (it) => (it.name ? `- ${it.name}${it.proficiency ? ` — ${it.proficiency}` : ""}` : null),
+  },
+  interests: {
+    name: "Interests",
+    itemFields: [
+      { key: "name", label: "Interest", type: "text" },
+      { key: "details", label: "Details (optional)", type: "text" },
+    ],
+    bullets: false,
+    md: (it) => (it.name ? `- ${it.name}${it.details ? ` — ${it.details}` : ""}` : null),
+  },
+  references: {
+    name: "References",
+    itemFields: [
+      { key: "name", label: "Name", type: "text" },
+      { key: "relation", label: "Relation", type: "text" },
+      { key: "email", label: "Email", type: "text" },
+      { key: "phone", label: "Phone", type: "text" },
+    ],
+    bullets: false,
+    md: (it) => (it.name ? `- **${it.name}** — ${[it.relation, it.email, it.phone].filter(Boolean).join(" • ")}` : null),
+  },
+  achievements: {
+    name: "Achievements",
+    itemFields: [
+      { key: "title", label: "Title", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "summary", label: "Summary", type: "textarea" },
+      { key: "link", label: "Link", type: "url" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!it.title) return null;
+      const left = it.link ? `[${it.title}](${it.link})` : it.title;
+      const meta = [it.date].filter(Boolean).join(" • ");
+      return `**${left}**${meta ? ` — ${meta}` : ""}${it.summary ? `
+- ${it.summary}` : ""}`;
+    },
+  },
+  patents: {
+    name: "Patents",
+    itemFields: [
+      { key: "title", label: "Title", type: "text" },
+      { key: "number", label: "Number", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "link", label: "Link", type: "url" },
+    ],
+    bullets: false,
+    md: (it) => {
+      if (!it.title) return null;
+      const left = it.link ? `[${it.title}](${it.link})` : it.title;
+      const meta = [it.number, it.date].filter(Boolean).join(" • ");
+      return `${left}${meta ? ` — ${meta}` : ""}`;
+    },
+  },
+  talks: {
+    name: "Talks / Conferences",
+    itemFields: [
+      { key: "title", label: "Title", type: "text" },
+      { key: "event", label: "Event", type: "text" },
+      { key: "location", label: "Location", type: "text" },
+      { key: "date", label: "Date", type: "month" },
+      { key: "link", label: "Link", type: "url" },
+    ],
+    bullets: true,
+    md: (it) => {
+      if (!it.title) return null;
+      const left = it.link ? `[${ it.title }](${ it.link })` : it.title;
+      const meta = [it.event, it.location, it.date].filter(Boolean).join(" • ");
+      return `**${left}**${meta ? ` — ${meta}` : ""}`;
+    },
+  },
+  custom: {
+    name: "Custom (freeform)",
+    itemFields: [{ key: "content", label: "Content", type: "textarea" }],
+    bullets: false,
+    md: (it) => (it.content ? it.content : null),
+  },
+  // NEW: Categorized Skills section
+  skillsets: {
+    name: "Skills (by category)",
+    itemFields: [
+      { key: "languages", label: "Languages", type: "tags", options: SKILL_OPTIONS.languages },
+      { key: "soft", label: "Soft Skills", type: "tags", options: SKILL_OPTIONS.soft },
+      { key: "concepts", label: "Concepts", type: "tags", options: SKILL_OPTIONS.concepts },
+      { key: "tools", label: "Tools", type: "tags", options: SKILL_OPTIONS.tools },
+      { key: "platforms", label: "Platforms", type: "tags", options: SKILL_OPTIONS.platforms },
+    ],
+    bullets: false,
+    md: (it) => {
+      const rows = [];
+      const show = (k, label) => Array.isArray(it[k]) && it[k].length
+        ? rows.push(`- **${label}:** ${it[k].join(", ")}`)
+        : null;
+      show("languages", "Languages");
+      show("soft", "Soft Skills");
+      show("concepts", "Concepts");
+      show("tools", "Tools");
+      show("platforms", "Platforms");
+      return rows.length ? rows.join("\n") : null;
+    },
+  },
+};
+
+// Utility: default item generator for a template
+function defaultItemFor(type) {
+  const t = SECTION_TEMPLATES[type];
+  if (!t) return {};
+  const it = {};
+  (t.itemFields || []).forEach((f) => {
+    if (f.type === "checkbox") it[f.key] = false;
+    else if (f.type === "tags") it[f.key] = [];
+    else it[f.key] = "";
+  });
+  if (t.bullets) it.bullets = [""];
+  return it;
+}
+
+function formatDates(start, end, current) {
+  const s = start || "";
+  const e = current ? "Present" : end || "";
+  return [s, e].filter(Boolean).join(" — ");
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 9);
+}
+
+const DEFAULT_SECTIONS = ["experience", "projects", "education", "skillsets"]; // include new section by default
+
 export default function ResumeBuilder() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     fullName: "",
     title: "",
     email: "",
     phone: "",
     location: "",
-    links: [{ label: "LinkedIn", url: "" }],
+    profiles: [{ label: "LinkedIn", url: "" }],
     summary: "",
-    skills: ["Python", "TensorFlow", "React"],
-    experience: [
-      { company: "", role: "", location: "", start: "", end: "", current: false, bullets: [""] },
-    ],
-    projects: [{ name: "", link: "", summary: "", bullets: [""] }],
-    education: [{ school: "", degree: "", field: "", start: "", end: "", location: "", score: "" }],
-  });
+    skills: ["Python", "TensorFlow", "React"], // legacy flat skills (optional)
+    sections: DEFAULT_SECTIONS.map((type) => createSection(type)),
+  }));
 
   const requiredOk = useMemo(() => {
     return form.fullName.trim() && form.email.trim() && form.phone.trim();
   }, [form.fullName, form.email, form.phone]);
 
+  // ---- Backend exports (LaTeX/PDF/JSON) -----------------------------------
+  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
+async function postAndDownload(path, body, fallbackName) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const ct = res.headers.get("content-type") || "";
+    const err = ct.includes("application/json") ? await res.json() : await res.text();
+    console.error("Export failed:", err);
+    alert(`Export failed:\n${typeof err === "string" ? err : JSON.stringify(err, null, 2)}`);
+    return;
+  }
+
+  const cd = res.headers.get("content-disposition") || "";
+  const match = /filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+  const filename = decodeURIComponent(match?.[1] || match?.[2] || fallbackName);
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+  const exportLaTeX = () => postAndDownload("/render/latex", form, "resume.tex");
+  const exportPDF   = () => postAndDownload("/render/pdf", form, "resume.pdf");
+  const exportJSON  = () => postAndDownload("/export/json", form, "resume.json");
+
+  // ---- Top-level helpers ---------------------------------------------------
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const addItem = (section, item) => setForm((f) => ({ ...f, [section]: [...f[section], item] }));
-  const removeItem = (section, idx) =>
+
+  // Profile links (top-level)
+  const addProfile = () => setForm((f) => ({ ...f, profiles: [...f.profiles, { label: "", url: "" }] }));
+  const updateProfile = (idx, key, value) =>
     setForm((f) => {
-      const arr = [...f[section]];
+      const arr = f.profiles.map((p, i) => (i === idx ? { ...p, [key]: value } : p));
+      return { ...f, profiles: arr };
+    });
+  const removeProfile = (idx) =>
+    setForm((f) => {
+      const arr = f.profiles.slice();
       arr.splice(idx, 1);
-      return { ...f, [section]: arr.length ? arr : [...arr, defaultItem(section)] };
-    });
-  const updateItem = (section, idx, key, value) =>
-    setForm((f) => {
-      const arr = f[section].map((it, i) => (i === idx ? { ...it, [key]: value } : it));
-      return { ...f, [section]: arr };
-    });
-  const addBullet = (section, idx) =>
-    setForm((f) => {
-      const arr = f[section].slice();
-      arr[idx] = { ...arr[idx], bullets: [...arr[idx].bullets, ""] };
-      return { ...f, [section]: arr };
-    });
-  const removeBullet = (section, idx, bidx) =>
-    setForm((f) => {
-      const arr = f[section].slice();
-      const bs = arr[idx].bullets.slice();
-      bs.splice(bidx, 1);
-      arr[idx] = { ...arr[idx], bullets: bs.length ? bs : [""] };
-      return { ...f, [section]: arr };
-    });
-  const updateBullet = (section, idx, bidx, value) =>
-    setForm((f) => {
-      const arr = f[section].slice();
-      const bs = arr[idx].bullets.slice();
-      bs[bidx] = value;
-      arr[idx] = { ...arr[idx], bullets: bs };
-      return { ...f, [section]: arr };
+      return { ...f, profiles: arr.length ? arr : [{ label: "", url: "" }] };
     });
 
+  // Skills (legacy chip list)
   const addSkill = (value) => {
     const v = value.trim();
     if (!v) return;
     setForm((f) => (f.skills.includes(v) ? f : { ...f, skills: [...f.skills, v] }));
   };
-  const removeSkill = (skill) =>
-    setForm((f) => ({ ...f, skills: f.skills.filter((s) => s !== skill) }));
+  const removeSkill = (skill) => setForm((f) => ({ ...f, skills: f.skills.filter((s) => s !== skill) }));
 
-  function defaultItem(section) {
-    switch (section) {
-      case "experience":
-        return { company: "", role: "", location: "", start: "", end: "", current: false, bullets: [""] };
-      case "projects":
-        return { name: "", link: "", summary: "", bullets: [""] };
-      case "education":
-        return { school: "", degree: "", field: "", start: "", end: "", location: "", score: "" };
-      case "links":
-        return { label: "", url: "" };
-      default:
-        return {};
-    }
+  // ---- Dynamic sections CRUD ----------------------------------------------
+  function createSection(type) {
+    const t = SECTION_TEMPLATES[type];
+    return {
+      id: uid(),
+      type,
+      title: t?.name || "Section",
+      items: [defaultItemFor(type)],
+    };
   }
 
-  const downloadJSON = () => {
-    const blob = new Blob([JSON.stringify(form, null, 2)], { type: "application/json" });
-    triggerDownload(blob, "resume.json");
-  };
-  const exportMarkdown = () => {
-    const md = toMarkdown(form);
-    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-    triggerDownload(blob, "resume.md");
-  };
-  function triggerDownload(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
+  const addSection = (type) => setForm((f) => ({ ...f, sections: [...f.sections, createSection(type)] }));
+  const removeSection = (id) => setForm((f) => ({ ...f, sections: f.sections.filter((s) => s.id !== id) }));
+  const moveSection = (id, dir) =>
+    setForm((f) => {
+      const idx = f.sections.findIndex((s) => s.id === id);
+      if (idx < 0) return f;
+      const arr = f.sections.slice();
+      const swapIdx = dir === "up" ? Math.max(0, idx - 1) : Math.min(arr.length - 1, idx + 1);
+      [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]];
+      return { ...f, sections: arr };
+    });
+  const renameSection = (id, title) =>
+    setForm((f) => ({ ...f, sections: f.sections.map((s) => (s.id === id ? { ...s, title } : s)) }));
 
+  // Item-level helpers
+  const addItem = (sectionId) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) =>
+        s.id === sectionId ? { ...s, items: [...s.items, defaultItemFor(s.type)] } : s
+      );
+      return { ...f, sections: arr };
+    });
+  const removeItem = (sectionId, idx) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const items = s.items.slice();
+        items.splice(idx, 1);
+        return { ...s, items };
+      });
+      return { ...f, sections: arr };
+    });
+  const updateItem = (sectionId, idx, key, value) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const items = s.items.map((it, i) => (i === idx ? { ...it, [key]: value } : it));
+        return { ...s, items };
+      });
+      return { ...f, sections: arr };
+    });
+
+  const addBullet = (sectionId, idx) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const items = s.items.slice();
+        const it = { ...items[idx] };
+        it.bullets = [...(it.bullets || []), ""];
+        items[idx] = it;
+        return { ...s, items };
+      });
+      return { ...f, sections: arr };
+    });
+  const removeBullet = (sectionId, idx, bidx) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const items = s.items.slice();
+        const it = { ...items[idx] };
+        const bs = (it.bullets || []).slice();
+        bs.splice(bidx, 1);
+        it.bullets = bs.length ? bs : [""];
+        items[idx] = it;
+        return { ...s, items };
+      });
+      return { ...f, sections: arr };
+    });
+  const updateBullet = (sectionId, idx, bidx, value) =>
+    setForm((f) => {
+      const arr = f.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        const items = s.items.slice();
+        const it = { ...items[idx] };
+        const bs = (it.bullets || []).slice();
+        bs[bidx] = value;
+        it.bullets = bs;
+        items[idx] = it;
+        return { ...s, items };
+      });
+      return { ...f, sections: arr };
+    });
+
+  // ---- UI -----------------------------------------------------------------
   return (
     <div className="rb-root">
       <header className="rb-header">
         <div className="rb-header-inner">
           <div className="rb-title">
-            <span className="rb-badge" aria-hidden>
+            <span className="rb-badge" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" strokeWidth="2">
                 <circle cx="12" cy="12" r="4" />
                 <path d="M3 12h3M18 12h3M12 3v3M12 18v3" />
@@ -115,8 +475,9 @@ export default function ResumeBuilder() {
             <span>Resume Builder</span>
           </div>
           <div className="rb-actions">
-            <button className="rb-btn ghost" onClick={downloadJSON} title="Download JSON">⭳ JSON</button>
-            <button className="rb-btn primary" onClick={exportMarkdown} title="Export Markdown">Export</button>
+            <button className="rb-btn" onClick={exportJSON} title="Download JSON">⭳ JSON</button>
+            <button className="rb-btn" onClick={exportLaTeX} title="Download LaTeX">.tex</button>
+            <button className="rb-btn primary" disabled={!requiredOk} onClick={exportPDF} title="Download PDF">PDF</button>
           </div>
         </div>
       </header>
@@ -143,16 +504,16 @@ export default function ResumeBuilder() {
             </Field>
           </div>
 
-          {/* Links */}
+          {/* Profiles / Links */}
           <div className="rb-list-header">
             <h4>Links</h4>
-            <button className="rb-icon" onClick={() => addItem("links", { label: "", url: "" })} title="Add link">＋</button>
+            <button className="rb-icon" onClick={addProfile} title="Add link">＋</button>
           </div>
-          {form.links.map((lnk, i) => (
+          {form.profiles.map((lnk, i) => (
             <div className="rb-row" key={`link-${i}`}>
-              <input className="rb-input" value={lnk.label} onChange={(e) => updateItem("links", i, "label", e.target.value)} />
-              <input className="rb-input" value={lnk.url} onChange={(e) => updateItem("links", i, "url", e.target.value)} />
-              <button className="rb-icon danger" onClick={() => removeItem("links", i)} title="Remove">🗑</button>
+              <input className="rb-input" placeholder="Label (e.g., LinkedIn)" value={lnk.label} onChange={(e) => updateProfile(i, "label", e.target.value)} />
+              <input className="rb-input" placeholder="https://" value={lnk.url} onChange={(e) => updateProfile(i, "url", e.target.value)} />
+              <button className="rb-icon danger" onClick={() => removeProfile(i)} title="Remove">🗑</button>
             </div>
           ))}
 
@@ -161,118 +522,46 @@ export default function ResumeBuilder() {
             <textarea className="rb-textarea" rows={4} value={form.summary} onChange={(e) => setField("summary", e.target.value)} />
           </Field>
 
-          {/* Skills */}
+          {/* Legacy flat Skills (optional) */}
           <SkillsChips skills={form.skills} onAdd={addSkill} onRemove={removeSkill} />
         </section>
 
-        {/* Experience */}
-        <section className="rb-card">
-          <div className="rb-list-header">
-            <h3 className="rb-card-title">Experience</h3>
-            <button className="rb-btn ghost" onClick={() => addItem("experience", defaultItem("experience"))}>＋ Add experience</button>
-          </div>
+        {/* Dynamic Sections */}
+        <SectionPicker onAdd={addSection} />
 
-          {form.experience.map((ex, i) => (
-            <div className="rb-item" key={`exp-${i}`}>
-              <div className="rb-item-head">
-                <strong>Role</strong>
-                <button className="rb-icon danger" onClick={() => removeItem("experience", i)} title="Remove">🗑</button>
-              </div>
-
-              <div className="rb-grid">
-                <Field label="Company"><input className="rb-input" value={ex.company} onChange={(e) => updateItem("experience", i, "company", e.target.value)} /></Field>
-                <Field label="Role / Title"><input className="rb-input" value={ex.role} onChange={(e) => updateItem("experience", i, "role", e.target.value)} /></Field>
-                <Field label="Location"><input className="rb-input" value={ex.location} onChange={(e) => updateItem("experience", i, "location", e.target.value)} /></Field>
-                <Field label="Start"><input className="rb-input" type="month" value={ex.start} onChange={(e) => updateItem("experience", i, "start", e.target.value)} /></Field>
-                <Field label="End"><input className="rb-input" type="month" value={ex.current ? "" : ex.end} onChange={(e) => updateItem("experience", i, "end", e.target.value)} disabled={ex.current} /></Field>
-                <label className="rb-check">
-                  <input type="checkbox" checked={ex.current} onChange={(e) => updateItem("experience", i, "current", e.target.checked)} />
-                  Current
-                </label>
-              </div>
-
-              <Bullets
-                bullets={ex.bullets}
-                onAdd={() => addBullet("experience", i)}
-                onRemove={(b) => removeBullet("experience", i, b)}
-                onChange={(b, val) => updateBullet("experience", i, b, val)}
-              />
-            </div>
-          ))}
-        </section>
-
-        {/* Projects */}
-        <section className="rb-card">
-          <div className="rb-list-header">
-            <h3 className="rb-card-title">Projects</h3>
-            <button className="rb-btn ghost" onClick={() => addItem("projects", defaultItem("projects"))}>＋ Add project</button>
-          </div>
-
-          {form.projects.map((p, i) => (
-            <div className="rb-item" key={`proj-${i}`}>
-              <div className="rb-item-head">
-                <strong>Project</strong>
-                <button className="rb-icon danger" onClick={() => removeItem("projects", i)} title="Remove">🗑</button>
-              </div>
-
-              <div className="rb-grid">
-                <Field label="Name"><input className="rb-input" value={p.name} onChange={(e) => updateItem("projects", i, "name", e.target.value)} /></Field>
-                <Field label="Link"><input className="rb-input" value={p.link} onChange={(e) => updateItem("projects", i, "link", e.target.value)} /></Field>
-                <Field label="One-line summary"><input className="rb-input" value={p.summary} onChange={(e) => updateItem("projects", i, "summary", e.target.value)} /></Field>
-              </div>
-
-              <Bullets
-                bullets={p.bullets}
-                onAdd={() => addBullet("projects", i)}
-                onRemove={(b) => removeBullet("projects", i, b)}
-                onChange={(b, val) => updateBullet("projects", i, b, val)}
-              />
-            </div>
-          ))}
-        </section>
-
-        {/* Education */}
-        <section className="rb-card">
-          <div className="rb-list-header">
-            <h3 className="rb-card-title">Education</h3>
-            <button className="rb-btn ghost" onClick={() => addItem("education", defaultItem("education"))}>＋ Add education</button>
-          </div>
-
-          {form.education.map((ed, i) => (
-            <div className="rb-item" key={`edu-${i}`}>
-              <div className="rb-item-head">
-                <strong>Program</strong>
-                <button className="rb-icon danger" onClick={() => removeItem("education", i)} title="Remove">🗑</button>
-              </div>
-
-              <div className="rb-grid">
-                <Field label="School"><input className="rb-input" value={ed.school} onChange={(e) => updateItem("education", i, "school", e.target.value)} /></Field>
-                <Field label="Degree"><input className="rb-input" value={ed.degree} onChange={(e) => updateItem("education", i, "degree", e.target.value)} /></Field>
-                <Field label="Field"><input className="rb-input" value={ed.field} onChange={(e) => updateItem("education", i, "field", e.target.value)} /></Field>
-                <Field label="Start"><input className="rb-input" type="month" value={ed.start} onChange={(e) => updateItem("education", i, "start", e.target.value)} /></Field>
-                <Field label="End"><input className="rb-input" type="month" value={ed.end} onChange={(e) => updateItem("education", i, "end", e.target.value)} /></Field>
-                <Field label="Location"><input className="rb-input" value={ed.location} onChange={(e) => updateItem("education", i, "location", e.target.value)} /></Field>
-                <Field label="Score (GPA/%)"><input className="rb-input" value={ed.score} onChange={(e) => updateItem("education", i, "score", e.target.value)} /></Field>
-              </div>
-            </div>
-          ))}
-        </section>
+        {form.sections.map((section) => (
+          <SectionCard
+            key={section.id}
+            section={section}
+            onRename={(t) => renameSection(section.id, t)}
+            onRemove={() => removeSection(section.id)}
+            onMoveUp={() => moveSection(section.id, "up")}
+            onMoveDown={() => moveSection(section.id, "down")}
+          >
+            <SectionItems
+              section={section}
+              onAddItem={() => addItem(section.id)}
+              onRemoveItem={(i) => removeItem(section.id, i)}
+              onUpdateItem={(i, k, v) => updateItem(section.id, i, k, v)}
+              onAddBullet={(i) => addBullet(section.id, i)}
+              onRemoveBullet={(i, b) => removeBullet(section.id, i, b)}
+              onUpdateBullet={(i, b, v) => updateBullet(section.id, i, b, v)}
+            />
+          </SectionCard>
+        ))}
 
         {/* Footer actions */}
         <section className="rb-footer">
           <span className={!requiredOk ? "rb-warning" : "rb-ok"}>
             {!requiredOk ? "Name, Email, and Phone are required." : "Looks good!"}
           </span>
-          <div className="rb-actions">
-            <button className="rb-btn ghost" onClick={() => setForm((f) => ({ ...f, ...blankForm() }))}>Clear form</button>
-            <button className="rb-btn primary" disabled={!requiredOk} onClick={exportMarkdown}>Generate Markdown</button>
-          </div>
         </section>
       </main>
     </div>
   );
 }
 
+// --- Reusable pieces --------------------------------------------------------
 function Field({ label, children }) {
   return (
     <label className="rb-field">
@@ -280,6 +569,127 @@ function Field({ label, children }) {
       {children}
     </label>
   );
+}
+
+function SectionPicker({ onAdd }) {
+  const [sel, setSel] = useState("experience");
+  const options = Object.entries(SECTION_TEMPLATES);
+  return (
+    <section className="rb-card">
+      <div className="rb-list-header">
+        <h3 className="rb-card-title">Sections</h3>
+        <div className="rb-row">
+          <select className="rb-input" value={sel} onChange={(e) => setSel(e.target.value)}>
+            {options.map(([key, t]) => (
+              <option key={key} value={key}>{t.name}</option>
+            ))}
+          </select>
+          <button className="rb-btn" onClick={() => onAdd(sel)}>＋ Add section</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SectionCard({ section, children, onRename, onRemove, onMoveUp, onMoveDown }) {
+  const t = SECTION_TEMPLATES[section.type] || { name: section.title };
+  return (
+    <section className="rb-card">
+      <div className="rb-list-header">
+        <h3 className="rb-card-title">
+          <input
+            className="rb-input"
+            value={section.title}
+            onChange={(e) => onRename(e.target.value)}
+            aria-label={`${t.name} title`}
+          />
+        </h3>
+        <div className="rb-actions">
+          <button className="rb-btn ghost" onClick={onMoveUp} title="Move up">↑</button>
+          <button className="rb-btn ghost" onClick={onMoveDown} title="Move down">↓</button>
+          <button className="rb-btn danger" onClick={onRemove} title="Remove section">Remove</button>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SectionItems({ section, onAddItem, onRemoveItem, onUpdateItem, onAddBullet, onRemoveBullet, onUpdateBullet }) {
+  const template = SECTION_TEMPLATES[section.type];
+  const fields = template?.itemFields || [];
+
+  return (
+    <div className="rb-items">
+      <div className="rb-list-header">
+        <h4>Entries</h4>
+        <button className="rb-btn ghost" onClick={onAddItem}>＋ Add entry</button>
+      </div>
+
+      {section.items.map((it, i) => (
+        <div className="rb-item" key={`${section.id}-item-${i}`}>
+          <div className="rb-item-head">
+            <strong>Entry #{i + 1}</strong>
+            <button className="rb-icon danger" onClick={() => onRemoveItem(i)} title="Remove">🗑</button>
+          </div>
+
+          <div className="rb-grid">
+            {fields.map((f) => (
+              <Field key={f.key} label={f.label}>
+                {renderField(section.type, it, f, (val) => onUpdateItem(i, f.key, val))}
+              </Field>
+            ))}
+          </div>
+
+          {template?.bullets ? (
+            <Bullets
+              bullets={it.bullets || [""]}
+              onAdd={() => onAddBullet(i)}
+              onRemove={(b) => onRemoveBullet(i, b)}
+              onChange={(b, val) => onUpdateBullet(i, b, val)}
+            />
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderField(sectionType, item, f, onChange) {
+  const disabled = f.dependsOn ? item[f.dependsOn.key] !== f.dependsOn.value : false;
+  const commonProps = {
+    className: "rb-input",
+    value: item[f.key] ?? "",
+    onChange: (e) => onChange(e.target.value),
+    disabled,
+  };
+
+  switch (f.type) {
+    case "checkbox":
+      return (
+        <label className="rb-check">
+          <input type="checkbox" checked={!!item[f.key]} onChange={(e) => onChange(e.target.checked)} /> {f.label}
+        </label>
+      );
+    case "textarea":
+      return (
+        <textarea className="rb-textarea" rows={3} value={item[f.key] || ""} onChange={(e) => onChange(e.target.value)} />
+      );
+    case "month":
+      return <input type="month" {...commonProps} />;
+    case "url":
+      return <input type="url" placeholder="https://" {...commonProps} />;
+    case "tags":
+      return (
+        <TagInput
+          value={Array.isArray(item[f.key]) ? item[f.key] : []}
+          onChange={(arr) => onChange(arr)}
+          options={f.options || []}
+        />
+      );
+    default:
+      return <input type="text" {...commonProps} />;
+  }
 }
 
 function SkillsChips({ skills, onAdd, onRemove }) {
@@ -298,9 +708,55 @@ function SkillsChips({ skills, onAdd, onRemove }) {
         ))}
       </div>
       <div className="rb-row">
-        <input className="rb-input" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKeyDown} />
+        <input className="rb-input" placeholder="Add a skill and press Enter" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKeyDown} />
         <button className="rb-btn" onClick={add}>＋ Add</button>
       </div>
+    </div>
+  );
+}
+
+function TagInput({ value, onChange, options = [], placeholder = "Add and press Enter" }) {
+  const [draft, setDraft] = useState("");
+  const add = (v) => {
+    const t = (v || draft).trim();
+    if (!t) return;
+    if (!value.includes(t)) onChange([...(value || []), t]);
+    setDraft("");
+  };
+  const remove = (tag) => onChange((value || []).filter((x) => x !== tag));
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+  };
+  return (
+    <div className="rb-tags">
+      <div className="rb-chipwrap">
+        {(value || []).map((s) => (
+          <span className="rb-chip" key={s}>
+            {s} <button className="rb-chip-x" onClick={() => remove(s)} title="Remove">×</button>
+          </span>
+        ))}
+      </div>
+      <div className="rb-row">
+        <input
+          list="rb-tag-options"
+          className="rb-input"
+          placeholder={placeholder}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+        />
+        <button className="rb-btn" type="button" onClick={() => add()}>＋ Add</button>
+        <datalist id="rb-tag-options">
+          {options.map((o) => <option key={o} value={o} />)}
+        </datalist>
+      </div>
+      {options.length ? (
+        <div className="rb-quickpick">
+          {options.map((o) => (
+            <button key={o} type="button" className="rb-chip ghost" onClick={() => add(o)}>{o}</button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -322,67 +778,41 @@ function Bullets({ bullets, onAdd, onRemove, onChange }) {
   );
 }
 
-function blankForm() {
-  return {
-    fullName: "",
-    title: "",
-    email: "",
-    phone: "",
-    location: "",
-    links: [{ label: "LinkedIn", url: "" }],
-    summary: "",
-    skills: [],
-  };
-}
-
+// --- Markdown (for preview, optional) --------------------------------------
 function toMarkdown(f) {
   const lines = [];
   lines.push(`# ${f.fullName}${f.title ? " — " + f.title : ""}`);
   lines.push(`${f.email} | ${f.phone}${f.location ? " | " + f.location : ""}`);
-  if (f.links?.length) {
-    lines.push(
-      f.links
-        .filter((l) => l.label || l.url)
-        .map((l) => (l.url ? `[${l.label || l.url}](${l.url})` : l.label))
-        .join(" • ")
-    );
+  if (f.profiles?.length) {
+    const row = f.profiles
+      .filter((l) => l.label || l.url)
+      .map((l) => (l.url ? `[${l.label || l.url}](${l.url})` : l.label))
+      .join(" • ");
+    if (row) lines.push(row);
   }
-  if (f.summary?.trim()) {
-    lines.push(`\n**Summary**\n${f.summary.trim()}`);
-  }
-  if (f.skills?.length) {
-    lines.push(`\n**Skills**\n${f.skills.join(", ")}`);
-  }
-  if (f.experience?.length) {
-    lines.push(`\n## Experience`);
-    f.experience.forEach((e) => {
-      if (!(e.company || e.role)) return;
-      const dates = `${e.start || ""}${e.current ? " — Present" : e.end ? " — " + e.end : ""}`;
-      lines.push(`\n**${e.role || ""}**, ${e.company || ""}${e.location ? " — " + e.location : ""}  _${dates}_`);
-      (e.bullets || []).forEach((b) => b && lines.push(`- ${b}`));
+  if (f.summary?.trim()) lines.push(`
+**Summary**
+${f.summary.trim()}`);
+  if (f.skills?.length) lines.push(`
+**Skills**
+${f.skills.join(", ")}`);
+  (f.sections || []).forEach((sec) => {
+    const t = SECTION_TEMPLATES[sec.type];
+    if (!t) return;
+    const body = [];
+    (sec.items || []).forEach((it) => {
+      const head = t.md ? t.md(it) : null;
+      if (!head) return;
+      body.push(`
+${head}`);
+      (it.bullets || []).forEach((b) => b && body.push(`- ${b}`));
     });
-  }
-  if (f.projects?.length) {
-    lines.push(`\n## Projects`);
-    f.projects.forEach((p) => {
-      if (!p.name && !p.summary) return;
-      const title = p.link ? `[${p.name || "Project"}](${p.link})` : (p.name || "Project");
-      lines.push(`\n**${title}** — ${p.summary || ""}`);
-      (p.bullets || []).forEach((b) => b && lines.push(`- ${b}`));
-    });
-  }
-  if (f.education?.length) {
-    lines.push(`\n## Education`);
-    f.education.forEach((ed) => {
-      if (!(ed.school || ed.degree)) return;
-      const dates = [ed.start, ed.end].filter(Boolean).join(" — ");
-      const line = `**${ed.degree || ""}${ed.field ? " in " + ed.field : ""}**, ${ed.school || ""}${
-        ed.location ? " — " + ed.location : ""
-      }  _${dates}_`;
-      lines.push(`\n${line}`);
-      if (ed.score) lines.push(`- Score: ${ed.score}`);
-    });
-  }
+    if (body.length) {
+      lines.push(`
+## ${sec.title || t.name}`);
+      lines.push(...body);
+    }
+  });
   lines.push("");
   return lines.join("\n");
 }

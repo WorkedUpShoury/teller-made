@@ -1,0 +1,307 @@
+% =============================================================================
+% editor.tex.jinja — Safe LaTeX template for ResumeBuilder (Jinja2)
+% Backend filters required:  |tex   |fmt_month   item|date_range
+% =============================================================================
+
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=black,
+  pdfauthor={{ form.fullName|tex }},
+  pdftitle={Resume - {{ form.fullName|tex }}}
+}
+
+\setlist[itemize]{nosep,leftmargin=1.2em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.25em}
+
+\newcommand{\dotsep}{\ensuremath{\cdot}}
+\newcommand{\sep}{\hspace{0.5em}{\small$\vcenter{\hbox{\dotsep}}$}\hspace{0.5em}}
+\newcommand{\tighthrule}{\vspace{0.35em}\hrule\vspace{0.35em}}
+
+\begin{document}
+
+% =====================
+% Header
+% =====================
+{\LARGE \textbf{ {{ form.fullName|tex }} }}%
+{% if form.title %} \quad {\large {{ form.title|tex }} }{% endif %}
+
+\vspace{0.4em}
+
+{{ form.email|tex }} \sep {{ form.phone|tex }}{% if form.location %}\sep {{ form.location|tex }}{% endif %}
+
+{% set links = [] %}
+{% if form.profiles %}
+  {% for p in form.profiles if p.label or p.url %}
+    {% if p.url %}
+      {% set links = links + ['\\href{' ~ p.url ~ '}{' ~ (p.label or p.url)|tex ~ '}'] %}
+    {% else %}
+      {% set links = links + [(p.label)|tex] %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% if links %}
+  \\
+  {{ links | join(' \\sep ') }}
+{% endif %}
+
+\tighthrule
+
+% =====================
+% Summary
+% =====================
+{% if form.summary %}
+\section*{Summary}
+{{ form.summary|tex }}
+{% endif %}
+
+% =====================
+% Legacy flat skills
+% =====================
+{% if form.skills and form.skills|length > 0 %}
+\section*{Skills}
+{{ (form.skills | join(', ')) | tex }}
+{% endif %}
+
+% =====================
+% Macros
+% =====================
+{% macro bullets(list) -%}
+  {% if list %}
+    {% set ns = namespace(count=0) %}
+    {% for b in list %}{% if b %}{% set ns.count = ns.count + 1 %}{% endif %}{% endfor %}
+    {% if ns.count > 0 %}
+    \begin{itemize}
+      {% for b in list %}{% if b %}\item {{ b|tex }}{% endif %}{% endfor %}
+    \end{itemize}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+
+{% macro header_line_lr(left, right) -%}
+  \noindent {{ left }}\hfill {{ right }}\\
+{%- endmacro %}
+
+{% macro render_experience_item(it) -%}
+  {% set left = '\\textbf{ ' ~ (it.role or '')|tex ~ ' }' %}
+  {% set org  = (it.company or '')|tex %}
+  {% if org %}{% set left = left ~ ', ' ~ org %}{% endif %}
+  {% if it.location %}{% set left = left ~ ' (' ~ it.location|tex ~ ')' %}{% endif %}
+  {{ header_line_lr(left, it|date_range) }}
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_volunteer_item(it) -%}
+  {% set left = '\\textbf{ ' ~ (it.role or '')|tex ~ ' }' %}
+  {% set org  = (it.organization or '')|tex %}
+  {% if org %}{% set left = left ~ ', ' ~ org %}{% endif %}
+  {% if it.location %}{% set left = left ~ ' (' ~ it.location|tex ~ ')' %}{% endif %}
+  {{ header_line_lr(left, it|date_range) }}
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_projects_item(it) -%}
+  {% if it.link %}
+    {% set title = '\\textbf{\\href{' ~ it.link ~ '}{' ~ (it.name or 'Project')|tex ~ '}}' %}
+  {% else %}
+    {% set title = '\\textbf{' ~ (it.name or 'Project')|tex ~ '}' %}
+  {% endif %}
+  {% set line = title %}
+  {% if it.summary %}{% set line = line ~ ' --- ' ~ (it.summary|tex) %}{% endif %}
+  \noindent {{ line }}\\
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_education_item(it) -%}
+  {% set left = '\\textbf{' ~ (it.degree or '')|tex ~ '}' %}
+  {% if it.field %}{% set left = left ~ ' in ' ~ it.field|tex %}{% endif %}
+  {% if it.school %}{% set left = left ~ ' --- ' ~ it.school|tex %}{% endif %}
+  {% if it.location %}{% set left = left ~ ' (' ~ it.location|tex ~ ')' %}{% endif %}
+  {% set right = '' %}
+  {% if it.start %}{% set right = it.start|fmt_month %}{% endif %}
+  {% if it.end %}{% set right = (right ~ (' — ' if right else '') ~ (it.end|fmt_month)) %}{% endif %}
+  {{ header_line_lr(left, right) }}
+  {% if it.score %}\emph{Score:} {{ it.score|tex }}\\{% endif %}
+{%- endmacro %}
+
+{% macro render_certifications_item(it) -%}
+  {% if it.url %}
+    {% set left = '\\href{' ~ it.url ~ '}{' ~ (it.name or '')|tex ~ '}' %}
+  {% else %}
+    {% set left = (it.name or '')|tex %}
+  {% endif %}
+  {% set meta = [] %}
+  {% if it.authority %}{% set meta = meta + [it.authority|tex] %}{% endif %}
+  {% if it.id %}{% set meta = meta + [('ID: ' ~ it.id)|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent {{ left }}{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+{%- endmacro %}
+
+{% macro render_awards_item(it) -%}
+  {% set title = (it.name or '')|tex %}
+  {% if it.url %}{% set title = '\\href{' ~ it.url ~ '}{' ~ title ~ '}' %}{% endif %}
+  {% set meta = [] %}
+  {% if it.issuer %}{% set meta = meta + [it.issuer|tex] %}{% endif %}
+  {% if it.location %}{% set meta = meta + [it.location|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [ it.date|fmt_month ] %}{% endif %}
+  \noindent \textbf{ {{ title }} }{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_publications_item(it) -%}
+  {% set title = (it.title or '')|tex %}
+  {% if it.link %}{% set title = '\\href{' ~ it.link ~ '}{' ~ title ~ '}' %}{% endif %}
+  {% set meta = [] %}
+  {% if it.authors %}{% set meta = meta + [it.authors|tex] %}{% endif %}
+  {% if it.venue %}{% set meta = meta + [it.venue|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent \textbf{ {{ title }} }{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_courses_item(it) -%}
+  {% if it.link %}
+    {% set left = '\\href{' ~ it.link ~ '}{' ~ (it.name or '')|tex ~ '}' %}
+  {% else %}
+    {% set left = (it.name or '')|tex %}
+  {% endif %}
+  {% set meta = [] %}
+  {% if it.provider %}{% set meta = meta + [it.provider|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent {{ left }}{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+{%- endmacro %}
+
+{% macro render_languages_item(it) -%}
+  {% if it.name %}
+  \noindent -- {{ it.name|tex }}{% if it.proficiency %} --- {{ it.proficiency|tex }}{% endif %}\\
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_interests_item(it) -%}
+  {% if it.name %}
+  \noindent -- {{ it.name|tex }}{% if it.details %} --- {{ it.details|tex }}{% endif %}\\
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_references_item(it) -%}
+  {% if it.name %}
+  \noindent -- \textbf{ {{ it.name|tex }} }%
+  {% set pieces = [] %}
+  {% if it.relation %}{% set pieces = pieces + [it.relation|tex] %}{% endif %}
+  {% if it.email %}{% set pieces = pieces + [it.email|tex] %}{% endif %}
+  {% if it.phone %}{% set pieces = pieces + [it.phone|tex] %}{% endif %}
+  {% if pieces %} --- {{ pieces|join(' \\sep ') }}{% endif %}\\
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_achievements_item(it) -%}
+  {% set title = (it.title or '')|tex %}
+  {% if it.link %}{% set title = '\\href{' ~ it.link ~ '}{' ~ title ~ '}' %}{% endif %}
+  {% set meta = [] %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent \textbf{ {{ title }} }{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+  {% if it.summary %}- {{ it.summary|tex }}\\{% endif %}
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_patents_item(it) -%}
+  {% set title = (it.title or '')|tex %}
+  {% if it.link %}{% set title = '\\href{' ~ it.link ~ '}{' ~ title ~ '}' %}{% endif %}
+  {% set meta = [] %}
+  {% if it.number %}{% set meta = meta + [('No: ' ~ it.number)|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent {{ title }}{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+{%- endmacro %}
+
+{% macro render_talks_item(it) -%}
+  {% set title = (it.title or '')|tex %}
+  {% if it.link %}{% set title = '\\href{' ~ it.link ~ '}{' ~ title ~ '}' %}{% endif %}
+  {% set meta = [] %}
+  {% if it.event %}{% set meta = meta + [it.event|tex] %}{% endif %}
+  {% if it.location %}{% set meta = meta + [it.location|tex] %}{% endif %}
+  {% if it.date %}{% set meta = meta + [it.date|fmt_month] %}{% endif %}
+  \noindent \textbf{ {{ title }} }{% if meta %} --- {{ meta|join(' \\sep ') }}{% endif %}\\
+  {{ bullets(it.bullets) }}
+{%- endmacro %}
+
+{% macro render_custom_item(it) -%}
+  {% if it.content %}{{ it.content|tex }}\\{% endif %}
+{%- endmacro %}
+
+{% macro render_skillsets_item(it) -%}
+  {% set rows = [] %}
+  {% if it.languages and it.languages|length %}{% set rows = rows + ['\\textbf{Languages:} ' ~ ((it.languages | join(', ')) | tex)] %}{% endif %}
+  {% if it.soft and it.soft|length %}{% set rows = rows + ['\\textbf{Soft Skills:} ' ~ ((it.soft | join(', ')) | tex)] %}{% endif %}
+  {% if it.concepts and it.concepts|length %}{% set rows = rows + ['\\textbf{Concepts:} ' ~ ((it.concepts | join(', ')) | tex)] %}{% endif %}
+  {% if it.tools and it.tools|length %}{% set rows = rows + ['\\textbf{Tools:} ' ~ ((it.tools | join(', ')) | tex)] %}{% endif %}
+  {% if it.platforms and it.platforms|length %}{% set rows = rows + ['\\textbf{Platforms:} ' ~ ((it.platforms | join(', ')) | tex)] %}{% endif %}
+  {% if rows %}
+    \begin{itemize}
+      {% for r in rows %}\item {{ r }}{% endfor %}
+    \end{itemize}
+  {% endif %}
+{%- endmacro %}
+
+% =====================
+% Sections
+% =====================
+{% macro render_section(sec) -%}
+  {% set t = sec.type %}
+  \section*{ {{ (sec.title or (t|capitalize))|tex }} }
+  {% for it in sec["items"] %}
+    {% if t == 'experience' %}
+      {{ render_experience_item(it) }}
+    {% elif t == 'projects' %}
+      {{ render_projects_item(it) }}
+    {% elif t == 'education' %}
+      {{ render_education_item(it) }}
+    {% elif t == 'certifications' %}
+      {{ render_certifications_item(it) }}
+    {% elif t == 'awards' %}
+      {{ render_awards_item(it) }}
+    {% elif t == 'publications' %}
+      {{ render_publications_item(it) }}
+    {% elif t == 'volunteer' %}
+      {{ render_volunteer_item(it) }}
+    {% elif t == 'courses' %}
+      {{ render_courses_item(it) }}
+    {% elif t == 'languages' %}
+      {{ render_languages_item(it) }}
+    {% elif t == 'interests' %}
+      {{ render_interests_item(it) }}
+    {% elif t == 'references' %}
+      {{ render_references_item(it) }}
+    {% elif t == 'achievements' %}
+      {{ render_achievements_item(it) }}
+    {% elif t == 'patents' %}
+      {{ render_patents_item(it) }}
+    {% elif t == 'talks' %}
+      {{ render_talks_item(it) }}
+    {% elif t == 'custom' %}
+      {{ render_custom_item(it) }}
+    {% elif t == 'skillsets' %}
+      {{ render_skillsets_item(it) }}
+    {% else %}
+      {% set line = [] %}
+      {% if it.title %}{% set line = line + ['\\textbf{' ~ (it.title|tex) ~ '}'] %}{% endif %}
+      {% if it.summary %}{% set line = line + [it.summary|tex] %}{% endif %}
+      {% if line %}\noindent {{ line|join(' --- ') }}\\{% endif %}
+      {{ bullets(it.bullets) }}
+    {% endif %}
+  {% endfor %}
+{%- endmacro %}
+
+{% for sec in form.sections if sec["items"] and (sec["items"]|length > 0) %}
+  {{ render_section(sec) }}
+{% endfor %}
+
+\end{document}

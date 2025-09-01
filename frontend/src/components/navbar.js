@@ -8,6 +8,10 @@ import '../styles/Navbar.css';
 function AppNavbar() {
   return (
     <Navbar expand="lg" className="shadow-sm navbar-custom">
+      <div className="ru-bokeh" aria-hidden>
+        <span className="b1" />
+        <span className="b2" />
+      </div>
       <Container>
         <Navbar.Brand as={Link} to="/">
           <img

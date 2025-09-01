@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./signin.css"; // dedicated CSS only for Login
-
+import logo from '../styles/logo.png';
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,8 +44,11 @@ export default function Login() {
   };
 
   return (
-    <div className="login-root">
+    <div className="login-root  login-neo">
       <div className="login-card" aria-busy={loading}>
+        <div className="login-logo">
+    <img src= {logo} alt="TellerMade Logo" />
+      </div>
         <header className="login-head">
           <span className="login-badge" aria-hidden>
             <svg
