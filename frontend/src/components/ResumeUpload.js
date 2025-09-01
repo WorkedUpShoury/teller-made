@@ -8,6 +8,10 @@ const ACCEPTED = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
+// Optional: set your API hosts here so you can change them without touching code elsewhere.
+const FASTAPI_BASE = process.env.REACT_APP_FASTAPI_BASE || "http://127.0.0.1:8000";
+const FLASK_BASE = process.env.REACT_APP_FLASK_BASE || "http://127.0.0.1:5001";
+
 export default function ResumeUploadPage() {
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDesc, setJobDesc] = useState("");
@@ -30,7 +34,8 @@ export default function ResumeUploadPage() {
 
   const validateFile = (file) => {
     if (!file) return "No file selected.";
-    if (!ACCEPTED.includes(file.type)) return "Please upload a PDF or Word document (.pdf, .doc, .docx).";
+    if (!ACCEPTED.includes(file.type))
+      return "Please upload a PDF or Word document (.pdf, .doc, .docx).";
     if (file.size > MAX_MB * 1024 * 1024) return `File is too large (max ${MAX_MB}MB).`;
     return "";
   };
@@ -61,6 +66,27 @@ export default function ResumeUploadPage() {
     }
   };
 
+  // Utility: extract filename from Content-Disposition (if server provides it)
+  const getFilenameFromHeaders = (response, fallback) => {
+    const cd = response.headers.get("Content-Disposition") || response.headers.get("content-disposition");
+    if (!cd) return fallback;
+    // Example: attachment; filename="Shoury_Sinha_Resume.pdf"
+    const match = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"|filename=([^;]+)/i.exec(cd);
+    const raw = decodeURIComponent(match?.[1] || match?.[2] || match?.[3] || "").trim();
+    return raw || fallback;
+  };
+
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = async () => {
     setSuccess("");
     setError("");
@@ -71,32 +97,52 @@ export default function ResumeUploadPage() {
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("resumeFile", resumeFile);
-    formData.append("jobDesc", jobDesc);
-
     try {
-      const response = await fetch("http://127.0.0.1:5001/api/optimize", {
-        method: "POST",
-        body: formData,
-      });
+      // Route based on file type:
+      // - PDF → FastAPI (/resumes/pdf) expects "file" + "jd", returns PDF
+      // - DOC/DOCX → Flask (/api/optimize) expects "resumeFile" + "jobDesc", returns DOCX
+      const isPDF = resumeFile.type === "application/pdf";
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || `HTTP error! Status: ${response.status}`);
+      if (isPDF) {
+        const formData = new FormData();
+        formData.append("file", resumeFile);
+        formData.append("jd", jobDesc);
+
+        const response = await fetch(`${FASTAPI_BASE}/resumes/pdf`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errJson = await response.json().catch(() => null);
+          throw new Error(errJson?.detail || `HTTP error! Status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const filename = getFilenameFromHeaders(response, "optimized_resume.pdf");
+        downloadBlob(blob, filename);
+        setSuccess("Your resume has been optimized and downloaded as PDF.");
+      } else {
+        // DOC/DOCX path to Flask
+        const formData = new FormData();
+        formData.append("resumeFile", resumeFile);
+        formData.append("jobDesc", jobDesc);
+
+        const response = await fetch(`${FLASK_BASE}/api/optimize`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errJson = await response.json().catch(() => null);
+          throw new Error(errJson?.error || `HTTP error! Status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const filename = getFilenameFromHeaders(response, "optimized_resume.docx");
+        downloadBlob(blob, filename);
+        setSuccess("Your resume has been optimized and downloaded as DOCX.");
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "optimized_resume.docx");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      setSuccess("Your resume has been optimized! The download has started.");
     } catch (err) {
       console.error("Error optimizing resume:", err);
       setError(`Optimization failed: ${err.message}`);
@@ -172,6 +218,7 @@ export default function ResumeUploadPage() {
               <input
                 ref={fileInputRef}
                 type="file"
+                // Accept PDF + DOC/DOCX (we route accordingly in handleSubmit)
                 accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 className="ru-file"
                 onChange={handleFileChange}

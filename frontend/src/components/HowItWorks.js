@@ -6,6 +6,7 @@ import {
   FaClipboardList,
   FaTachometerAlt 
 } from 'react-icons/fa';
+import '../styles/HowItWorks.css';
 
 const steps = [
   {
@@ -36,10 +37,10 @@ const HowItWorks = () => {
         
         <Row className="g-4">
           {steps.map((step, index) => (
-            <Col md={4} key={index}>
+            <Col md={4} key={index} className="howitworks-card fade-in" style={{ animationDelay: `${index * 0.2}s` }}>
               <div className="p-4 h-100 bg-white rounded-3 shadow-sm">
                 <div 
-                  className="d-flex align-items-center justify-content-center mb-3 rounded-circle" 
+                  className="d-flex align-items-center justify-content-center mb-3 rounded-circle howitworks-icon"
                   style={{
                     width: '60px',
                     height: '60px',
@@ -55,14 +56,15 @@ const HowItWorks = () => {
             </Col>
           ))}
         </Row>
+
         
         {/* Admin Dashboard Section */}
         <Row className="mt-5 pt-5">
-          <Col>
+          <Col className="fade-in" style={{ animationDelay: "0.8s" }}>
             <div className="bg-white p-4 rounded-3 shadow-sm d-flex align-items-start">
               <div className="me-4">
                 <div 
-                  className="d-flex align-items-center justify-content-center rounded-circle" 
+                  className="d-flex align-items-center justify-content-center rounded-circle howitworks-icon"
                   style={{
                     width: '60px',
                     height: '60px',
@@ -82,6 +84,7 @@ const HowItWorks = () => {
             </div>
           </Col>
         </Row>
+
       </Container>
     </section>
   );

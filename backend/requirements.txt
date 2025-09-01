@@ -5,3 +5,10 @@ PyMuPDF
 spacy
 openai
 werkzeug
+fastapi
+uvicorn[standard]
+jinja2
+pdfminer.six
+python-multipart
+google-generativeai
+pydantic>=2

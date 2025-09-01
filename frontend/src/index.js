@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import './App.css';
 import './styles/custom.css';
+import './styles/variables.css';
 
 ReactDOM.render(
   <React.StrictMode>

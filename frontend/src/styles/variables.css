@@ -1,0 +1,7 @@
+:root {
+  --primary-color: #6a11cb;   /* deep purple */
+  --secondary-color: #2575fc; /* vibrant blue */
+  --accent-color: #ff00b7;    /* violet */
+  --light-color: #f9f9f9;     /* background light */
+  --dark-color: #222;         /* text dark */
+}

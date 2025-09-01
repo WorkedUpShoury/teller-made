@@ -10,6 +10,7 @@ import {
   FaRobot, 
   FaHistory 
 } from 'react-icons/fa';
+import '../styles/Features.css';
 
 const features = [
   {
@@ -62,7 +63,7 @@ const Features = () => {
             <Col key={index}>
               {/* 🔁 Updated this Card to make Resume & JD Upload clickable */}
               <Card
-                className="h-100 border-0 shadow-sm"
+                className="h-100 border-0 shadow-sm feature-card"
                 style={{
                   cursor: feature.title === "Resume & JD Upload" ? 'pointer' : 'default'
                 }}
@@ -74,7 +75,7 @@ const Features = () => {
               >
                 <Card.Body className="p-4">
                   <div 
-                    className="d-flex align-items-center justify-content-center mb-3 rounded-circle" 
+                    className="d-flex align-items-center justify-content-center mb-3 rounded-circle feature-icon" 
                     style={{
                       width: '50px',
                       height: '50px',

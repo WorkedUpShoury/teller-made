@@ -1,0 +1,5 @@
+source .venv/Scripts/Activate
+uvicorn app.main:app --reload - main
+npm start - frontend
+node server.js - server(db login, register)
+py app.py - app

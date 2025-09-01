@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import '../styles/Hero.css'; // ✅ custom animations
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -9,7 +10,8 @@ const Hero = () => {
     <section className="hero-section py-5">
       <Container>
         <Row className="align-items-center">
-          <Col lg={6} className="mb-4 mb-lg-0">
+          {/* Left Section */}
+          <Col lg={6} className="mb-4 mb-lg-0 fade-in-left">
             <h1 className="display-4 fw-bold mb-4">
               <span style={{ color: 'black' }}>Tailor Your Resume</span>{' '}
               <span style={{ color: 'var(--primary-color)' }}>with AI Precision</span>
@@ -19,20 +21,28 @@ const Hero = () => {
               Transform your job search with intelligent automation.
             </p>
             <div className="d-flex gap-3">
-              <Button variant="primary" size="lg" onClick={() => navigate('/upload')}>
+              <Button 
+                size="lg" 
+                className="btn-animate"
+                onClick={() => navigate('/upload')}
+              >
                 Try it Now
               </Button>
-              <Button variant="outline-primary" size="lg">Watch Demo</Button>
+              <Button variant="outline-primary" size="lg" className="btn-animate-outline">
+                Watch Demo
+              </Button>
             </div>
-            <div className="mt-3 text-muted free-forever-text">
+            <div className="mt-3 text-muted free-forever-text fade-in-up">
               <small>Free forever  • No credit card required</small>
             </div>
           </Col>
-          <Col lg={6}>
+
+          {/* Right Section */}
+          <Col lg={6} className="fade-in-right">
             <div 
-              className="rounded-3 p-4 text-center"
+              className="rounded-3 p-4 text-center hero-illustration"
               style={{
-                background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)',
+                background: 'linear-gradient(135deg, #932ac6, #a92dba, #ff2d92)',
                 color: 'white',
                 height: '300px',
                 display: 'flex',

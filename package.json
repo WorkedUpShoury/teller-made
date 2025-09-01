@@ -1,0 +1,33 @@
+{
+  "name": "teller-made",
+  "version": "1.0.0",
+  "description": "TellerMade is an AI-powered resume tailoring platform that helps job seekers customize their resumes to match specific job descriptions, optimize for Applicant Tracking Systems (ATS), and improve interview conversion rates.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WorkedUpShoury/teller-made.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/WorkedUpShoury/teller-made/issues"
+  },
+  "homepage": "https://github.com/WorkedUpShoury/teller-made#readme",
+  "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

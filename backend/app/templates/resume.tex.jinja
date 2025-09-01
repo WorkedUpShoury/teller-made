@@ -1,0 +1,184 @@
+\documentclass[10pt]{article}
+
+% ---------- Packages ----------
+\usepackage[margin=0.6in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+\usepackage[final]{microtype}
+\usepackage[none]{hyphenat}
+
+% ---------- Compact but breathable styling ----------
+\RaggedRight
+\sloppy
+\flushbottom
+\linespread{1.06}                      % overall line spacing (raise to 1.08 for more air)
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\emergencystretch=2em
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1.5pt minus 1pt}  % paragraph/line breathing room
+
+\setlist[itemize]{
+  left=1.6em,
+  itemsep=3pt plus 1.5pt minus 1pt,             % space between bullets
+  topsep=3pt plus 1.5pt minus 1pt,
+  parsep=0pt plus 0.5pt minus 0.5pt
+}
+
+% Section look & spacing (no \titlerule — use our own rule macro)
+\titleformat{\section}{\bfseries\large\uppercase}{\thesection}{0.5em}{}
+\titlespacing*{\section}{0pt}{7pt plus 3pt minus 2pt}{6pt plus 2pt minus 2pt}
+
+% A portable section underline rule (MiKTeX-safe)
+\newcommand{\sectrule}{\par\vspace{-2pt}\noindent\rule{\linewidth}{0.4pt}\par\vspace{-2pt}}
+
+
+\pagestyle{empty}
+
+\begin{document}
+
+% =======================
+% Header
+% =======================
+\begin{center}
+{\LARGE\bfseries [[ resume.first_name|tex ]] [[ resume.last_name|tex ]]}\\[-1pt]
+\small
+(% if resume.email %) \href{mailto:[[ resume.email|tex ]]}{[[ resume.email|tex ]]} (% endif %)
+(% if resume.phone %) \,|\, [[ resume.phone|tex ]] (% endif %)
+(% if resume.location %) \,|\, [[ resume.location|tex ]] (% endif %)\\
+(% if resume.links %)
+(% for link in resume.links %)
+\href{[[ link.url|tex ]]}{[[ link.label|tex ]]}(% if not loop.last %) \,|\, (% endif %)
+(% endfor %)
+(% endif %)
+\end{center}
+
+% =======================
+% Profile (Conditional)
+% =======================
+(% if resume.show_summary and resume.summary %)
+\section*{Profile}\sectrule
+[[ resume.summary|tex ]]
+(% endif %)
+
+% =======================
+% Technical & Creative Skills (3 rows, always shown if present)
+% =======================
+(% if resume.skills_row1 or resume.skills_row2 or resume.skills_row3 %)
+\section*{Technical \& Creative Skills}\sectrule
+\textbf{Design Tools:} [[ resume.skills_row1|tex ]]\\
+\textbf{Web/Tech Skills:} [[ resume.skills_row2|tex ]]\\
+\textbf{Content Expertise:} [[ resume.skills_row3|tex ]]
+\vspace{6pt plus 2pt minus 1pt}
+(% endif %)
+
+% =======================
+% Experience
+% =======================
+(% if resume.experience %)
+\section*{Experience}\sectrule
+(% for exp in resume.experience or [] %)
+\noindent
+(% if exp.title and exp.company %)
+\textbf{[[ exp.title|tex ]]} --- [[ exp.company|tex ]]
+(% elif exp.title and (not exp.company) %)
+\textbf{[[ exp.title|tex ]]}
+(% elif (not exp.title) and exp.company %)
+\textbf{[[ exp.company|tex ]]}
+(% endif %)
+(% if exp.location %) \hfill [[ exp.location|tex ]] (% endif %)\\
+(% if exp.start_date %)\emph{[[ exp.start_date|tex ]]} -- \emph{[[ exp.end_date or "Present"|tex ]]} \\(% endif %)
+(% if exp.summary %){\small [[ exp.summary|tex ]]} \\(% endif %)
+
+(% if exp.bullets %)
+\begin{itemize}
+(% for b in exp.bullets or [] %)
+  \item [[ b|tex ]]
+(% endfor %)
+\end{itemize}
+(% endif %)
+\vspace{6pt plus 2pt minus 1pt}
+(% endfor %)
+(% endif %)
+
+% =======================
+% Projects
+% =======================
+(% if resume.projects %)
+\section*{Projects}\sectrule
+(% for p in resume.projects or [] %)
+\noindent
+\textbf{[[ p.name|tex ]]}%
+(% if p.link %) \,(\href{[[ p.link|tex ]]}{Link}) (% endif %)
+\hfill
+(% if p.tech %)\emph{[[ p.tech|tex ]]}(% endif %)\\
+(% if p.start_date %)\emph{[[ p.start_date|tex ]]} -- \emph{[[ p.end_date or "Present"|tex ]]} \\(% endif %)
+(% if p.summary %){\small [[ p.summary|tex ]]} \\(% endif %)
+
+(% if p.bullets %)
+\begin{itemize}
+(% for b in p.bullets or [] %)
+  \item [[ b|tex ]]
+(% endfor %)
+\end{itemize}
+(% endif %)
+\vspace{6pt plus 2pt minus 1pt}
+(% endfor %)
+(% endif %)
+
+% =======================
+% Education
+% =======================
+(% if resume.education %)
+\section*{Education}\sectrule
+(% for edu in resume.education or [] %)
+\textbf{[[ edu.degree|tex ]]} --- [[ edu.institution|tex ]]
+(% if edu.location %) \hfill [[ edu.location|tex ]] (% endif %)\\
+(% if edu.graduation_year %)Graduated: [[ edu.graduation_year|tex ]] \\(% endif %)
+
+(% if edu.details %)
+\begin{itemize}
+(% for d in edu.details or [] %)
+  \item [[ d|tex ]]
+(% endfor %)
+\end{itemize}
+(% endif %)
+\vspace{6pt plus 2pt minus 1pt}
+(% endfor %)
+(% endif %)
+
+% =======================
+% Certifications (with description line)
+% =======================
+(% if resume.certifications %)
+\section*{Certifications}\sectrule
+\begin{itemize}
+(% for c in resume.certifications or [] %)
+  \item \textbf{[[ c.name|tex ]]}%
+  (% if c.issuer %) --- [[ c.issuer|tex ]] (% endif %)
+  (% if c.date %) \,([[ c.date|tex ]])(% endif %)
+  (% if c.link %) \,(\href{[[ c.link|tex ]]}{Verify}) (% endif %)\\
+  {\small [[ c.description|tex ]]}
+(% endfor %)
+\end{itemize}
+(% endif %)
+
+% =======================
+% Publications (optional)
+% =======================
+(% if resume.publications %)
+\section*{Publications}\sectrule
+\begin{itemize}
+(% for pub in resume.publications or [] %)
+  \item [[ pub|tex ]]
+(% endfor %)
+\end{itemize}
+(% endif %)
+
+\end{document}

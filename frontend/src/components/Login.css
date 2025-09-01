@@ -1,100 +1,358 @@
-/* Uses your existing CSS vars; adds a local --ring fallback if missing */
+/* Login.css (updated) */
+.register-compact .auth-form { margin-top: 0; }
+
+/* ---------- Root theme + layout ---------- */
+/* Local fallbacks so it still looks good if CSS vars are missing */
 .auth-root{
+  --violet: var(--violet, #6c5ce7);
+  --fuchsia: var(--fuchsia, #A855F7);
   --ring: var(--ring, var(--violet));
   --border-strong: var(--border-strong, #94A3B8);
+  --border: var(--border, #D1D5DB);
+  --bg: var(--bg, #EEF2F7);
+  --panel: var(--panel, #fff);
+  --text: var(--text, #0B1320);
+  --muted: var(--muted, #667085);
+  --success: var(--success, #10b981);
+  --danger: var(--danger, #dc2626);
 
-  min-height:100vh;
-  background:var(--bg, #EEF2F7);
-  display:grid;place-items:center;
-  padding:24px;
-  color:var(--text, #0B1320);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef2f7, #f5f3ff);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
 
-.auth-card{
-  width:100%; max-width:420px;
-  background:var(--panel,#fff);
-  border:1.5px solid var(--border-strong);
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(2,6,23,.10), 0 2px 6px rgba(2,6,23,.06);
-  padding:22px;
+/* Remove the numbered step list completely (and the big white gap) */
+.stepper { display: none !important; }
+
+/* ---------- Card / header ---------- */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
+              0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.auth-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.auth-badge{
-  display:grid;place-items:center;width:36px;height:36px;border-radius:12px;
-  background:linear-gradient(135deg,var(--violet,#6366F1),var(--fuchsia,#A855F7));
-  box-shadow:0 10px 24px rgba(99,102,241,.25);
-}
-.auth-title{margin:0;font-size:20px;font-weight:700}
-.auth-subtitle{margin:2px 0 0;color:var(--muted,#667085);font-size:13px}
 
-.btn{
-  width:100%; display:inline-flex; align-items:center; justify-content:center; gap:10px;
-  padding:10px 14px; border-radius:12px; cursor:pointer;
-  border:1.5px solid var(--border,#D1D5DB); background:#fff; color:#111827;
-  box-shadow:0 1px 2px rgba(2,6,23,.06);
-  transition:transform .12s ease, background .12s ease, opacity .12s ease;
-}
-.btn:hover{background:#F2F4F7}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-
-.btn-google{
-  border-color:var(--border-strong);
-  margin-top:6px;
+.auth-head{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.auth-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.25);
 }
 
-.btn-primary{
-  background:linear-gradient(135deg,var(--violet,#6366F1),var(--fuchsia,#A855F7));
-  color:#fff; border:none;
-  box-shadow:0 10px 24px rgba(99,102,241,.28);
+.auth-badge svg { display:block; }
+
+.auth-title{ margin:0; font-size:20px; font-weight:700; }
+.auth-subtitle{ margin:2px 0 0; color: var(--muted); font-size:13px; }
+
+/* ---------- Register-only: compact spacing / wider card ---------- */
+/* Add className="auth-root register-compact" on the Register page root */
+.register-compact .auth-card { max-width: 720px; padding: 16px 20px 12px; }
+.register-compact .auth-head { margin-bottom: 12px; }
+.register-compact .auth-form .field { margin-bottom: 12px; }
+
+/* ---------- Buttons ---------- */
+/* Button base */
+.btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
-.btn-primary:hover{transform:translateY(-1px)}
+
+/* White default */
+.btn-primary {
+  background: #fff;
+  color: #111827;
+  border: 1.5px solid #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Hover → magenta */
+.btn-primary:hover {
+  background: #b3125d; /* or your exact magenta shade */
+  color: #fff;
+  border-color: #b3125d;
+  box-shadow: 0 6px 14px rgba(179, 18, 93, 0.35);
+}
+
+/* Active click state */
+.btn-primary:active {
+  background: #960e4d;
+  border-color: #960e4d;
+  color: #fff;
+}
+
+
+
+/* primary / secondary variants (no more white-on-white after click) */
+.btn.btn-primary { background: var(--violet); color: #fff; border: 1px solid transparent; }
+.btn.btn-primary:hover { filter: brightness(.95); }
+.btn.btn-primary:active { filter: brightness(.9); color: #fff; }
+
+.btn.btn-secondary { background: transparent; border: 1px solid #d1d5db; color: #111827; }
+.btn.btn-secondary:hover { background: #f3f4f6; }
+.btn.btn-secondary:active { background: #e5e7eb; color: #111827; }
+
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
 .spinner{
-  width:16px;height:16px;border-radius:999px;
-  border:2px solid rgba(255,255,255,.45);border-top-color:#fff;margin-right:8px;
-  animation:spin 1s linear infinite;
+  width:16px; height:16px; border-radius: 999px;
+  border:2px solid rgba(255,255,255,.45); border-top-color:#fff; margin-right:8px;
+  animation: spin 1s linear infinite;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin{ to{ transform: rotate(360deg) } }
 
-.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0}
-.auth-divider:before,.auth-divider:after{
-  content:""; height:1px; flex:1; background:var(--border,#E4E7EE);
-}
-.auth-divider span{font-size:12px;color:var(--muted,#667085)}
+/* ---------- Form ---------- */
+.auth-form{ display: grid; gap: 12px; }
 
-.auth-form{display:grid;gap:12px}
 .auth-alert{
   background:#FEF3F2; color:#B42318;
   border:1.5px solid #FCA5A5; border-radius:10px; padding:10px 12px; font-size:14px;
 }
 
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:12px;color:var(--muted)}
-.field input{
-  width:100%; background:#fff; color:inherit;
-  border:1.5px solid var(--border,#E4E7EE); border-radius:12px;
-  padding:10px 12px; outline:none;
-  box-shadow:inset 0 1px 2px rgba(2,6,23,.05);
-  transition:border-color .12s ease, box-shadow .12s ease;
-}
-.field input:focus{
-  border-color:var(--ring);
-  box-shadow:0 0 0 3px color-mix(in oklab, var(--ring) 30%, transparent);
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field label{ font-size:12px; color: var(--muted); }
+
+/* Inputs / selects unified look */
+.field input,
+.field select,
+.field textarea{
+  width: 100%;
+  background: #fff; color: inherit;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(2,6,23,.05);
+  transition: border-color .12s ease, box-shadow .12s ease;
+  height: 42px;
 }
 
-.input-wrap{position:relative}
-.pw-toggle{
-  position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  border:none; background:transparent; cursor:pointer; font-size:14px; line-height:1;
+.field textarea{ min-height: 100px; height: auto; resize: vertical; }
+
+.field input::placeholder,
+.field textarea::placeholder{ color: #9ca3af; }
+
+/* Focus ring – with a safe fallback if color-mix is unsupported */
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, .25);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 30%, transparent);
+}
+
+/* Help + errors */
+.field-help{ font-size:12px; color: var(--muted); margin-top:2px; }
+.error-text{ color: var(--danger); }
+
+/* ---------- Password toggle (icon button) ---------- */
+.input-wrap { position: relative; }
+
+.pw-toggle{ /* base (kept for backwards compatibility) */
+  position:absolute; right:8px; top:50%; transform: translateY(-50%);
+  border:none; background: transparent; cursor: pointer; line-height:1;
   color:#667085; padding:4px; border-radius:8px;
 }
-.pw-toggle:hover{color:#0F172A}
-.pw-toggle:focus-visible{outline:2px solid color-mix(in oklab, var(--ring) 45%, transparent)}
+.pw-toggle:hover{ color:#0F172A; }
+.pw-toggle:focus-visible{ outline: 2px solid color-mix(in oklab, var(--ring) 45%, transparent); }
 
-.form-meta{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
-.remember{display:flex;align-items:center;gap:8px;color:#344054;font-size:13px}
-.link{color:var(--violet);text-decoration:none}
-.link:hover{text-decoration:underline}
-.link-strong{font-weight:600}
+/* new icon style we’re using now */
+.pw-toggle.icon-btn{
+  right: .5rem;
+  padding: .25rem;
+  display: grid; place-items: center;
+  color: #6b7280;
+}
+.pw-toggle.icon-btn:hover{ color: #4b5563; }
+.pw-toggle.icon-btn:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; border-radius:.5rem; }
 
-.auth-foot{margin-top:14px;text-align:center;color:var(--muted);font-size:14px}
+/* ---------- Misc ---------- */
+.auth-divider{ display:flex; align-items:center; gap:10px; margin:14px 0; }
+.auth-divider:before,.auth-divider:after{
+  content:""; height:1px; flex:1; background: var(--border, #E4E7EE);
+}
+.auth-divider span{ font-size:12px; color: var(--muted); }
+
+.form-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:2px; }
+.remember{ display:flex; align-items:center; gap:8px; color:#344054; font-size:13px; }
+
+.link{ color: var(--violet); text-decoration:none; }
+.link:hover{ text-decoration:underline; }
+.link-strong{ font-weight:600; }
+
+.auth-foot{ margin-top:14px; text-align:center; color: var(--muted); font-size:14px; }
+/* === TellerMade “NeoGlass” theme (Register only) ========================= */
+/* activate by adding className="auth-root register-neo" on the page root   */
+
+/* Background: soft radial gradient glows */
+.register-neo {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glow layers */
+.register-neo::before,
+.register-neo::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  width: 55vmax; height: 55vmax;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* violet/fuchsia glow top-left */
+.register-neo::before {
+  top: -10vmax; left: -10vmax;
+  background:
+    radial-gradient(closest-side, rgba(124,58,237,.35), transparent 70%),
+    radial-gradient(closest-side, rgba(168,85,247,.28), transparent 75%);
+}
+
+/* cyan/blue glow bottom-right */
+.register-neo::after {
+  bottom: -12vmax; right: -12vmax;
+  background:
+    radial-gradient(closest-side, rgba(6,182,212,.33), transparent 70%),
+    radial-gradient(closest-side, rgba(59,130,246,.25), transparent 75%);
+}
+
+/* Card: frosted glass */
+.register-neo .auth-card {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  padding: 24px 28px 18px;
+
+  background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.40));
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 20px;
+
+  box-shadow:
+    0 30px 60px rgba(15, 23, 42, .18),
+    inset 0 1px 0 rgba(255,255,255,.25);
+
+  /* real glass where supported */
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+}
+
+/* Header */
+.register-neo .auth-head { margin-bottom: 14px; }
+.register-neo .auth-title {
+  margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.01em;
+}
+.register-neo .auth-subtitle { margin: 4px 0 0; color: #6b7280; }
+
+.register-neo .auth-badge{
+  display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 12px;
+  color: #fff; /* makes the SVG visible (uses currentColor) */
+  background:
+    conic-gradient(from 180deg at 50% 50%, #7C3AED, #6366F1, #06B6D4, #7C3AED);
+  box-shadow:
+    0 16px 40px rgba(99,102,241,.35),
+    inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+/* Form spacing (tighter, pro) */
+.register-neo .auth-form { gap: 12px; }
+.register-neo .field { margin-bottom: 10px; }
+
+/* Inputs: glass */
+.register-neo .field input,
+.register-neo .field select,
+.register-neo .field textarea{
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.55);
+  background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.70));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 1px 1px rgba(2,6,23,.06);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+.register-neo .field input::placeholder,
+.register-neo .field textarea::placeholder{ color:#9ca3af; }
+
+.register-neo .field input:focus,
+.register-neo .field select:focus,
+.register-neo .field textarea:focus{
+  border-color: rgba(124,58,237,.65);
+  box-shadow:
+    0 0 0 3px rgba(124,58,237,.15),
+    0 10px 25px rgba(99,102,241,.10);
+}
+
+/* Password toggle (icon button ready) */
+.register-neo .input-wrap { position: relative; }
+.register-neo .pw-toggle {
+  position:absolute; right:.5rem; top:50%; transform:translateY(-50%);
+  background: transparent; border: 0; padding: .25rem;
+  color: #6b7280; cursor: pointer; border-radius: 8px;
+}
+.register-neo .pw-toggle:hover { color: #4b5563; }
+.register-neo .pw-toggle:focus-visible { outline:2px solid #7C3AED; outline-offset:2px; }
+
+/* Buttons: gradient primary, subtle secondary */
+.register-neo .btn {
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow:
+    0 1px 2px rgba(2,6,23,.06),
+    inset 0 1px 0 rgba(255,255,255,.5);
+}
+
+.register-neo .btn.btn-primary{
+  background-image: linear-gradient(135deg, #7C3AED 0%, #6366F1 50%, #06B6D4 100%);
+  color: #fff;
+  border: 1px solid rgba(99,102,241,.55);
+}
+.register-neo .btn.btn-primary:hover{
+  filter: brightness(.97);
+  box-shadow: 0 8px 24px rgba(99,102,241,.25);
+}
+.register-neo .btn.btn-primary:active{
+  filter: brightness(.93);
+}
+
+.register-neo .btn.btn-secondary{
+  background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.65));
+  color: #0f172a;
+}
+
+/* Alerts: glass-tint */
+.register-neo .auth-alert{
+  background: linear-gradient(180deg, rgba(254,243,242,.85), rgba(254,243,242,.65));
+  border: 1.5px solid rgba(252,165,165,.8);
+}
+
+/* Links */
+.register-neo .link,
+.register-neo .link-strong{ color: #6366F1; }
+.register-neo .link:hover{ text-decoration: underline; }
