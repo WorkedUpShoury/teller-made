@@ -33,7 +33,7 @@ coverage/
 htmlcov/
 build/
 dist/
-node_modules/
+
 # Vector/DB caches
 /backend/chromadb_store/**
 
@@ -43,15 +43,20 @@ backend/uploads/*
 
 # ---- Node / Frontend ----
 /frontend/node_modules/
-frontend/dist/
-frontend/.vite/
+/frontend/dist/
+/frontend/.vite/
+
+/backend/node_modules/   # Explicit ignore for backend node_modules
+/backend/dist/           # Optional if backend has build outputs
+/backend/.vite/          # Optional if backend uses Vite bundling
+
 .pnpm-store/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Env files
+# ---- Env files ----
 .env
 *.env
 frontend/.env*
