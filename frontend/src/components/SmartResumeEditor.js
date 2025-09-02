@@ -1,5 +1,5 @@
 // =============================
-// ResumeBuilder.jsx (FULL, updated + syntax fixes)
+// ResumeBuilder.jsx (FULL, updated)
 // =============================
 import React, { useMemo, useState } from "react";
 import "./ResumeBuilder.css";
@@ -288,6 +288,93 @@ function uid() {
 
 const DEFAULT_SECTIONS = ["experience", "projects", "education", "skillsets"]; // include new section by default
 
+// ------------------- Skills helpers (clean + collapse) ---------------------
+function dedupeAndSort(arr) {
+  return Array.from(new Set((arr || []).map((s) => s.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+}
+
+function cleanedSkillsetsLines(f) {
+  const rows = [];
+  const items = (f.sections || []).filter((s) => s.type === "skillsets").flatMap((s) => s.items || []);
+  if (!items.length) return rows;
+
+  const acc = { languages: [], soft: [], concepts: [], tools: [], platforms: [] };
+  items.forEach((it) => {
+    Object.keys(acc).forEach((k) => {
+      if (Array.isArray(it[k])) acc[k].push(...it[k]);
+    });
+  });
+
+  Object.keys(acc).forEach((k) => (acc[k] = dedupeAndSort(acc[k])));
+
+  const label = {
+    languages: "Languages",
+    soft: "Soft Skills",
+    concepts: "Concepts",
+    tools: "Tools",
+    platforms: "Platforms",
+  };
+
+  Object.entries(acc).forEach(([k, vals]) => {
+    if (vals.length) rows.push(`- **${label[k]}:** ${vals.join(", ")}`);
+  });
+
+  return rows;
+}
+
+function slugName(fullName = "", title = "") {
+  const base = [fullName, title].filter(Boolean).join("_").trim();
+  return (base || "resume")
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Za-z0-9._-]/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+// --- Markdown (for preview, optional) --------------------------------------
+function toMarkdown(f) {
+  const lines = [];
+  lines.push(`# ${f.fullName}${f.title ? " — " + f.title : ""}`);
+  lines.push(`${f.email} | ${f.phone}${f.location ? " | " + f.location : ""}`);
+  if (f.profiles?.length) {
+    const row = f.profiles
+      .filter((l) => l.label || l.url)
+      .map((l) => (l.url ? `[${l.label || l.url}](${l.url})` : l.label))
+      .join(" • ");
+    if (row) lines.push(row);
+  }
+  if (f.summary?.trim()) lines.push(`\n${f.summary.trim()}`);
+
+  // Prefer categorized skillsets; fall back to legacy flat skills
+  const skillsetRows = cleanedSkillsetsLines(f);
+  if (skillsetRows.length) {
+    lines.push(`\n**Skills**`);
+    lines.push(skillsetRows.join("\n"));
+  } else if (f.skills?.length) {
+    const flat = dedupeAndSort(f.skills);
+    lines.push(`\n**Skills**\n${flat.join(", ")}`);
+  }
+
+  (f.sections || []).forEach((sec) => {
+    if (sec.type === "skillsets") return; // already printed unified skills
+    const t = SECTION_TEMPLATES[sec.type];
+    if (!t) return;
+    const body = [];
+    (sec.items || []).forEach((it) => {
+      const head = t.md ? t.md(it) : null;
+      if (!head) return;
+      body.push(`\n${head}`);
+      (it.bullets || []).forEach((b) => b && body.push(`- ${b}`));
+    });
+    if (body.length) {
+      lines.push(`\n## ${sec.title || t.name}`);
+      lines.push(...body);
+    }
+  });
+  lines.push("");
+  return lines.join("\n");
+}
+
+// ============================= Component ===================================
 export default function ResumeBuilder() {
   const [form, setForm] = useState(() => ({
     fullName: "",
@@ -301,45 +388,82 @@ export default function ResumeBuilder() {
     sections: DEFAULT_SECTIONS.map((type) => createSection(type)),
   }));
 
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
   const requiredOk = useMemo(() => {
     return form.fullName.trim() && form.email.trim() && form.phone.trim();
   }, [form.fullName, form.email, form.phone]);
 
   // ---- Backend exports (LaTeX/PDF/JSON) -----------------------------------
   const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
-async function postAndDownload(path, body, fallbackName) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
 
-  if (!res.ok) {
-    const ct = res.headers.get("content-type") || "";
-    const err = ct.includes("application/json") ? await res.json() : await res.text();
-    console.error("Export failed:", err);
-    alert(`Export failed:\n${typeof err === "string" ? err : JSON.stringify(err, null, 2)}`);
-    return;
+  async function postAndDownload(path, body, fallbackName, withProgress = false) {
+    let timer = null;
+    const startProgress = () => {
+      setLoading(true);
+      setProgress(5);
+      // Smoothly ease toward 90% unless finished earlier
+      timer = window.setInterval(() => {
+        setProgress((p) => (p < 90 ? p + Math.max(0.5, (100 - p) * 0.03) : p));
+      }, 200);
+    };
+    const stopProgress = (final = 100) => {
+      if (timer) { clearInterval(timer); timer = null; }
+      setProgress(final);
+      setTimeout(() => setLoading(false), 300);
+    };
+
+    try {
+      if (withProgress) startProgress();
+
+      const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const ct = res.headers.get("content-type") || "";
+        const err = ct.includes("application/json") ? await res.json() : await res.text();
+        console.error("Export failed:", err);
+        alert(`Export failed:\n${typeof err === "string" ? err : JSON.stringify(err, null, 2)}`);
+        if (withProgress) stopProgress(0);
+        return;
+      }
+
+      const cd = res.headers.get("content-disposition") || "";
+      const match = /filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+      const filename = decodeURIComponent(match?.[1] || match?.[2] || fallbackName);
+
+      const blob = await res.blob();
+      if (withProgress) setProgress(98);
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      if (withProgress) stopProgress(100);
+    } catch (e) {
+      console.error(e);
+      alert(`Export failed:\n${String(e)}`);
+      if (withProgress) stopProgress(0);
+    }
   }
 
-  const cd = res.headers.get("content-disposition") || "";
-  const match = /filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/i.exec(cd);
-  const filename = decodeURIComponent(match?.[1] || match?.[2] || fallbackName);
+  const exportLaTeX = () =>
+    postAndDownload("/render/latex", form, `${slugName(form.fullName, form.title)}.tex`, false);
 
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
+  const exportPDF = () =>
+    postAndDownload("/render/pdf", form, `${slugName(form.fullName, form.title)}.pdf`, true);
 
-  const exportLaTeX = () => postAndDownload("/render/latex", form, "resume.tex");
-  const exportPDF   = () => postAndDownload("/render/pdf", form, "resume.pdf");
-  const exportJSON  = () => postAndDownload("/export/json", form, "resume.json");
+  const exportJSON = () =>
+    postAndDownload("/export/json", form, `${slugName(form.fullName, form.title)}.json`, false);
 
   // ---- Top-level helpers ---------------------------------------------------
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -475,9 +599,9 @@ async function postAndDownload(path, body, fallbackName) {
             <span>Resume Builder</span>
           </div>
           <div className="rb-actions">
-            <button className="rb-btn" onClick={exportJSON} title="Download JSON">⭳ JSON</button>
-            <button className="rb-btn" onClick={exportLaTeX} title="Download LaTeX">.tex</button>
-            <button className="rb-btn primary" disabled={!requiredOk} onClick={exportPDF} title="Download PDF">PDF</button>
+            <button className="rb-btn" disabled={loading} onClick={exportJSON} title="Download JSON">⭳ JSON</button>
+            <button className="rb-btn" disabled={loading} onClick={exportLaTeX} title="Download LaTeX">.tex</button>
+            <button className="rb-btn primary" disabled={!requiredOk || loading} onClick={exportPDF} title="Download PDF">PDF</button>
           </div>
         </div>
       </header>
@@ -522,8 +646,11 @@ async function postAndDownload(path, body, fallbackName) {
             <textarea className="rb-textarea" rows={4} value={form.summary} onChange={(e) => setField("summary", e.target.value)} />
           </Field>
 
-          {/* Legacy flat Skills (optional) */}
-          <SkillsChips skills={form.skills} onAdd={addSkill} onRemove={removeSkill} />
+          {/* Legacy flat Skills (optional, collapsed) */}
+          <details className="rb-details">
+            <summary className="rb-summary">Legacy flat skills (optional)</summary>
+            <SkillsChips skills={form.skills} onAdd={addSkill} onRemove={removeSkill} />
+          </details>
         </section>
 
         {/* Dynamic Sections */}
@@ -557,6 +684,9 @@ async function postAndDownload(path, body, fallbackName) {
           </span>
         </section>
       </main>
+
+      {/* Progress Overlay */}
+      <ProgressOverlay show={loading} label="Compiling PDF…" value={progress} />
     </div>
   );
 }
@@ -778,41 +908,18 @@ function Bullets({ bullets, onAdd, onRemove, onChange }) {
   );
 }
 
-// --- Markdown (for preview, optional) --------------------------------------
-function toMarkdown(f) {
-  const lines = [];
-  lines.push(`# ${f.fullName}${f.title ? " — " + f.title : ""}`);
-  lines.push(`${f.email} | ${f.phone}${f.location ? " | " + f.location : ""}`);
-  if (f.profiles?.length) {
-    const row = f.profiles
-      .filter((l) => l.label || l.url)
-      .map((l) => (l.url ? `[${l.label || l.url}](${l.url})` : l.label))
-      .join(" • ");
-    if (row) lines.push(row);
-  }
-  if (f.summary?.trim()) lines.push(`
-**Summary**
-${f.summary.trim()}`);
-  if (f.skills?.length) lines.push(`
-**Skills**
-${f.skills.join(", ")}`);
-  (f.sections || []).forEach((sec) => {
-    const t = SECTION_TEMPLATES[sec.type];
-    if (!t) return;
-    const body = [];
-    (sec.items || []).forEach((it) => {
-      const head = t.md ? t.md(it) : null;
-      if (!head) return;
-      body.push(`
-${head}`);
-      (it.bullets || []).forEach((b) => b && body.push(`- ${b}`));
-    });
-    if (body.length) {
-      lines.push(`
-## ${sec.title || t.name}`);
-      lines.push(...body);
-    }
-  });
-  lines.push("");
-  return lines.join("\n");
+function ProgressOverlay({ show, label = "Compiling PDF…", value = 0 }) {
+  if (!show) return null;
+  return (
+    <div className="rb-overlay">
+      <div className="rb-overlay-card">
+        <div className="rb-spinner" aria-hidden="true" />
+        <div className="rb-overlay-title">{label}</div>
+        <div className="rb-progress">
+          <div className="rb-progress-bar" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+        </div>
+        <div className="rb-progress-text">{Math.floor(value)}%</div>
+      </div>
+    </div>
+  );
 }

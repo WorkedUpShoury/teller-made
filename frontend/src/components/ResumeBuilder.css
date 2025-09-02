@@ -136,3 +136,52 @@
   .rb-input,.rb-textarea{border-color:#94A3B8}
   .rb-icon{border-color:#94A3B8}
 }
+
+/* ---------- New: collapsible legacy skills ---------- */
+.rb-details { margin-top: 0.75rem; }
+.rb-summary { cursor: pointer; color: var(--muted); user-select: none; }
+.rb-summary:hover { color: #334155; }
+
+/* ---------- New: Progress overlay + spinner ---------- */
+.rb-overlay {
+  position: fixed; inset: 0; background: rgba(2,6,23,0.35);
+  display: grid; place-items: center; z-index: 9999;
+}
+.rb-overlay-card {
+  width: min(420px, 92vw);
+  background: #fff; border-radius: 12px; padding: 20px 18px;
+  box-shadow: var(--shadow-2); border: 1px solid var(--border-strong);
+}
+.rb-overlay-title { font-weight: 700; margin-bottom: 10px; text-align: center; color: var(--text); }
+
+/* bar */
+.rb-progress {
+  height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.rb-progress-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--violet), var(--fuchsia));
+  transition: width 200ms ease;
+}
+.rb-progress-text { text-align: center; margin-top: 8px; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* spinner */
+.rb-spinner {
+  width: 28px; height: 28px; border: 3px solid #e5e7eb; border-top-color: var(--violet);
+  border-radius: 50%; animation: rb-spin 1s linear infinite; margin: 0 auto 8px;
+}
+@keyframes rb-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce){
+  .rb-progress-bar{ transition: none; }
+  .rb-btn.primary:hover{ transform:none; }
+  .rb-spinner{ animation: none; border-top-color: var(--violet); }
+}
+
+/* ---------- New: Tag quick-pick row (optional polish) ---------- */
+.rb-quickpick{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.rb-chip.ghost{
+  background:#fff; border-color:var(--border); color:#0B1320;
+}
+.rb-chip.ghost:hover{ background:#F8FAFC; }
