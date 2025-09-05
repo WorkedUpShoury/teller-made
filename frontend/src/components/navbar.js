@@ -1,11 +1,19 @@
-// src/components/Navbar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import logo from '../styles/logo.png';
 import '../styles/Navbar.css';
 
 function AppNavbar() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/");
+    window.location.reload(); // refresh navbar state
+  };
+
   return (
     <Navbar expand="lg" className="shadow-sm navbar-custom">
       <div className="ru-bokeh" aria-hidden>
@@ -27,10 +35,17 @@ function AppNavbar() {
             <Nav.Link as={Link} to="/upload">Resume</Nav.Link>
             <Nav.Link as={Link} to="/chat-assistant">AI Assist</Nav.Link>
             <Nav.Link as={Link} to="/smart-editor">Editor</Nav.Link>
-            <NavDropdown title="Account" id="account-dropdown">
-              <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/register">Register</NavDropdown.Item>
-            </NavDropdown>
+
+            {user ? (
+              <NavDropdown title={`👤 ${user.username}`} id="account-dropdown">
+                <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <NavDropdown title="Account" id="account-dropdown">
+                <NavDropdown.Item as={Link} to="/login">Login</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/register">Register</NavDropdown.Item>
+              </NavDropdown>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

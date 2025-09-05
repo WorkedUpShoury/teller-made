@@ -8,6 +8,8 @@ from docx import Document
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from flask import request, jsonify
+from db import get_db_connection
 
 # Try to import DB helper; provide a safe fallback if missing
 try:
@@ -209,32 +211,96 @@ def optimize_resume_endpoint():
                 os.remove(file_path)
             except Exception:
                 pass
-
+            
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json(silent=True) or {}
+    data = request.form.to_dict()  # because frontend is sending FormData
+
+    # --- Core fields ---
     username = data.get("username")
+    full_name = data.get("name")
     email = data.get("email")
     password = data.get("password")  # TODO: hash before storing
 
-    if not username or not email or not password:
-        return jsonify({"error": "Missing fields"}), 400
+    # Auto-generate username if not provided
+    if not username:
+        if email:
+            username = email.split("@")[0]  # take part before @
+        else:
+            return jsonify({"error": "Username or email required"}), 400
+
+    phone = data.get("phone")
+    location = data.get("location")
+    dob = data.get("dob")
+    gender = data.get("gender")
+    linkedin = data.get("linkedin")
+    portfolio = data.get("portfolio")
+    skills = data.get("skills")
+    status = data.get("status")
+
+    # Student fields
+    college = data.get("college")
+    degree = data.get("degree")
+    major = data.get("major")
+    grad_year = data.get("gradYear")
+    semester = data.get("semester")
+    gpa = data.get("gpa")
+
+    # Working professional fields
+    company = data.get("company")
+    title = data.get("title")
+    industry = data.get("industry")
+    yoe = data.get("yoe")
+    currently_employed = str(data.get("current")).lower() in ("true", "1", "yes")
+    notice = data.get("notice")
+    ctc = data.get("ctc")
+
+    # Not working fields
+    last_affiliation = data.get("lastAffiliation")
+    highest_edu = data.get("highestEdu")
+    target_role = data.get("targetRole")
+    availability = data.get("availability")
+    preferred_location = data.get("preferredLocation")
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-            (username, email, password)
-        )
+
+        cur.execute("""
+            INSERT INTO users (
+                username, full_name, email, password, phone, location, dob, gender,
+                linkedin, portfolio, skills, status,
+                college, degree, major, grad_year, semester, gpa,
+                company, title, industry, yoe, currently_employed, notice, ctc,
+                last_affiliation, highest_edu, target_role, availability, preferred_location
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
+            RETURNING id
+        """, (
+            username, full_name, email, password, phone, location, dob, gender,
+            linkedin, portfolio, skills, status,
+            college, degree, major, grad_year, semester, gpa,
+            company, title, industry, yoe, currently_employed, notice, ctc,
+            last_affiliation, highest_edu, target_role, availability, preferred_location
+        ))
+
+        new_id = cur.fetchone()[0]
         conn.commit()
         cur.close()
         conn.close()
-        return jsonify({"message": "User registered successfully"})
+
+        return jsonify({"message": "User registered successfully", "user_id": new_id})
+
     except Exception as e:
         print("Error in register:", e)
         return jsonify({"error": str(e)}), 500
 
+# --- LOGIN ---
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json(silent=True) or {}
@@ -247,7 +313,11 @@ def login():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, username, email, password FROM users WHERE email = %s", (email,))
+        cur.execute("""
+            SELECT id, username, full_name, email, password
+            FROM users
+            WHERE email = %s
+        """, (email,))
         user = cur.fetchone()
         cur.close()
         conn.close()
@@ -255,21 +325,26 @@ def login():
         if not user:
             return jsonify({"error": "User not found"}), 401
 
-        # Compare hashed password here!
-        if password != user[3]:  # Replace with hash check
+        # TODO: use password hashing in production
+        if password != user[4]:
             return jsonify({"error": "Invalid credentials"}), 401
 
-        # Return user profile (omit password)
+        # Build safe user object (exclude password)
+        user_obj = {
+            "id": user[0],
+            "username": user[1],
+            "full_name": user[2],
+            "email": user[3]
+        }
+
         return jsonify({
-            "user": {
-                "id": user[0],
-                "username": user[1],
-                "email": user[2]
-            },
-            "token": "dummy-token"  # Replace with JWT if needed
+            "message": "Login successful",
+            "user": user_obj,
+            "token": "dummy-token"  # Replace with JWT later
         })
+
     except Exception as e:
-        print("Error in login:", e)
+        print("Error in login:", str(e))
         return jsonify({"error": str(e)}), 500
 
 # --- Main Execution ---
