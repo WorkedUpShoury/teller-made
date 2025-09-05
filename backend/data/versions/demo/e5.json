@@ -1,0 +1,14 @@
+{
+  "basics": {
+    "name": "Emma Wilson",
+    "email": "emma@example.com",
+    "label": "UI/UX Designer"
+  },
+  "work": [
+    {
+      "company": "DesignHub",
+      "position": "UX Designer",
+      "startDate": "2021-11-10"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "basics": {
+    "name": "Catherine Lee",
+    "email": "catherine@example.com",
+    "label": "Full Stack Developer"
+  },
+  "work": [
+    {
+      "company": "DevSolutions",
+      "position": "Full Stack Developer",
+      "startDate": "2019-09-01"
+    }
+  ]
+}

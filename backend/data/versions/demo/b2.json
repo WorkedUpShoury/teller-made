@@ -1,0 +1,14 @@
+{
+  "basics": {
+    "name": "Brian Smith",
+    "email": "brian@example.com",
+    "label": "Backend Developer"
+  },
+  "work": [
+    {
+      "company": "CodeBase",
+      "position": "Backend Engineer",
+      "startDate": "2020-06-15"
+    }
+  ]
+}

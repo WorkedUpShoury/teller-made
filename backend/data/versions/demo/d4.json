@@ -1,0 +1,14 @@
+{
+  "basics": {
+    "name": "Daniel Green",
+    "email": "daniel@example.com",
+    "label": "Data Analyst"
+  },
+  "work": [
+    {
+      "company": "DataWorks",
+      "position": "Data Analyst",
+      "startDate": "2022-03-01"
+    }
+  ]
+}

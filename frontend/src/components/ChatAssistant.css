@@ -251,6 +251,21 @@
   box-shadow: var(--shadow-md);
 }
 
+.tm-sidewrap {
+  margin-top: 16px;
+  margin-right: 16px;    /* space from the left */
+  margin-bottom: 16px;  /* space from the bottom */
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.tm-sidebar {
+  margin-top: 16px;
+  margin-right: 16px;
+  margin-bottom: 16px;
+}
+
+
 .tm-bubble-assistant {
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
@@ -515,6 +530,7 @@
 
 /* Sidebar wrapper with glass effect */
 .tm-sidewrap {
+  margin-top: 16px;
   width: 320px;
   flex-shrink: 0;
   border-left: 1px solid var(--glass-border);

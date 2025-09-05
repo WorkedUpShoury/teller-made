@@ -37,7 +37,25 @@ function AppNavbar() {
             <Nav.Link as={Link} to="/smart-editor">Editor</Nav.Link>
 
             {user ? (
-              <NavDropdown title={`👤 ${user.username}`} id="account-dropdown">
+              <NavDropdown
+                title={
+                  <span className="d-flex align-items-center">
+                    <img
+                      src={user.img_url}
+                      alt="Profile"
+                      className="rounded-circle me-2"
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        objectFit: "cover",
+                        border: "1px solid #ddd"
+                      }}
+                    />
+                    {user.full_name}
+                  </span>
+                }
+                id="account-dropdown"
+              >
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>
             ) : (

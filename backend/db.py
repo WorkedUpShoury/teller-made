@@ -8,7 +8,7 @@ def get_db_connection():
         database="tellermade",
         user="postgres",
         # password=os.getenv("POSTGRES_PASSWORD") or "Samu@1234",
-        password="Samu@1234",
+        password="Shoury@37",
         port="5432"
     )
     return conn

@@ -1,13 +1,4 @@
 {
-  "fullName": "",
-  "title": "",
-  "email": "",
-  "phone": "",
-  "location": "",
-  "profiles": [],
-  "summary": "",
-  "skills": [],
-  "sections": [],
   "basics": {
     "name": "Alice Johnson",
     "email": "alice@example.com",

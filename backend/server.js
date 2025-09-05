@@ -86,11 +86,22 @@ function normalizeRegisterPayload(req) {
   const experience = toNumericOrNull(experienceRaw);
   const skills = normalizeSkills(b.skills);
 
+  // NEW: accept profile image URL from either imgUrl or img_url
+  const imgUrl = (b.imgUrl || b.img_url || '').toString().trim() || null;
+
   const resume = req.file || null;
 
   return {
-    fullName, email, password, userType,
-    collegeName, institutionName, experience, skills, resume
+    fullName,
+    email,
+    password,
+    userType,
+    collegeName,
+    institutionName,
+    experience,
+    skills,
+    imgUrl, // include in normalized payload
+    resume,
   };
 }
 
@@ -108,7 +119,7 @@ app.get('/api/health', async (_req, res) => {
 app.post('/api/register', upload.single('resume'), async (req, res) => {
   const {
     fullName, email, password, userType,
-    collegeName, institutionName, experience, skills
+    collegeName, institutionName, experience, skills, imgUrl,
   } = normalizeRegisterPayload(req);
 
   if (!fullName || !email || !password || !userType) {
@@ -133,10 +144,20 @@ app.post('/api/register', upload.single('resume'), async (req, res) => {
 
     const insert = await client.query(
       `INSERT INTO users
-        (full_name, email, password_hash, user_type, college_name, institution_name, experience, skills)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       RETURNING id, full_name, email, user_type, created_at`,
-      [fullName, email, hash, userType, collegeName || null, institutionName || null, experience, skills]
+        (full_name, email, password_hash, user_type, college_name, institution_name, experience, skills, img_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING id, full_name, email, user_type, img_url, created_at`,
+      [
+        fullName,
+        email,
+        hash,
+        userType,
+        collegeName || null,
+        institutionName || null,
+        experience,
+        skills,
+        imgUrl, // <- store img_url
+      ]
     );
 
     await client.query('COMMIT');
@@ -167,7 +188,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, full_name, email, password_hash, user_type, created_at
+      `SELECT id, full_name, email, password_hash, user_type, img_url, created_at
        FROM users WHERE lower(email) = lower($1)`,
       [email]
     );
@@ -196,6 +217,29 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+/* ---------------- OPTIONAL: Update avatar ---------------- */
+app.put('/api/me/avatar', async (req, res) => {
+  try {
+    const { email, img_url } = req.body || {};
+    if (!email || !img_url) {
+      return res.status(400).json({ error: 'email and img_url required' });
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE users
+       SET img_url = $1
+       WHERE lower(email) = lower($2)
+       RETURNING id, full_name, email, user_type, img_url, created_at`,
+      [img_url, email]
+    );
+
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: rows[0] });
+  } catch (e) {
+    console.error('avatar update error:', e);
+    res.status(500).json({ error: 'Server error', detail: e.message });
+  }
+});
 
 /* ---------------- Global error ---------------- */
 app.use((err, _req, res, _next) => {

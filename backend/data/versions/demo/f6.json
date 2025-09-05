@@ -1,0 +1,14 @@
+{
+  "basics": {
+    "name": "Frank Harris",
+    "email": "frank@example.com",
+    "label": "Project Manager"
+  },
+  "work": [
+    {
+      "company": "ManageIt",
+      "position": "Project Manager",
+      "startDate": "2018-05-20"
+    }
+  ]
+}
