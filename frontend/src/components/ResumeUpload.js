@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./ResumeUploadPage.css";
+import ResumeVersionsSidebar from "./ResumeVersionsSidebar";
 
 const MAX_MB = 5;
 const ACCEPTED = [
@@ -8,8 +9,9 @@ const ACCEPTED = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-const FASTAPI_BASE = process.env.REACT_APP_FASTAPI_BASE || "http://127.0.0.1:8000";
-const FLASK_BASE = process.env.REACT_APP_FLASK_BASE || "http://127.0.0.1:5001";
+// One backend: FastAPI, mounted under /api
+const API_BASE =
+  (process.env.REACT_APP_FASTAPI_BASE || "http://127.0.0.1:8000") + "/api";
 
 export default function ResumeUploadPage() {
   const [resumeFile, setResumeFile] = useState(null);
@@ -22,6 +24,9 @@ export default function ResumeUploadPage() {
   const [pulseDrop, setPulseDrop] = useState(false);
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Base JSON shown in versions sidebar (optional)
+  const [baseJson, setBaseJson] = useState(null);
 
   const step = !resumeFile ? 1 : jobDesc.trim() ? 3 : 2;
 
@@ -100,9 +105,7 @@ export default function ResumeUploadPage() {
         };
       }
 
-      xhr.onloadstart = () => {
-        setPct(5);
-      };
+      xhr.onloadstart = () => setPct(5);
 
       xhr.onprogress = (e) => {
         if (fakeTimer) {
@@ -188,36 +191,23 @@ export default function ResumeUploadPage() {
     setProgress(0);
 
     try {
-      const isPDF = resumeFile.type === "application/pdf";
-      if (isPDF) {
-        const formData = new FormData();
-        formData.append("file", resumeFile);
-        formData.append("jd", jobDesc);
+      // Send ALL file types to FastAPI:
+      const formData = new FormData();
+      formData.append("file", resumeFile); // field name 'file'
+      formData.append("jd", jobDesc);      // job description
 
-        const { blob, filename } = await postWithProgress({
-          url: `${FASTAPI_BASE}/resumes/pdf`,
-          formData,
-          fileSize: resumeFile.size,
-          fallbackName: "optimized_resume.pdf",
-        });
+      const { blob, filename } = await postWithProgress({
+        url: `${API_BASE}/resumes/pdf`,   // unified endpoint
+        formData,
+        fileSize: resumeFile.size,
+        fallbackName: "optimized_resume.pdf",
+      });
 
-        downloadBlob(blob, filename);
-        setSuccess("Your resume has been optimized and downloaded as PDF.");
-      } else {
-        const formData = new FormData();
-        formData.append("resumeFile", resumeFile);
-        formData.append("jobDesc", jobDesc);
+      downloadBlob(blob, filename);
+      setSuccess("Your resume has been optimized and downloaded as PDF.");
 
-        const { blob, filename } = await postWithProgress({
-          url: `${FLASK_BASE}/api/optimize`,
-          formData,
-          fileSize: resumeFile.size,
-          fallbackName: "optimized_resume.docx",
-        });
-
-        downloadBlob(blob, filename);
-        setSuccess("Your resume has been optimized and downloaded as DOCX.");
-      }
+      // If your API also returns structured JSON via a separate endpoint,
+      // you can set it like: setBaseJson(extractedJson)
     } catch (err) {
       console.error("Error optimizing resume:", err);
       setError(`Optimization failed: ${err.message}`);
@@ -233,7 +223,7 @@ export default function ResumeUploadPage() {
     <div className={`ru-root ${mounted ? "is-mounted" : ""}`}>
       {/* Subtle gradient background */}
       <div className="ru-background" aria-hidden />
-      
+
       {/* Header */}
       <header className="ru-header">
         <div className="ru-header-content">
@@ -280,7 +270,7 @@ export default function ResumeUploadPage() {
                 <span>{error}</span>
               </div>
             )}
-            
+
             {success && (
               <div className="ru-alert ru-alert-success" role="status">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -420,58 +410,15 @@ export default function ResumeUploadPage() {
           </div>
         </main>
 
-        {/* Sidebar */}
+        {/* Right rail: Versions Sidebar */}
         <aside className="ru-sidebar">
-          <div className="ru-sidebar-card">
-            <h3>Tips for Best Results</h3>
-            <ul className="ru-tips-list">
-              <li>
-                <div className="ru-tip-icon">📋</div>
-                <div className="ru-tip-content">
-                  <strong>Include the full job description</strong>
-                  <span>Responsibilities, requirements, and qualifications</span>
-                </div>
-              </li>
-              <li>
-                <div className="ru-tip-icon">🎯</div>
-                <div className="ru-tip-content">
-                  <strong>Quantify achievements</strong>
-                  <span>Use numbers to demonstrate impact</span>
-                </div>
-              </li>
-              <li>
-                <div className="ru-tip-icon">🔑</div>
-                <div className="ru-tip-content">
-                  <strong>Include industry keywords</strong>
-                  <span>Technical skills, tools, and methodologies</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div className="ru-sidebar-card">
-            <h3>Keyboard Shortcuts</h3>
-            <div className="ru-shortcuts">
-              <div className="ru-shortcut">
-                <kbd>Ctrl</kbd> + <kbd>V</kbd>
-                <span>Paste job description</span>
-              </div>
-              <div className="ru-shortcut">
-                <kbd>Enter</kbd>
-                <span>Start optimization</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="ru-sidebar-card ru-sidebar-card-accent">
-            <div className="ru-security-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22s7-4 7-10V5l-7-3-7 3v7c0 6 7 10 7 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <h3>Secure & Private</h3>
-            <p>Your documents are processed securely and never stored on our servers</p>
-          </div>
+          <ResumeVersionsSidebar
+            currentJson={baseJson}
+            onSelect={(json) => {
+              setBaseJson(json);
+            }}
+            showModeControls={true}
+          />
         </aside>
       </div>
 
@@ -483,8 +430,8 @@ export default function ResumeUploadPage() {
               <h3>Optimizing Your Resume</h3>
               <div className="ru-progress-value">{Math.round(progress)}%</div>
               <div className="ru-progress-bar">
-                <div 
-                  className="ru-progress-fill" 
+                <div
+                  className="ru-progress-fill"
                   style={{ width: `${Math.min(100, Math.round(progress))}%` }}
                 />
               </div>

@@ -1,8 +1,9 @@
 // =============================
-// ResumeBuilder.jsx (FULL, updated)
+// ResumeBuilder.jsx (FULL, classnames-ready for separate CSS)
 // =============================
 import React, { useMemo, useState } from "react";
-import "./ResumeBuilder.css";
+import "./ResumeEditor.css"; // will add the clouds/background/elevations here
+import ResumeVersionsSidebar from "./ResumeVersionsSidebar";
 
 // Preset options for categorized skills
 const SKILL_OPTIONS = {
@@ -14,8 +15,6 @@ const SKILL_OPTIONS = {
 };
 
 // --- Section templates ------------------------------------------------------
-// Each template defines the fields for an item inside a section and
-// how it should render to Markdown (for preview) and LaTeX (via backend).
 const SECTION_TEMPLATES = {
   experience: {
     name: "Experience",
@@ -63,8 +62,9 @@ const SECTION_TEMPLATES = {
     md: (it) => {
       if (!(it.school || it.degree)) return null;
       const dates = [it.start, it.end].filter(Boolean).join(" — ");
-      return `**${it.degree || ""}${it.field ? " in " + it.field : ""}**, ${it.school || ""}${it.location ? " — " + it.location : ""}  _${dates}_${it.score ? `
-- Score: ${it.score}` : ""}`;
+      return `**${it.degree || ""}${it.field ? " in " + it.field : ""}**, ${it.school || ""}${
+        it.location ? " — " + it.location : ""
+      }  _${dates}_${it.score ? `\n- Score: ${it.score}` : ""}`;
     },
   },
   certifications: {
@@ -178,7 +178,8 @@ const SECTION_TEMPLATES = {
       { key: "phone", label: "Phone", type: "text" },
     ],
     bullets: false,
-    md: (it) => (it.name ? `- **${it.name}** — ${[it.relation, it.email, it.phone].filter(Boolean).join(" • ")}` : null),
+    md: (it) =>
+      it.name ? `- **${it.name}** — ${[it.relation, it.email, it.phone].filter(Boolean).join(" • ")}` : null,
   },
   achievements: {
     name: "Achievements",
@@ -193,8 +194,7 @@ const SECTION_TEMPLATES = {
       if (!it.title) return null;
       const left = it.link ? `[${it.title}](${it.link})` : it.title;
       const meta = [it.date].filter(Boolean).join(" • ");
-      return `**${left}**${meta ? ` — ${meta}` : ""}${it.summary ? `
-- ${it.summary}` : ""}`;
+      return `**${left}**${meta ? ` — ${meta}` : ""}${it.summary ? `\n- ${it.summary}` : ""}`;
     },
   },
   patents: {
@@ -225,7 +225,7 @@ const SECTION_TEMPLATES = {
     bullets: true,
     md: (it) => {
       if (!it.title) return null;
-      const left = it.link ? `[${ it.title }](${ it.link })` : it.title;
+      const left = it.link ? `[${it.title}](${it.link})` : it.title;
       const meta = [it.event, it.location, it.date].filter(Boolean).join(" • ");
       return `**${left}**${meta ? ` — ${meta}` : ""}`;
     },
@@ -249,9 +249,8 @@ const SECTION_TEMPLATES = {
     bullets: false,
     md: (it) => {
       const rows = [];
-      const show = (k, label) => Array.isArray(it[k]) && it[k].length
-        ? rows.push(`- **${label}:** ${it[k].join(", ")}`)
-        : null;
+      const show = (k, label) =>
+        Array.isArray(it[k]) && it[k].length ? rows.push(`- **${label}:** ${it[k].join(", ")}`) : null;
       show("languages", "Languages");
       show("soft", "Soft Skills");
       show("concepts", "Concepts");
@@ -262,7 +261,7 @@ const SECTION_TEMPLATES = {
   },
 };
 
-// Utility: default item generator for a template
+// Utility helpers
 function defaultItemFor(type) {
   const t = SECTION_TEMPLATES[type];
   if (!t) return {};
@@ -272,41 +271,33 @@ function defaultItemFor(type) {
     else if (f.type === "tags") it[f.key] = [];
     else it[f.key] = "";
   });
-  if (t.bullets) it.bullets = [""];
+  if (t.bullets) it.bullets = [""]; // default one empty bullet row for bullet sections
   return it;
 }
-
 function formatDates(start, end, current) {
   const s = start || "";
   const e = current ? "Present" : end || "";
   return [s, e].filter(Boolean).join(" — ");
 }
-
 function uid() {
   return Math.random().toString(36).slice(2, 9);
 }
+const DEFAULT_SECTIONS = ["experience", "projects", "education", "skillsets"];
 
-const DEFAULT_SECTIONS = ["experience", "projects", "education", "skillsets"]; // include new section by default
-
-// ------------------- Skills helpers (clean + collapse) ---------------------
 function dedupeAndSort(arr) {
   return Array.from(new Set((arr || []).map((s) => s.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
 }
-
 function cleanedSkillsetsLines(f) {
   const rows = [];
   const items = (f.sections || []).filter((s) => s.type === "skillsets").flatMap((s) => s.items || []);
   if (!items.length) return rows;
-
   const acc = { languages: [], soft: [], concepts: [], tools: [], platforms: [] };
   items.forEach((it) => {
     Object.keys(acc).forEach((k) => {
       if (Array.isArray(it[k])) acc[k].push(...it[k]);
     });
   });
-
   Object.keys(acc).forEach((k) => (acc[k] = dedupeAndSort(acc[k])));
-
   const label = {
     languages: "Languages",
     soft: "Soft Skills",
@@ -314,14 +305,11 @@ function cleanedSkillsetsLines(f) {
     tools: "Tools",
     platforms: "Platforms",
   };
-
   Object.entries(acc).forEach(([k, vals]) => {
     if (vals.length) rows.push(`- **${label[k]}:** ${vals.join(", ")}`);
   });
-
   return rows;
 }
-
 function slugName(fullName = "", title = "") {
   const base = [fullName, title].filter(Boolean).join("_").trim();
   return (base || "resume")
@@ -329,8 +317,6 @@ function slugName(fullName = "", title = "") {
     .replace(/[^A-Za-z0-9._-]/g, "_")
     .replace(/^_+|_+$/g, "");
 }
-
-// --- Markdown (for preview, optional) --------------------------------------
 function toMarkdown(f) {
   const lines = [];
   lines.push(`# ${f.fullName}${f.title ? " — " + f.title : ""}`);
@@ -355,7 +341,7 @@ function toMarkdown(f) {
   }
 
   (f.sections || []).forEach((sec) => {
-    if (sec.type === "skillsets") return; // already printed unified skills
+    if (sec.type === "skillsets") return;
     const t = SECTION_TEMPLATES[sec.type];
     if (!t) return;
     const body = [];
@@ -384,16 +370,17 @@ export default function ResumeBuilder() {
     location: "",
     profiles: [{ label: "LinkedIn", url: "" }],
     summary: "",
-    skills: ["Python", "TensorFlow", "React"], // legacy flat skills (optional)
+    skills: ["Python", "TensorFlow", "React"],
     sections: DEFAULT_SECTIONS.map((type) => createSection(type)),
   }));
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const requiredOk = useMemo(() => {
-    return form.fullName.trim() && form.email.trim() && form.phone.trim();
-  }, [form.fullName, form.email, form.phone]);
+  const requiredOk = useMemo(
+    () => form.fullName.trim() && form.email.trim() && form.phone.trim(),
+    [form.fullName, form.email, form.phone]
+  );
 
   // ---- Backend exports (LaTeX/PDF/JSON) -----------------------------------
   const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
@@ -403,13 +390,15 @@ export default function ResumeBuilder() {
     const startProgress = () => {
       setLoading(true);
       setProgress(5);
-      // Smoothly ease toward 90% unless finished earlier
       timer = window.setInterval(() => {
         setProgress((p) => (p < 90 ? p + Math.max(0.5, (100 - p) * 0.03) : p));
       }, 200);
     };
     const stopProgress = (final = 100) => {
-      if (timer) { clearInterval(timer); timer = null; }
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
       setProgress(final);
       setTimeout(() => setLoading(false), 300);
     };
@@ -426,7 +415,6 @@ export default function ResumeBuilder() {
       if (!res.ok) {
         const ct = res.headers.get("content-type") || "";
         const err = ct.includes("application/json") ? await res.json() : await res.text();
-        console.error("Export failed:", err);
         alert(`Export failed:\n${typeof err === "string" ? err : JSON.stringify(err, null, 2)}`);
         if (withProgress) stopProgress(0);
         return;
@@ -450,7 +438,6 @@ export default function ResumeBuilder() {
 
       if (withProgress) stopProgress(100);
     } catch (e) {
-      console.error(e);
       alert(`Export failed:\n${String(e)}`);
       if (withProgress) stopProgress(0);
     }
@@ -458,10 +445,8 @@ export default function ResumeBuilder() {
 
   const exportLaTeX = () =>
     postAndDownload("/render/latex", form, `${slugName(form.fullName, form.title)}.tex`, false);
-
   const exportPDF = () =>
     postAndDownload("/render/pdf", form, `${slugName(form.fullName, form.title)}.pdf`, true);
-
   const exportJSON = () =>
     postAndDownload("/export/json", form, `${slugName(form.fullName, form.title)}.json`, false);
 
@@ -469,7 +454,8 @@ export default function ResumeBuilder() {
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
   // Profile links (top-level)
-  const addProfile = () => setForm((f) => ({ ...f, profiles: [...f.profiles, { label: "", url: "" }] }));
+  const addProfile = () =>
+    setForm((f) => ({ ...f, profiles: [...f.profiles, { label: "", url: "" }] }));
   const updateProfile = (idx, key, value) =>
     setForm((f) => {
       const arr = f.profiles.map((p, i) => (i === idx ? { ...p, [key]: value } : p));
@@ -488,7 +474,8 @@ export default function ResumeBuilder() {
     if (!v) return;
     setForm((f) => (f.skills.includes(v) ? f : { ...f, skills: [...f.skills, v] }));
   };
-  const removeSkill = (skill) => setForm((f) => ({ ...f, skills: f.skills.filter((s) => s !== skill) }));
+  const removeSkill = (skill) =>
+    setForm((f) => ({ ...f, skills: f.skills.filter((s) => s !== skill) }));
 
   // ---- Dynamic sections CRUD ----------------------------------------------
   function createSection(type) {
@@ -501,8 +488,10 @@ export default function ResumeBuilder() {
     };
   }
 
-  const addSection = (type) => setForm((f) => ({ ...f, sections: [...f.sections, createSection(type)] }));
-  const removeSection = (id) => setForm((f) => ({ ...f, sections: f.sections.filter((s) => s.id !== id) }));
+  const addSection = (type) =>
+    setForm((f) => ({ ...f, sections: [...f.sections, createSection(type)] }));
+  const removeSection = (id) =>
+    setForm((f) => ({ ...f, sections: f.sections.filter((s) => s.id !== id) }));
   const moveSection = (id, dir) =>
     setForm((f) => {
       const idx = f.sections.findIndex((s) => s.id === id);
@@ -586,107 +575,187 @@ export default function ResumeBuilder() {
 
   // ---- UI -----------------------------------------------------------------
   return (
-    <div className="rb-root">
-      <header className="rb-header">
-        <div className="rb-header-inner">
-          <div className="rb-title">
-            <span className="rb-badge" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" strokeWidth="2">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M3 12h3M18 12h3M12 3v3M12 18v3" />
-              </svg>
-            </span>
-            <span>Resume Builder</span>
-          </div>
-          <div className="rb-actions">
-            <button className="rb-btn" disabled={loading} onClick={exportJSON} title="Download JSON">⭳ JSON</button>
-            <button className="rb-btn" disabled={loading} onClick={exportLaTeX} title="Download LaTeX">.tex</button>
-            <button className="rb-btn primary" disabled={!requiredOk || loading} onClick={exportPDF} title="Download PDF">PDF</button>
-          </div>
-        </div>
-      </header>
+    <div className="rb-page">
+      {/* Background gradient + floating clouds (styled purely in CSS) */}
+    <div className="rb-bg">
+      <div className="rb-cloud rb-cloud--1"></div>
+      <div className="rb-cloud rb-cloud--2"></div>
+    </div>
 
-      <main className="rb-main">
-        {/* Basics */}
-        <section className="rb-card">
-          <h3 className="rb-card-title">Basics</h3>
-          <div className="rb-grid">
-            <Field label="Full name *">
-              <input className="rb-input" value={form.fullName} onChange={(e) => setField("fullName", e.target.value)} />
-            </Field>
-            <Field label="Title / Role">
-              <input className="rb-input" value={form.title} onChange={(e) => setField("title", e.target.value)} />
-            </Field>
-            <Field label="Email *">
-              <input className="rb-input" type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} />
-            </Field>
-            <Field label="Phone *">
-              <input className="rb-input" value={form.phone} onChange={(e) => setField("phone", e.target.value)} />
-            </Field>
-            <Field label="Location">
-              <input className="rb-input" value={form.location} onChange={(e) => setField("location", e.target.value)} />
-            </Field>
-          </div>
-
-          {/* Profiles / Links */}
-          <div className="rb-list-header">
-            <h4>Links</h4>
-            <button className="rb-icon" onClick={addProfile} title="Add link">＋</button>
-          </div>
-          {form.profiles.map((lnk, i) => (
-            <div className="rb-row" key={`link-${i}`}>
-              <input className="rb-input" placeholder="Label (e.g., LinkedIn)" value={lnk.label} onChange={(e) => updateProfile(i, "label", e.target.value)} />
-              <input className="rb-input" placeholder="https://" value={lnk.url} onChange={(e) => updateProfile(i, "url", e.target.value)} />
-              <button className="rb-icon danger" onClick={() => removeProfile(i)} title="Remove">🗑</button>
+      <div className="rb-root">
+        <header className="rb-header">
+          <div className="rb-header-inner">
+            <div className="rb-title">
+              <span className="rb-badge" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M3 12h3M18 12h3M12 3v3M12 18v3" />
+                </svg>
+              </span>
+              <span>Resume Builder</span>
             </div>
-          ))}
+            <div className="rb-actions">
+              <button className="rb-btn" disabled={loading} onClick={exportJSON} title="Download JSON">
+                ⭳ JSON
+              </button>
+              <button className="rb-btn" disabled={loading} onClick={exportLaTeX} title="Download LaTeX">
+                .tex
+              </button>
+              <button
+                className="rb-btn primary"
+                disabled={!requiredOk || loading}
+                onClick={exportPDF}
+                title="Download PDF"
+              >
+                PDF
+              </button>
+            </div>
+          </div>
+        </header>
 
-          {/* Summary */}
-          <Field label="Summary">
-            <textarea className="rb-textarea" rows={4} value={form.summary} onChange={(e) => setField("summary", e.target.value)} />
-          </Field>
+        {/* layout moved to CSS */}
+        <div className="rb-layout">
+          <main className="rb-main">
+            {/* Basics */}
+            <section className="rb-card">
+              <h3 className="rb-card-title">Basics</h3>
+              <div className="rb-grid">
+                <Field label="Full name *">
+                  <input
+                    className="rb-input"
+                    value={form.fullName}
+                    onChange={(e) => setField("fullName", e.target.value)}
+                  />
+                </Field>
+                <Field label="Title / Role">
+                  <input
+                    className="rb-input"
+                    value={form.title}
+                    onChange={(e) => setField("title", e.target.value)}
+                  />
+                </Field>
+                <Field label="Email *">
+                  <input
+                    className="rb-input"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setField("email", e.target.value)}
+                  />
+                </Field>
+                <Field label="Phone *">
+                  <input
+                    className="rb-input"
+                    value={form.phone}
+                    onChange={(e) => setField("phone", e.target.value)}
+                  />
+                </Field>
+                <Field label="Location">
+                  <input
+                    className="rb-input"
+                    value={form.location}
+                    onChange={(e) => setField("location", e.target.value)}
+                  />
+                </Field>
+              </div>
 
-          {/* Legacy flat Skills (optional, collapsed) */}
-          <details className="rb-details">
-            <summary className="rb-summary">Legacy flat skills (optional)</summary>
-            <SkillsChips skills={form.skills} onAdd={addSkill} onRemove={removeSkill} />
-          </details>
-        </section>
+              {/* Profiles / Links */}
+              <div className="rb-list-header">
+                <h4>Links</h4>
+                <button className="rb-icon" onClick={addProfile} title="Add link">
+                  ＋
+                </button>
+              </div>
+              {form.profiles.map((lnk, i) => (
+                <div className="rb-row" key={`link-${i}`}>
+                  <input
+                    className="rb-input"
+                    placeholder="Label (e.g., LinkedIn)"
+                    value={lnk.label}
+                    onChange={(e) => updateProfile(i, "label", e.target.value)}
+                  />
+                  <input
+                    className="rb-input"
+                    placeholder="https://"
+                    value={lnk.url}
+                    onChange={(e) => updateProfile(i, "url", e.target.value)}
+                  />
+                  <button className="rb-icon danger" onClick={() => removeProfile(i)} title="Remove">
+                    🗑
+                  </button>
+                </div>
+              ))}
 
-        {/* Dynamic Sections */}
-        <SectionPicker onAdd={addSection} />
+              {/* Summary */}
+              <Field label="Summary">
+                <textarea
+                  className="rb-textarea"
+                  rows={4}
+                  value={form.summary}
+                  onChange={(e) => setField("summary", e.target.value)}
+                />
+              </Field>
 
-        {form.sections.map((section) => (
-          <SectionCard
-            key={section.id}
-            section={section}
-            onRename={(t) => renameSection(section.id, t)}
-            onRemove={() => removeSection(section.id)}
-            onMoveUp={() => moveSection(section.id, "up")}
-            onMoveDown={() => moveSection(section.id, "down")}
-          >
-            <SectionItems
-              section={section}
-              onAddItem={() => addItem(section.id)}
-              onRemoveItem={(i) => removeItem(section.id, i)}
-              onUpdateItem={(i, k, v) => updateItem(section.id, i, k, v)}
-              onAddBullet={(i) => addBullet(section.id, i)}
-              onRemoveBullet={(i, b) => removeBullet(section.id, i, b)}
-              onUpdateBullet={(i, b, v) => updateBullet(section.id, i, b, v)}
+              {/* Legacy flat Skills (optional, collapsed) */}
+              <details className="rb-details">
+                <summary className="rb-summary">Legacy flat skills (optional)</summary>
+                <SkillsChips skills={form.skills} onAdd={addSkill} onRemove={removeSkill} />
+              </details>
+            </section>
+
+            {/* Dynamic Sections */}
+            <SectionPicker onAdd={addSection} />
+
+            {form.sections.map((section) => (
+              <SectionCard
+                key={section.id}
+                section={section}
+                onRename={(t) => renameSection(section.id, t)}
+                onRemove={() => removeSection(section.id)}
+                onMoveUp={() => moveSection(section.id, "up")}
+                onMoveDown={() => moveSection(section.id, "down")}
+              >
+                <SectionItems
+                  section={section}
+                  onAddItem={() => addItem(section.id)}
+                  onRemoveItem={(i) => removeItem(section.id, i)}
+                  onUpdateItem={(i, k, v) => updateItem(section.id, i, k, v)}
+                  onAddBullet={(i) => addBullet(section.id, i)}
+                  onRemoveBullet={(i, b) => removeBullet(section.id, i, b)}
+                  onUpdateBullet={(i, b, v) => updateBullet(section.id, i, b, v)}
+                />
+              </SectionCard>
+            ))}
+
+            {/* Footer actions */}
+            <section className="rb-footer">
+              <span className={!requiredOk ? "rb-warning" : "rb-ok"}>
+                {!requiredOk ? "Name, Email, and Phone are required." : "Looks good!"}
+              </span>
+            </section>
+          </main>
+
+          {/* Sidebar: wired to current JSON form */}
+          <aside className="rb-side">
+            <ResumeVersionsSidebar
+              className="rb-side-panel"
+              currentJson={form}
+              onSelect={(json) => setForm(json)}
+              onAfterSave={() => {}}
+              showModeControls={true}
             />
-          </SectionCard>
-        ))}
+          </aside>
+        </div>
 
-        {/* Footer actions */}
-        <section className="rb-footer">
-          <span className={!requiredOk ? "rb-warning" : "rb-ok"}>
-            {!requiredOk ? "Name, Email, and Phone are required." : "Looks good!"}
-          </span>
-        </section>
-      </main>
-
-      {/* Progress Overlay */}
-      <ProgressOverlay show={loading} label="Compiling PDF…" value={progress} />
+        {/* Progress Overlay */}
+        <ProgressOverlay show={loading} label="Compiling PDF…" value={progress} />
+      </div>
     </div>
   );
 }
@@ -711,10 +780,14 @@ function SectionPicker({ onAdd }) {
         <div className="rb-row">
           <select className="rb-input" value={sel} onChange={(e) => setSel(e.target.value)}>
             {options.map(([key, t]) => (
-              <option key={key} value={key}>{t.name}</option>
+              <option key={key} value={key}>
+                {t.name}
+              </option>
             ))}
           </select>
-          <button className="rb-btn" onClick={() => onAdd(sel)}>＋ Add section</button>
+          <button className="rb-btn" onClick={() => onAdd(sel)}>
+            ＋ Add section
+          </button>
         </div>
       </div>
     </section>
@@ -735,9 +808,15 @@ function SectionCard({ section, children, onRename, onRemove, onMoveUp, onMoveDo
           />
         </h3>
         <div className="rb-actions">
-          <button className="rb-btn ghost" onClick={onMoveUp} title="Move up">↑</button>
-          <button className="rb-btn ghost" onClick={onMoveDown} title="Move down">↓</button>
-          <button className="rb-btn danger" onClick={onRemove} title="Remove section">Remove</button>
+          <button className="rb-btn ghost" onClick={onMoveUp} title="Move up">
+            ↑
+          </button>
+          <button className="rb-btn ghost" onClick={onMoveDown} title="Move down">
+            ↓
+          </button>
+          <button className="rb-btn danger" onClick={onRemove} title="Remove section">
+            Remove
+          </button>
         </div>
       </div>
       {children}
@@ -745,7 +824,15 @@ function SectionCard({ section, children, onRename, onRemove, onMoveUp, onMoveDo
   );
 }
 
-function SectionItems({ section, onAddItem, onRemoveItem, onUpdateItem, onAddBullet, onRemoveBullet, onUpdateBullet }) {
+function SectionItems({
+  section,
+  onAddItem,
+  onRemoveItem,
+  onUpdateItem,
+  onAddBullet,
+  onRemoveBullet,
+  onUpdateBullet,
+}) {
   const template = SECTION_TEMPLATES[section.type];
   const fields = template?.itemFields || [];
 
@@ -753,14 +840,18 @@ function SectionItems({ section, onAddItem, onRemoveItem, onUpdateItem, onAddBul
     <div className="rb-items">
       <div className="rb-list-header">
         <h4>Entries</h4>
-        <button className="rb-btn ghost" onClick={onAddItem}>＋ Add entry</button>
+        <button className="rb-btn ghost" onClick={onAddItem}>
+          ＋ Add entry
+        </button>
       </div>
 
       {section.items.map((it, i) => (
         <div className="rb-item" key={`${section.id}-item-${i}`}>
           <div className="rb-item-head">
             <strong>Entry #{i + 1}</strong>
-            <button className="rb-icon danger" onClick={() => onRemoveItem(i)} title="Remove">🗑</button>
+            <button className="rb-icon danger" onClick={() => onRemoveItem(i)} title="Remove">
+              🗑
+            </button>
           </div>
 
           <div className="rb-grid">
@@ -798,12 +889,22 @@ function renderField(sectionType, item, f, onChange) {
     case "checkbox":
       return (
         <label className="rb-check">
-          <input type="checkbox" checked={!!item[f.key]} onChange={(e) => onChange(e.target.checked)} /> {f.label}
+          <input
+            type="checkbox"
+            checked={!!item[f.key]}
+            onChange={(e) => onChange(e.target.checked)}
+          />{" "}
+          {f.label}
         </label>
       );
     case "textarea":
       return (
-        <textarea className="rb-textarea" rows={3} value={item[f.key] || ""} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+          className="rb-textarea"
+          rows={3}
+          value={item[f.key] || ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
       );
     case "month":
       return <input type="month" {...commonProps} />;
@@ -824,22 +925,39 @@ function renderField(sectionType, item, f, onChange) {
 
 function SkillsChips({ skills, onAdd, onRemove }) {
   const [draft, setDraft] = useState("");
-  const add = () => { onAdd(draft); setDraft(""); };
+  const add = () => {
+    onAdd(draft);
+    setDraft("");
+  };
   const onKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      add();
+    }
   };
   return (
     <div className="rb-skills">
       <div className="rb-chipwrap">
         {skills.map((s) => (
           <span className="rb-chip" key={s}>
-            {s} <button className="rb-chip-x" onClick={() => onRemove(s)} title="Remove">×</button>
+            {s}{" "}
+            <button className="rb-chip-x" onClick={() => onRemove(s)} title="Remove">
+              ×
+            </button>
           </span>
         ))}
       </div>
       <div className="rb-row">
-        <input className="rb-input" placeholder="Add a skill and press Enter" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKeyDown} />
-        <button className="rb-btn" onClick={add}>＋ Add</button>
+        <input
+          className="rb-input"
+          placeholder="Add a skill and press Enter"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+        />
+        <button className="rb-btn" onClick={add}>
+          ＋ Add
+        </button>
       </div>
     </div>
   );
@@ -855,14 +973,20 @@ function TagInput({ value, onChange, options = [], placeholder = "Add and press 
   };
   const remove = (tag) => onChange((value || []).filter((x) => x !== tag));
   const onKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      add();
+    }
   };
   return (
     <div className="rb-tags">
       <div className="rb-chipwrap">
         {(value || []).map((s) => (
           <span className="rb-chip" key={s}>
-            {s} <button className="rb-chip-x" onClick={() => remove(s)} title="Remove">×</button>
+            {s}{" "}
+            <button className="rb-chip-x" onClick={() => remove(s)} title="Remove">
+              ×
+            </button>
           </span>
         ))}
       </div>
@@ -875,15 +999,21 @@ function TagInput({ value, onChange, options = [], placeholder = "Add and press 
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
         />
-        <button className="rb-btn" type="button" onClick={() => add()}>＋ Add</button>
+        <button className="rb-btn" type="button" onClick={() => add()}>
+          ＋ Add
+        </button>
         <datalist id="rb-tag-options">
-          {options.map((o) => <option key={o} value={o} />)}
+          {options.map((o) => (
+            <option key={o} value={o} />
+          ))}
         </datalist>
       </div>
       {options.length ? (
         <div className="rb-quickpick">
           {options.map((o) => (
-            <button key={o} type="button" className="rb-chip ghost" onClick={() => add(o)}>{o}</button>
+            <button key={o} type="button" className="rb-chip ghost" onClick={() => add(o)}>
+              {o}
+            </button>
           ))}
         </div>
       ) : null}
@@ -896,12 +1026,21 @@ function Bullets({ bullets, onAdd, onRemove, onChange }) {
     <div className="rb-bullets">
       <div className="rb-list-header">
         <h5>Highlights</h5>
-        <button className="rb-icon" onClick={onAdd} title="Add bullet">＋</button>
+        <button className="rb-icon" onClick={onAdd} title="Add bullet">
+          ＋
+        </button>
       </div>
       {bullets.map((b, bidx) => (
         <div className="rb-row" key={`b-${bidx}`}>
-          <textarea className="rb-textarea" rows={2} value={b} onChange={(e) => onChange(bidx, e.target.value)} />
-          <button className="rb-icon danger" onClick={() => onRemove(bidx)} title="Remove">🗑</button>
+          <textarea
+            className="rb-textarea"
+            rows={2}
+            value={b}
+            onChange={(e) => onChange(bidx, e.target.value)}
+          />
+          <button className="rb-icon danger" onClick={() => onRemove(bidx)} title="Remove">
+            🗑
+          </button>
         </div>
       ))}
     </div>
@@ -916,7 +1055,10 @@ function ProgressOverlay({ show, label = "Compiling PDF…", value = 0 }) {
         <div className="rb-spinner" aria-hidden="true" />
         <div className="rb-overlay-title">{label}</div>
         <div className="rb-progress">
-          <div className="rb-progress-bar" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+          <div
+            className="rb-progress-bar"
+            style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+          />
         </div>
         <div className="rb-progress-text">{Math.floor(value)}%</div>
       </div>

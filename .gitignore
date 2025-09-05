@@ -42,13 +42,12 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 
 # ---- Node / Frontend ----
-/frontend/node_modules/
-/frontend/dist/
-/frontend/.vite/
+# Ignore ALL node_modules directories everywhere
+**/node_modules/
 
-/backend/node_modules/   # Explicit ignore for backend node_modules
-/backend/dist/           # Optional if backend has build outputs
-/backend/.vite/          # Optional if backend uses Vite bundling
+# Ignore all dist & vite outputs
+**/dist/
+**/.vite/
 
 .pnpm-store/
 npm-debug.log*

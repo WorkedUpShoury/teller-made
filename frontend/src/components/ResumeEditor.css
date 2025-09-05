@@ -1,0 +1,302 @@
+/* =========================================
+   ResumeBuilder.css  (FULL)
+   ========================================= */
+
+/* ---------- Theme tokens ---------- */
+:root{
+  --bg:#EEF2F7;
+  --panel:#FFFFFF;
+  --text:#0B1320;
+  --muted:#475569;
+  --border:#D1D5DB;
+  --border-strong:#94A3B8;
+  --ring:#6366F1;
+  --violet:#7C3AED;   /* deep violet */
+  --fuchsia:#EC4899;  /* hot pink */
+  --blue:#60A5FA;
+
+  --shadow-1: 0 1px 2px rgba(2,6,23,.06), 0 1px 0 rgba(2,6,23,.04);
+  --shadow-2: 0 12px 30px rgba(2,6,23,.10), 0 3px 8px rgba(2,6,23,.06);
+  --shadow-3: 0 22px 60px rgba(2,6,23,.16);
+}
+
+/* ---------- Page + floating gradient clouds ---------- */
+.rb-root{
+  min-height:100vh;
+  color:var(--text);
+  position:relative;
+  overflow-x:hidden;
+  /* soft base wash so clouds blend nicely */
+  background: transparent;  
+}
+
+/* gradient cloud container */
+.rb-bg{
+  position:fixed;
+  inset:-12% -12% -12% -12%;
+  z-index:-1;
+  pointer-events:none;
+  filter:saturate(104%) contrast(102%);
+}
+
+/* two drifting “clouds” */
+.rb-cloud{
+  position:absolute;
+  width:1200px; height:1200px;
+  border-radius:50%;
+  opacity:.42;
+  filter:blur(70px);
+  will-change:transform, opacity, filter;
+  animation: rb-float 24s ease-in-out infinite;
+}
+
+/* left/top cloud: vibrant violet + pink */
+.rb-cloud--1{
+  left:-14%;
+  top:-8%;
+  background:
+    radial-gradient(45% 45% at 40% 45%, rgba(124,58,237,.78), rgba(124,58,237,0) 60%),
+    radial-gradient(42% 42% at 68% 60%, rgba(236,72,153,.72), rgba(236,72,153,0) 62%);
+  animation-delay:0s;
+}
+
+/* right/bottom cloud: pink + soft blue */
+.rb-cloud--2{
+  right:-12%;
+  bottom:-16%;
+  background:
+    radial-gradient(44% 44% at 60% 55%, rgba(236,72,153,.60), rgba(236,72,153,0) 60%),
+    radial-gradient(40% 40% at 35% 35%, rgba(96,165,250,.55), rgba(96,165,250,0) 60%);
+  animation-delay:6s;
+}
+
+@keyframes rb-float{
+  0%   { transform:translate3d(0,0,0) scale(1);   opacity:.40; }
+  50%  { transform:translate3d(3%,-3%,0) scale(1.06); opacity:.48; }
+  100% { transform:translate3d(0,0,0) scale(1);   opacity:.40; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .rb-cloud{ animation:none }
+}
+
+/* ---------- Header (glass) ---------- */
+.rb-header{
+  position:sticky; top:0; z-index:30;
+  background:rgba(255,255,255,.82);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 10px 30px rgba(2,6,23,.06);
+}
+.rb-header-inner{
+  max-width:1140px; margin:0 auto;
+  padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.rb-title{ display:flex; align-items:center; gap:10px; font-weight:800; }
+.rb-badge{
+  display:grid; place-items:center;
+  width:28px; height:28px; border-radius:10px;
+  background:linear-gradient(135deg, var(--violet), var(--fuchsia));
+  box-shadow:0 10px 24px rgba(124,58,237,.25);
+}
+.rb-actions{ display:flex; gap:10px; }
+
+/* ---------- Buttons ---------- */
+.rb-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 14px; border-radius:12px;
+  border:1.5px solid var(--border);
+  background:#fff; color:#111827; cursor:pointer;
+  box-shadow:var(--shadow-1);
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+}
+.rb-btn:hover{ background:#F8FAFC; box-shadow:0 6px 16px rgba(2,6,23,.10); transform:translateY(-1px); }
+.rb-btn:hover-visible{ outline:3px solid rgba(99,102,241,.28); outline-offset:2px; }
+.rb-btn.primary{
+  background:linear-gradient(135deg, var(--violet), var(--fuchsia));
+  border:none; color:#fff;
+  box-shadow:0 14px 28px rgba(124,58,237,.32);
+}
+.rb-btn.primary:hover{ transform:translateY(-1.5px); box-shadow:0 18px 34px rgba(124,58,237,.38); }
+.rb-btn.ghost{ background:#fff; border:1.5px solid var(--border); }
+.rb-btn.danger{ background:#fff1f2; color:#B42318; border:1.5px solid #fecaca; }
+
+/* small square icon button */
+.rb-icon{
+  width:36px; height:36px; border-radius:10px;
+  border:1.5px solid var(--border-strong);
+  background:#fff; color:#344054; cursor:pointer;
+  box-shadow:var(--shadow-1);
+  transition:.15s ease;
+}
+.rb-icon:hover{ background:#F2F4F7 }
+.rb-icon.danger{ border-color:#FCA5A5; background:#FFF1F2; color:#B42318 }
+
+/* ---------- Layout ---------- */
+.rb-layout{
+  max-width:1140px; margin:26px auto 32px;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 320px; /* main + sidebar */
+  gap:24px;
+  align-items:start;
+}
+.rb-main{ display:grid; gap:16px; }
+
+.rb-side{ position:relative; }
+.rb-side .rb-side-panel{ position:sticky; top:88px; }
+
+/* ---------- Cards ---------- */
+.rb-card{
+  background:var(--panel);
+  border:1.5px solid var(--border-strong);
+  border-radius:16px;
+  padding:18px;
+  transition:transform .22s ease, box-shadow .22s ease;
+  box-shadow:
+    0 0 25px rgba(168, 117, 255, 0.25); /* vibrant, layered drop shadow */
+  backdrop-filter: blur(14px) saturate(150%); /* glassmorphic blur */
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  color: var(--tm-text);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.rb-card-title{ margin:0 0 12px 0; }
+
+/* float-up on focus */
+.rb-card:hover{
+    box-shadow:
+    0 0 35px rgba(124, 58, 237, 0.35);
+  transform:translateY(-4px) scale(1.01);
+  box-shadow:var(--shadow-3);
+  z-index:2;
+}
+
+/* ---------- Fields / grid ---------- */
+.rb-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
+  gap:12px;
+}
+.rb-field{ display:flex; flex-direction:column; gap:6px; }
+.rb-label{ font-size:12px; color:var(--muted); font-weight:700; letter-spacing:.02em; }
+
+/* high-contrast inputs with soft inner shadow */
+.rb-input, .rb-textarea, select.rb-input{
+  width:100%;
+  background:#fff; color:var(--text);
+  border:1.75px solid #cfd6e2;
+  border-radius:12px;
+  padding:11px 12px;
+  outline:none;
+  box-shadow:inset 0 1px 2px rgba(2,6,23,.05);
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.rb-textarea{ line-height:1.55; resize:vertical; }
+
+/* focus ring + subtle glow */
+.rb-input:focus, .rb-textarea:focus, select.rb-input:focus{
+  border-color:var(--ring);
+  box-shadow:0 0 0 3px rgba(99,102,241,.22), inset 0 1px 2px rgba(2,6,23,.06);
+  background:#fff;
+}
+
+/* ---------- Lists / rows ---------- */
+.rb-list-header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin:12px 0 10px;
+}
+.rb-row{ display:flex; gap:10px; align-items:flex-start; }
+
+/* ---------- Reusable item shells ---------- */
+.rb-item{
+  border:1.5px solid var(--border-strong);
+  border-radius:14px; padding:12px; margin-bottom:10px; background:#fff;
+  box-shadow:var(--shadow-1);
+}
+.rb-item:focus-within{
+  border-color:var(--ring);
+  box-shadow:0 0 0 3px rgba(99,102,241,.20), var(--shadow-1);
+}
+.rb-item-head{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+}
+
+/* ---------- Chips / tag inputs ---------- */
+.rb-skills{ margin-top:8px; }
+.rb-chipwrap{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.rb-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 12px; border-radius:999px;
+  background:#F1F5F9; border:1.5px solid #CBD5E1; color:#0B1320;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+}
+.rb-chip.ghost{ background:#fff; border-color:var(--border); }
+.rb-chip.ghost:hover{ background:#F8FAFC; }
+.rb-chip-x{ border:none; background:transparent; color:#667085; cursor:pointer; font-size:14px; }
+.rb-chip-x:hover{ color:#0F172A }
+
+/* ---------- Checks / bullets ---------- */
+.rb-check{ display:flex; align-items:center; gap:8px; color:#344054; margin-top:18px; }
+.rb-bullets textarea{ min-height:60px }
+
+/* ---------- Footer ---------- */
+.rb-footer{
+  display:flex; align-items:center; justify-content:space-between;
+  background:transparent; padding:10px 2px; border-top:1.5px solid var(--border);
+}
+.rb-warning{ color:#B42318; font-weight:700 }
+.rb-ok{ color:#027A48; font-weight:700 }
+
+/* ---------- Collapsible legacy skills ---------- */
+.rb-details{ margin-top:.75rem }
+.rb-summary{ cursor:pointer; color:var(--muted); user-select:none }
+.rb-summary:hover{ color:#334155 }
+
+/* ---------- Overlay / progress ---------- */
+.rb-overlay{
+  position:fixed; inset:0; background:rgba(2,6,23,.38);
+  display:grid; place-items:center; z-index:9999;
+}
+.rb-overlay-card{
+  width:min(420px,92vw);
+  background:#fff; border-radius:14px; padding:20px 18px;
+  box-shadow:var(--shadow-3); border:1px solid var(--border-strong);
+}
+.rb-overlay-title{ font-weight:800; margin-bottom:10px; text-align:center; color:var(--text) }
+.rb-progress{
+  height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden;
+  border:1px solid var(--border);
+}
+.rb-progress-bar{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--violet), var(--fuchsia));
+  transition:width 220ms ease;
+}
+.rb-progress-text{ text-align:center; margin-top:8px; font-variant-numeric:tabular-nums; color:var(--muted) }
+
+.rb-spinner{
+  width:28px; height:28px; border:3px solid #e5e7eb; border-top-color:var(--violet);
+  border-radius:50%; animation:rb-spin 1s linear infinite; margin:0 auto 8px;
+}
+@keyframes rb-spin{ to{ transform:rotate(360deg) } }
+
+@media (prefers-reduced-motion: reduce){
+  .rb-progress-bar{ transition:none }
+  .rb-btn.primary:hover{ transform:none }
+  .rb-spinner{ animation:none; border-top-color:var(--violet) }
+}
+
+/* ---------- High contrast mode ---------- */
+@media (prefers-contrast: more){
+  .rb-card, .rb-item{ border-color:#64748B }
+  .rb-input, .rb-textarea{ border-color:#94A3B8 }
+  .rb-icon{ border-color:#94A3B8 }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 900px){
+  .rb-layout{ grid-template-columns:1fr; }
+  .rb-side .rb-side-panel{ position:static; }
+}

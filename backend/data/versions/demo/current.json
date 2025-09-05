@@ -1,0 +1,80 @@
+{
+  "fullName": "",
+  "title": "",
+  "email": "",
+  "phone": "",
+  "location": "",
+  "profiles": [
+    {
+      "label": "LinkedIn",
+      "url": ""
+    }
+  ],
+  "summary": "",
+  "skills": [
+    "Python",
+    "React",
+    "TensorFlow"
+  ],
+  "sections": [
+    {
+      "id": "wn5b7qj",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [],
+          "start": "",
+          "end": "",
+          "current": false,
+          "location": "",
+          "company": "",
+          "role": ""
+        }
+      ]
+    },
+    {
+      "id": "mfyhtu5",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [],
+          "name": "",
+          "link": "",
+          "summary": ""
+        }
+      ]
+    },
+    {
+      "id": "jfn7w05",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "",
+          "degree": "",
+          "field": "",
+          "start": "",
+          "end": "",
+          "location": "",
+          "score": ""
+        }
+      ]
+    },
+    {
+      "id": "tdvjojw",
+      "type": "skillsets",
+      "title": "Skills (by category)",
+      "items": [
+        {
+          "languages": [],
+          "soft": [],
+          "concepts": [],
+          "tools": [],
+          "platforms": []
+        }
+      ]
+    }
+  ]
+}
