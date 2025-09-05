@@ -26,19 +26,15 @@
 \newcommand{\dotsep}{\ensuremath{\cdot}}
 \newcommand{\sep}{\hspace{0.5em}{\small$\vcenter{\hbox{\dotsep}}$}\hspace{0.5em}}
 \newcommand{\tighthrule}{\vspace{0.35em}\hrule\vspace{0.35em}}
+\usepackage[scaled]{helvet}
+\renewcommand\familydefault{\sfdefault} % Switches everything to Helvetica
+
 
 \begin{document}
 
 % =====================
 % Header
 % =====================
-{\LARGE \textbf{ {{ form.fullName|tex }} }}%
-{% if form.title %} \quad {\large {{ form.title|tex }} }{% endif %}
-
-\vspace{0.4em}
-
-{{ form.email|tex }} \sep {{ form.phone|tex }}{% if form.location %}\sep {{ form.location|tex }}{% endif %}
-
 {% set links = [] %}
 {% if form.profiles %}
   {% for p in form.profiles if p.label or p.url %}
@@ -49,18 +45,28 @@
     {% endif %}
   {% endfor %}
 {% endif %}
-{% if links %}
-  \\
-  {{ links | join(' \\sep ') }}
-{% endif %}
+
+\begin{center}
+  {\LARGE \textbf{ {{ form.fullName|tex }} }}\\
+  {% if form.title %}{\large {{ form.title|tex }} }\\[-0.2em]{% endif %}
+
+  \vspace{0.4em}
+
+  {{ form.email|tex }} \sep {{ form.phone|tex }}{% if form.location %}\sep {{ form.location|tex }}{% endif %}
+
+  {% if links %}
+    \\
+    {{ links | join(' \\sep ') }}
+  {% endif %}
+\end{center}
 
 \tighthrule
+
 
 % =====================
 % Summary
 % =====================
 {% if form.summary %}
-\section*{Summary}
 {{ form.summary|tex }}
 {% endif %}
 
@@ -119,7 +125,9 @@
   {% if it.summary %}{% set line = line ~ ' --- ' ~ (it.summary|tex) %}{% endif %}
   \noindent {{ line }}\\
   {{ bullets(it.bullets) }}
+  \vspace{0.8em}   % <-- Adds space between projects
 {%- endmacro %}
+
 
 {% macro render_education_item(it) -%}
   {% set left = '\\textbf{' ~ (it.degree or '')|tex ~ '}' %}
@@ -257,6 +265,7 @@
 {% macro render_section(sec) -%}
   {% set t = sec.type %}
   \section*{ {{ (sec.title or (t|capitalize))|tex }} }
+  \tighthrule
   {% for it in sec["items"] %}
     {% if t == 'experience' %}
       {{ render_experience_item(it) }}
