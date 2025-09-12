@@ -116,6 +116,84 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+/* ---------------- GOOGLE LOGIN ---------------- */
+app.post('/api/google-login', async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'Google token required' });
+
+    // 1. Verify token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    const email = payload.email;
+    const fullName = payload.name;
+    const imgUrl = payload.picture;
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // 2. Check if user already exists
+      let userRes = await client.query(
+        `SELECT id, full_name, email, user_type, img_url, created_at
+         FROM users WHERE lower(email)=lower($1)`,
+        [email]
+      );
+
+      let user;
+      if (userRes.rowCount === 0) {
+        // 3. If not, create a new user (google users default to 'student' or 'working' as per your logic)
+        const insert = await client.query(
+          `INSERT INTO users (full_name, email, user_type, img_url)
+           VALUES ($1,$2,$3,$4)
+           RETURNING id, full_name, email, user_type, img_url, created_at`,
+          [fullName, email, 'student', imgUrl]  // <-- adjust default type if needed
+        );
+        user = insert.rows[0];
+      } else {
+        user = userRes.rows[0];
+        // Optionally update avatar if changed
+        if (imgUrl && user.img_url !== imgUrl) {
+          const update = await client.query(
+            `UPDATE users SET img_url=$1 WHERE id=$2
+             RETURNING id, full_name, email, user_type, img_url, created_at`,
+            [imgUrl, user.id]
+          );
+          user = update.rows[0];
+        }
+      }
+
+      await client.query('COMMIT');
+
+      // 4. Issue JWT
+      const jwtToken = jwt.sign(
+        { sub: user.id, email: user.email },
+        process.env.JWT_SECRET || 'dev_secret',
+        { expiresIn: '7d' }
+      );
+
+      res.json({ user, token: jwtToken });
+    } catch (e) {
+      await client.query('ROLLBACK');
+      console.error('google-login error:', e);
+      res.status(500).json({ error: 'Server error', detail: e.message });
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Google token verification failed:', err);
+    res.status(401).json({ error: 'Invalid Google token' });
+  }
+});
+
+
 app.post('/api/register', upload.single('resume'), async (req, res) => {
   const {
     fullName, email, password, userType,

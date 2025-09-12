@@ -1,5 +1,5 @@
 source .venv/Scripts/Activate
-uvicorn app.main:app --reload - main
+uvicorn main:app --reload - main
 uvicorn app.smart-editor:app --reload - editor
 npm start - frontend
 node server.js - server(db login, register)

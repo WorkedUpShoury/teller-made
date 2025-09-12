@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from app.routers.versions import get_user_id
-from app.services.llm_service import generate_chat_reply
+# New, correct import
+from app.services.ai_service import generate_chat_reply
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 

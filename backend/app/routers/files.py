@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from .versions import get_user_id, _udir
-from ..services.resume_parser import parse_pdf
+from ..services.parser import parse_resume_file
 from pathlib import Path
 import shutil
 
@@ -27,10 +27,6 @@ async def upload_file(
 
         extracted_text = ""
         if (file.content_type or "").lower() in {"application/pdf", "application/x-pdf"} or str(dest).lower().endswith(".pdf"):
-            # re-open a fresh UploadFile stream for parse_pdf if needed
-            # parse_pdf expects UploadFile, but we can just return text from saved path
-            # quick reuse: wrap the path as UploadFile-like by re-reading
-            # simpler: call pdfminer directly via the helper
             from pdfminer.high_level import extract_text
             extracted_text = extract_text(str(dest)) or ""
 

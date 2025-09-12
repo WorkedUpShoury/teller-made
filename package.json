@@ -20,6 +20,7 @@
   "homepage": "https://github.com/WorkedUpShoury/teller-made#readme",
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",
+    "@react-oauth/google": "^0.12.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",

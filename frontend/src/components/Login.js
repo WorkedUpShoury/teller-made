@@ -1,7 +1,11 @@
+// Top of your file
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import "./signin.css"; 
-import logo from '../styles/logo.png';
+import logo from "../styles/logo.png";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,6 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  /* ------------------ Email/Password Login ------------------ */
   const handleLogin = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -25,22 +30,58 @@ export default function Login() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || "Login failed");
 
-      // ✅ Save user info in localStorage
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      navigate("/"); // Redirect after login
-      window.location.reload(); // 🔥 reload to update navbar
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/");
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setError("Failed to log in. Please check your credentials.");
     } finally {
       setLoading(false);
     }
+  };
+
+  /* ------------------ Google Login ------------------ */
+  const handleGoogleSuccess = (credentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError("Google login failed. No credential received.");
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      console.log("Google User Decoded:", decoded);
+
+      // Send token to backend for verification
+      fetch("http://localhost:5001/api/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user) {
+            localStorage.setItem("user", JSON.stringify(data.user));
+            navigate("/");
+            window.location.reload();
+          } else {
+            setError("Google login failed on server.");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setError("Google login failed.");
+        });
+    } catch (err) {
+      console.error("JWT Decode error:", err);
+      setError("Invalid Google token.");
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login was unsuccessful. Please try again.");
   };
 
   return (
@@ -98,6 +139,11 @@ export default function Login() {
             {loading ? "Logging in…" : "Login"}
           </button>
         </form>
+
+        {/* ✅ Google Login Button */}
+        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+        </div>
 
         <p className="login-foot">
           New to TellerMade?{" "}

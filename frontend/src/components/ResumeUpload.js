@@ -57,6 +57,7 @@ export default function ResumeUploadPage() {
       setResumeFile(null);
     } else {
       setResumeFile(file);
+      setBaseJson(null); // Clear any selection from sidebar
       setSuccess("");
       setPulseDrop(true);
       setTimeout(() => setPulseDrop(false), 900);
@@ -73,10 +74,27 @@ export default function ResumeUploadPage() {
       setResumeFile(null);
     } else {
       setResumeFile(file);
+      setBaseJson(null); // Clear any selection from sidebar
       setSuccess("");
       setPulseDrop(true);
       setTimeout(() => setPulseDrop(false), 900);
     }
+  };
+
+  const handleVersionSelect = (json) => {
+    setBaseJson(json);
+    // Create a mock file object for UI consistency and to advance the stepper
+    setResumeFile({
+      name: json.meta?.fileName || "Previously Saved Version",
+      size: 0, // Differentiates from a real file
+      isVirtual: true, // A flag to identify this as a JSON-based resume
+    });
+    setError("");
+    setSuccess(`Selected "${json.meta?.fileName || 'resume'}" from your versions.`);
+    
+    // Animate the dropzone
+    setPulseDrop(true);
+    setTimeout(() => setPulseDrop(false), 900);
   };
 
   const getFilenameFromHeaders = (raw, fallback) => {
@@ -86,7 +104,7 @@ export default function ResumeUploadPage() {
     return name || fallback;
   };
 
-  const postWithProgress = ({ url, formData, fileSize, fallbackName }) =>
+  const postWithProgress = ({ url, formData, jsonData, fileSize, fallbackName }) =>
     new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let fakeTimer = null;
@@ -94,7 +112,15 @@ export default function ResumeUploadPage() {
       const setPct = (n) => setProgress((p) => (n > p ? Math.min(100, Math.round(n)) : p));
 
       xhr.open("POST", url, true);
-      xhr.responseType = "blob";
+      
+      if (jsonData) {
+        // Handle JSON request
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.responseType = "blob";
+      } else {
+        // Handle FormData request
+        xhr.responseType = "blob";
+      }
 
       if (xhr.upload) {
         xhr.upload.onprogress = (e) => {
@@ -132,8 +158,13 @@ export default function ResumeUploadPage() {
           return;
         }, 120);
       };
-      xhr.upload.onload = startProcessingSim;
-
+      if (xhr.upload) {
+        xhr.upload.onload = startProcessingSim;
+      } else {
+        // For JSON requests, start sim immediately
+        startProcessingSim();
+      }
+      
       xhr.onerror = () => {
         if (fakeTimer) clearInterval(fakeTimer);
         reject(new Error("Network error"));
@@ -166,7 +197,11 @@ export default function ResumeUploadPage() {
         }
       };
 
-      xhr.send(formData);
+      if (jsonData) {
+        xhr.send(JSON.stringify(jsonData));
+      } else {
+        xhr.send(formData);
+      }
     });
 
   const downloadBlob = (blob, filename) => {
@@ -184,30 +219,39 @@ export default function ResumeUploadPage() {
     setSuccess("");
     setError("");
     if (!resumeFile || !jobDesc.trim()) {
-      setError("Please upload your resume and paste the job description.");
+      setError("Please select your resume and paste the job description.");
       return;
     }
     setLoading(true);
     setProgress(0);
 
     try {
-      // Send ALL file types to FastAPI:
-      const formData = new FormData();
-      formData.append("file", resumeFile); // field name 'file'
-      formData.append("jd", jobDesc);      // job description
-
-      const { blob, filename } = await postWithProgress({
-        url: `${API_BASE}/resumes/pdf`,   // unified endpoint
-        formData,
-        fileSize: resumeFile.size,
-        fallbackName: "optimized_resume.pdf",
-      });
-
+      let result;
+      // Check if it's a virtual file from the sidebar or a real uploaded file
+      if (resumeFile.isVirtual && baseJson) {
+        // If it's from the sidebar, send the JSON data
+        result = await postWithProgress({
+          url: `${API_BASE}/resumes/json-to-pdf`, // Assumes a new endpoint for this flow
+          jsonData: { resume_json: baseJson, jd: jobDesc },
+          fallbackName: "optimized_resume.pdf",
+        });
+      } else {
+        // Otherwise, send the actual file via FormData
+        const formData = new FormData();
+        formData.append("file", resumeFile);
+        formData.append("jd", jobDesc);
+        result = await postWithProgress({
+          url: `${API_BASE}/resumes/file-to-pdf`, // Assumes endpoint for file uploads
+          formData,
+          fileSize: resumeFile.size,
+          fallbackName: "optimized_resume.pdf",
+        });
+      }
+      
+      const { blob, filename } = result;
       downloadBlob(blob, filename);
       setSuccess("Your resume has been optimized and downloaded as PDF.");
-
-      // If your API also returns structured JSON via a separate endpoint,
-      // you can set it like: setBaseJson(extractedJson)
+      
     } catch (err) {
       console.error("Error optimizing resume:", err);
       setError(`Optimization failed: ${err.message}`);
@@ -217,7 +261,10 @@ export default function ResumeUploadPage() {
     }
   };
 
-  const removeFile = () => setResumeFile(null);
+  const removeFile = () => {
+    setResumeFile(null);
+    setBaseJson(null);
+  };
 
   return (
     <div className={`ru-root ${mounted ? "is-mounted" : ""}`}>
@@ -326,7 +373,9 @@ export default function ResumeUploadPage() {
                     </div>
                     <div className="ru-file-info">
                       <div className="ru-file-name">{resumeFile.name}</div>
-                      <div className="ru-file-size">{(resumeFile.size / (1024 * 1024)).toFixed(2)} MB</div>
+                      <div className="ru-file-size">
+                        {!resumeFile.isVirtual && `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                      </div>
                     </div>
                     <button className="ru-file-remove" onClick={removeFile} aria-label="Remove file">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -414,9 +463,7 @@ export default function ResumeUploadPage() {
         <aside className="ru-sidebar">
           <ResumeVersionsSidebar
             currentJson={baseJson}
-            onSelect={(json) => {
-              setBaseJson(json);
-            }}
+            onSelect={handleVersionSelect}
             showModeControls={true}
           />
         </aside>

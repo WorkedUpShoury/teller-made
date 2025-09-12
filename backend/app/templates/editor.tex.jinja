@@ -1,6 +1,6 @@
 % =============================================================================
 % editor.tex.jinja — Safe LaTeX template for ResumeBuilder (Jinja2)
-% Backend filters required:  |tex   |fmt_month   item|date_range
+% Backend filters required:  |tex  |fmt_month  item|date_range
 % =============================================================================
 
 \documentclass[10pt]{article}
@@ -60,7 +60,7 @@
   {% endif %}
 \end{center}
 
-\tighthrule
+
 
 
 % =====================
@@ -125,7 +125,7 @@
   {% if it.summary %}{% set line = line ~ ' --- ' ~ (it.summary|tex) %}{% endif %}
   \noindent {{ line }}\\
   {{ bullets(it.bullets) }}
-  \vspace{0.8em}   % <-- Adds space between projects
+  \vspace{0.8em}    % <-- Adds space between projects
 {%- endmacro %}
 
 
@@ -264,6 +264,10 @@
 % =====================
 {% macro render_section(sec) -%}
   {% set t = sec.type %}
+  
+  % Reduce the gap between sections
+  \vspace{-1.0em} 
+
   \section*{ {{ (sec.title or (t|capitalize))|tex }} }
   \tighthrule
   {% for it in sec["items"] %}

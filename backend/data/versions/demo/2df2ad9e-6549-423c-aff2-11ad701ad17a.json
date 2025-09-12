@@ -1,20 +1,20 @@
 {
-  "fullName": "Shoury Sinha",
-  "title": "AI Developer",
+  "fullName": "Tushar Shahi",
+  "title": "DevOps",
   "email": "contactshoury@gmail.com",
-  "phone": "9955422038",
-  "location": "Pune, Maharashtra",
+  "phone": "9293193213",
+  "location": "Jharkhand",
   "profiles": [
     {
       "label": "LinkedIn",
-      "url": "https://www.linkedin.com/in/shourysinha"
+      "url": "https://www.linkedin.com/in/tuhsarshahi"
     },
     {
       "label": "GitHub",
-      "url": "https://github.com/WorkedUpShoury"
+      "url": "https://github.com/tusharw2ww"
     }
   ],
-  "summary": "MCA graduate with hands-on experience in JSP,Servlets, Python, and MySQL. Built scalable web applications like a rolebased job portal with ATS integration. Committed to developing efficient backend systems and learning from real-world\nprojects.\n",
+  "summary": "\n",
   "skills": [],
   "sections": [
     {
