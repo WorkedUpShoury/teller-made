@@ -56,6 +56,7 @@ function AppNavbar() {
                 }
                 id="account-dropdown"
               >
+                <NavDropdown.Item as={Link} to = "/profile">Profile</NavDropdown.Item> 
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>
             ) : (

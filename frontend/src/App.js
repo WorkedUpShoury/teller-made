@@ -12,6 +12,7 @@ import ResumeUploadPage from './components/ResumeUpload';
 import Login from './components/Login';
 import Register from './components/Register';
 import ChatAssistant from './components/ChatAssistant';
+import Profile from './components/profile';
 
 <Route path="/editor" element={<SmartResumeEditor />} />
 
@@ -39,7 +40,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/smart-editor" element={<SmartResumeEditor />} />
           <Route path="/chat-assistant" element={<ChatAssistant />} />
-
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
       <Footer />
