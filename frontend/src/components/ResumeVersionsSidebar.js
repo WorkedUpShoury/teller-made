@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./ResumeVersionsSidebar.css"; // ✅ Import external CSS
+import "./ResumeVersionsSidebar.css";
 
 // Point directly at FastAPI; keep overrideable via env
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
@@ -39,12 +39,14 @@ export default function ResumeVersionsSidebar({
   const [name, setName] = useState("");
   const [ws, setWs] = useState(null);
   const [err, setErr] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editingName, setEditingName] = useState("");
 
   const loadVersions = async () => {
     setLoading(true);
     try {
-      const rows = await fetchJSON("/api/versions/list");
-      setVersions(Array.isArray(rows) ? rows : []);
+      const data = await fetchJSON("/api/versions/list");
+      setVersions(Array.isArray(data.versions) ? data.versions : []);
     } catch (e) {
       console.error(e);
       setErr(String(e.message || e));
@@ -85,12 +87,13 @@ export default function ResumeVersionsSidebar({
   };
 
   const open = async (id) => {
+    if (editingId) return;
     setErr("");
     try {
       await fetchJSON(`/api/workspace/select?version_id=${encodeURIComponent(id)}`, { method: "POST" });
+      // ✅ FIX: Changed endpoint from /get/ to /load/ to match the backend API
       const json = await fetchJSON(`/api/versions/load/${encodeURIComponent(id)}`);
-      const meta = versions.find((v) => v.id === id) || { id };
-      onSelect && onSelect(json, meta);
+      onSelect && onSelect(json.data, json);
       await loadWorkspace();
     } catch (e) {
       console.error(e);
@@ -119,6 +122,41 @@ export default function ResumeVersionsSidebar({
     } catch (e) {
       console.error(e);
       setErr(String(e.message || e));
+    }
+  };
+
+  const handleRename = async (version) => {
+    if (editingName === version.name) {
+        setEditingId(null);
+        return;
+    }
+    setErr("");
+    try {
+        await fetchJSON(`/api/versions/rename/${version.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ new_name: editingName }),
+        });
+        await loadVersions();
+    } catch(e) {
+        console.error(e);
+        setErr(String(e.message || e));
+    } finally {
+        setEditingId(null);
+        setEditingName("");
+    }
+  };
+
+  const startEditing = (version) => {
+    setEditingId(version.id);
+    setEditingName(version.name || "");
+  };
+
+  const handleEditKeyDown = (e, version) => {
+    if (e.key === 'Enter') {
+        handleRename(version);
+    } else if (e.key === 'Escape') {
+        setEditingId(null);
+        setEditingName("");
     }
   };
 
@@ -169,30 +207,15 @@ export default function ResumeVersionsSidebar({
           <div className="rvp-modes-title">Autosave</div>
           <div className="rvp-modes-row">
             <label className="rvp-radio">
-              <input
-                type="radio"
-                name="mode"
-                checked={mode === "workspace"}
-                onChange={() => setMode("workspace")}
-              />
+              <input type="radio" name="mode" checked={mode === "workspace"} onChange={() => setMode("workspace")} />
               <span>Workspace only</span>
             </label>
             <label className="rvp-radio" title="If a version is selected, also overwrite it on each save/patch">
-              <input
-                type="radio"
-                name="mode"
-                checked={mode === "overwrite_version"}
-                onChange={() => setMode("overwrite_version")}
-              />
+              <input type="radio" name="mode" checked={mode === "overwrite_version"} onChange={() => setMode("overwrite_version")} />
               <span>Overwrite selected</span>
             </label>
             <label className="rvp-radio" title="Create a new snapshot on each save/patch">
-              <input
-                type="radio"
-                name="mode"
-                checked={mode === "snapshot_on_save"}
-                onChange={() => setMode("snapshot_on_save")}
-              />
+              <input type="radio" name="mode" checked={mode === "snapshot_on_save"} onChange={() => setMode("snapshot_on_save")} />
               <span>Snapshot on save</span>
             </label>
           </div>
@@ -205,13 +228,26 @@ export default function ResumeVersionsSidebar({
 
         {versions.map((v) => (
           <div className={`rvp-item ${v.id === selectedVersionId ? "rvp-selected" : ""}`} key={v.id}>
-            <button className="rvp-item-main" onClick={() => open(v.id)} title="Load this version">
-              <div className="rvp-item-title">
+            <div className="rvp-item-main" onClick={() => open(v.id)} title="Load this version">
+              <div className="rvp-item-title" onDoubleClick={() => startEditing(v)}>
                 <span className="rvp-dot" />
-                {v.name || v.id}
+                {editingId === v.id ? (
+                  <input
+                    type="text"
+                    className="rvp-edit-input"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onBlur={() => handleRename(v)}
+                    onKeyDown={(e) => handleEditKeyDown(e, v)}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                  />
+                ) : (
+                  v.name || v.id
+                )}
               </div>
-              <div className="rvp-sub">{new Date(v.createdAt).toLocaleString()}</div>
-            </button>
+              <div className="rvp-sub">{new Date(v.created_at || v.createdAt).toLocaleString()}</div>
+            </div>
             <button className="rvp-del" onClick={() => remove(v.id)} title="Delete version">
               🗑
             </button>

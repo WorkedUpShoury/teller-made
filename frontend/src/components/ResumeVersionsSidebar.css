@@ -29,6 +29,7 @@
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   color: var(--tm-text);
   transition: box-shadow 0.3s ease, transform 0.2s ease;
+  height: 100%; /* Fix for potential overflow issues */
 }
 
 /* Add slight hover "pop" */
@@ -39,6 +40,9 @@
 }
 
 /* ===== Header ===== */
+.rvp-head {
+    padding-bottom: 0.5rem;
+}
 .rvp-title-wrap {
   display: flex;
   align-items: center;
@@ -117,6 +121,7 @@
   opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
+  filter: none;
 }
 
 /* ===== Modes ===== */
@@ -154,6 +159,7 @@
   flex-direction: column;
   gap: 0.35rem;
   overflow: auto;
+  flex-grow: 1; /* Allow list to fill space */
 }
 .rvp-item {
   display: flex;

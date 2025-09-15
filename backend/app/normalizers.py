@@ -8,10 +8,23 @@ def dedupe_sorted(xs: List[str]) -> List[str]:
 
 def normalize_resume(form: Dict[str, Any]) -> Dict[str, Any]:
     """Coerce shapes, dedupe skills, ensure bullets arrays exist for bulleted sections, etc."""
-    rf = ResumeForm(**form).dict()  # validates & coerces items
-    # legacy flat skills cleanup
+    
+    # Check if the skills field is a dictionary and flatten it before validation
+    skills_input = form.get("skills", [])
+    if isinstance(skills_input, dict):
+        all_skills = []
+        for v in skills_input.values():
+            if isinstance(v, list):
+                all_skills.extend(v)
+            elif isinstance(v, str):
+                all_skills.append(v)
+        form["skills"] = all_skills
+    # No else block needed as the rest of the function handles both old and new formats.
+    
+    # Pydantic validation and coercion can now proceed with a list
+    rf = ResumeForm(**form).dict()
     rf["skills"] = dedupe_sorted(rf.get("skills", []))
-
+    
     # bullets presence for bulleted sections
     for sec in rf.get("sections", []):
         t = sec.get("type")

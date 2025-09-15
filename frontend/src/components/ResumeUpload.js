@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import "./ResumeUploadPage.css";
 import ResumeVersionsSidebar from "./ResumeVersionsSidebar";
 
@@ -24,6 +25,7 @@ export default function ResumeUploadPage() {
   const [pulseDrop, setPulseDrop] = useState(false);
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate(); // Initialize the navigate function
 
   // Base JSON shown in versions sidebar (optional)
   const [baseJson, setBaseJson] = useState(null);
@@ -81,30 +83,26 @@ export default function ResumeUploadPage() {
     }
   };
 
+  // This handler is now just for showing a success message when selecting from the sidebar.
+  // The optimization flow requires an actual file upload.
   const handleVersionSelect = (json) => {
     setBaseJson(json);
-    // Create a mock file object for UI consistency and to advance the stepper
     setResumeFile({
       name: json.meta?.fileName || "Previously Saved Version",
-      size: 0, // Differentiates from a real file
-      isVirtual: true, // A flag to identify this as a JSON-based resume
+      size: 0,
+      isVirtual: true,
     });
     setError("");
     setSuccess(`Selected "${json.meta?.fileName || 'resume'}" from your versions.`);
-    
-    // Animate the dropzone
     setPulseDrop(true);
     setTimeout(() => setPulseDrop(false), 900);
   };
 
-  const getFilenameFromHeaders = (raw, fallback) => {
-    if (!raw) return fallback;
-    const match = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"|filename=([^;]+)/i.exec(raw);
-    const name = decodeURIComponent(match?.[1] || match?.[2] || match?.[3] || "").trim();
-    return name || fallback;
-  };
-
-  const postWithProgress = ({ url, formData, jsonData, fileSize, fallbackName }) =>
+  /**
+   * Post data with progress tracking.
+   * Resolves with the JSON response from the server.
+   */
+  const postAndOptimize = ({ url, formData, fileSize }) =>
     new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let fakeTimer = null;
@@ -112,15 +110,7 @@ export default function ResumeUploadPage() {
       const setPct = (n) => setProgress((p) => (n > p ? Math.min(100, Math.round(n)) : p));
 
       xhr.open("POST", url, true);
-      
-      if (jsonData) {
-        // Handle JSON request
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.responseType = "blob";
-      } else {
-        // Handle FormData request
-        xhr.responseType = "blob";
-      }
+      xhr.responseType = "text"; // Expect text to manually parse as JSON
 
       if (xhr.upload) {
         xhr.upload.onprogress = (e) => {
@@ -133,19 +123,6 @@ export default function ResumeUploadPage() {
 
       xhr.onloadstart = () => setPct(5);
 
-      xhr.onprogress = (e) => {
-        if (fakeTimer) {
-          clearInterval(fakeTimer);
-          fakeTimer = null;
-        }
-        if (e.lengthComputable && e.total > 0) {
-          const dl = (e.loaded / e.total) * 15;
-          setPct(85 + dl);
-        } else {
-          setPct(92);
-        }
-      };
-
       const startProcessingSim = () => {
         if (fakeTimer) return;
         fakeTimer = setInterval(() => {
@@ -155,19 +132,18 @@ export default function ResumeUploadPage() {
             fakeTimer = null;
             return p;
           });
-          return;
         }, 120);
       };
+
       if (xhr.upload) {
         xhr.upload.onload = startProcessingSim;
       } else {
-        // For JSON requests, start sim immediately
         startProcessingSim();
       }
-      
+
       xhr.onerror = () => {
         if (fakeTimer) clearInterval(fakeTimer);
-        reject(new Error("Network error"));
+        reject(new Error("Network error during upload."));
       };
 
       xhr.onreadystatechange = () => {
@@ -175,21 +151,16 @@ export default function ResumeUploadPage() {
           if (fakeTimer) clearInterval(fakeTimer);
           if (xhr.status >= 200 && xhr.status < 300) {
             setPct(100);
-            const cd = xhr.getResponseHeader("Content-Disposition");
-            const filename = getFilenameFromHeaders(cd, fallbackName);
-            resolve({ blob: xhr.response, filename });
+            try {
+              const jsonResponse = JSON.parse(xhr.responseText);
+              resolve(jsonResponse); // Resolve with the parsed JSON
+            } catch (e) {
+              reject(new Error("Failed to parse the server's response."));
+            }
           } else {
             try {
-              const reader = new FileReader();
-              reader.onload = () => {
-                try {
-                  const j = JSON.parse(reader.result);
-                  reject(new Error(j?.detail || j?.error || `HTTP error! Status: ${xhr.status}`));
-                } catch {
-                  reject(new Error(`HTTP error! Status: ${xhr.status}`));
-                }
-              };
-              reader.readAsText(xhr.response || new Blob());
+              const errJson = JSON.parse(xhr.responseText);
+              reject(new Error(errJson?.detail || `Server error: ${xhr.status}`));
             } catch {
               reject(new Error(`HTTP error! Status: ${xhr.status}`));
             }
@@ -197,23 +168,8 @@ export default function ResumeUploadPage() {
         }
       };
 
-      if (jsonData) {
-        xhr.send(JSON.stringify(jsonData));
-      } else {
-        xhr.send(formData);
-      }
+      xhr.send(formData);
     });
-
-  const downloadBlob = (blob, filename) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  };
 
   const handleSubmit = async () => {
     setSuccess("");
@@ -222,41 +178,40 @@ export default function ResumeUploadPage() {
       setError("Please select your resume and paste the job description.");
       return;
     }
+
+    // The optimization flow requires a real file, not a virtual one from the sidebar.
+    if (resumeFile.isVirtual) {
+        setError("This feature requires a file upload (PDF/DOCX) to parse and optimize. Please select a file from your computer.");
+        return;
+    }
+
     setLoading(true);
     setProgress(0);
 
     try {
-      let result;
-      // Check if it's a virtual file from the sidebar or a real uploaded file
-      if (resumeFile.isVirtual && baseJson) {
-        // If it's from the sidebar, send the JSON data
-        result = await postWithProgress({
-          url: `${API_BASE}/resumes/json-to-pdf`, // Assumes a new endpoint for this flow
-          jsonData: { resume_json: baseJson, jd: jobDesc },
-          fallbackName: "optimized_resume.pdf",
-        });
-      } else {
-        // Otherwise, send the actual file via FormData
-        const formData = new FormData();
-        formData.append("file", resumeFile);
-        formData.append("jd", jobDesc);
-        result = await postWithProgress({
-          url: `${API_BASE}/resumes/file-to-pdf`, // Assumes endpoint for file uploads
-          formData,
-          fileSize: resumeFile.size,
-          fallbackName: "optimized_resume.pdf",
-        });
-      }
-      
-      const { blob, filename } = result;
-      downloadBlob(blob, filename);
-      setSuccess("Your resume has been optimized and downloaded as PDF.");
-      
+      const formData = new FormData();
+      formData.append("file", resumeFile);
+      formData.append("jd", jobDesc);
+
+      // This function now returns the optimized resume JSON directly
+      await postAndOptimize({
+        url: `${API_BASE}/resumes/upload-and-optimize`,
+        formData,
+        fileSize: resumeFile.size,
+      });
+
+      setSuccess("Resume optimized! Redirecting to the editor...");
+
+      // The backend has already saved the new version and updated the workspace.
+      // We just need to navigate to the editor, which will load the latest version.
+      setTimeout(() => {
+        navigate("/editor");
+      }, 1500);
+
     } catch (err) {
       console.error("Error optimizing resume:", err);
       setError(`Optimization failed: ${err.message}`);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only stop loading on error
       setProgress(0);
     }
   };
@@ -264,8 +219,10 @@ export default function ResumeUploadPage() {
   const removeFile = () => {
     setResumeFile(null);
     setBaseJson(null);
+    setSuccess("");
   };
 
+  // --- The rest of the component's JSX remains unchanged ---
   return (
     <div className={`ru-root ${mounted ? "is-mounted" : ""}`}>
       {/* Subtle gradient background */}
@@ -464,7 +421,7 @@ export default function ResumeUploadPage() {
           <ResumeVersionsSidebar
             currentJson={baseJson}
             onSelect={handleVersionSelect}
-            showModeControls={true}
+            showModeControls={false} // Hiding mode controls as they are less relevant here
           />
         </aside>
       </div>

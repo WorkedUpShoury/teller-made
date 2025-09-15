@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from ..models import RenderRequest
 from ..normalizers import normalize_resume
 from ..rendering import render_tex, compile_pdf

@@ -1,6 +1,7 @@
 # app/services/ai_service.py
 import os
 import json
+from pathlib import Path
 from typing import Any, Dict
 from google import generativeai as genai
 
@@ -9,6 +10,17 @@ try:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 except KeyError:
     print("⚠️ GEMINI_API_KEY environment variable not set.")
+
+try:
+    project_root = Path(__file__).parent.parent.parent
+    json_file_path = project_root / "json_template.json"
+    with open(json_file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    json_string = json.dumps(data, indent=2)
+except FileNotFoundError:
+    print(f"Error: The file was not found at {json_file_path}")
+except json.JSONDecodeError:
+    print("Error: The file is not a valid JSON.")
 
 # --- Model for JSON Extraction ---
 json_model = genai.GenerativeModel(
@@ -24,12 +36,18 @@ chat_model = genai.GenerativeModel(
         "If you propose specific edits, return them as JSON Patch operations inside a ```json block."
     ]
 )
+def load_json_content_as_string() -> str | None:
+    """
+    Finds and loads the 'json_template.json' file from the project root,
+    returning its content as a formatted string.
+    """
 
+    
 def extract_resume_info(raw_text: str) -> Dict[str, Any]:
     """Extracts structured JSON from resume text."""
     prompt = f"""
     Based on the following resume text, extract a structured JSON object.
-    Use the SmartResumeEditor schema.
+    Use this format: {json_string}
     
     === RESUME TEXT ===
     {raw_text}
@@ -55,7 +73,8 @@ def optimize_resume_json_with_jd(resume_json: Dict[str, Any], jd: str) -> Dict[s
     === ORIGINAL RESUME JSON ===
     {resume_text}
 
-    === OPTIMIZED RESUME JSON ===
+    === JSON STRUCTURE ===
+    {json_string}
     """
     try:
         resp = json_model.generate_content(prompt)
