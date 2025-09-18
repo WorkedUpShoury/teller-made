@@ -1,0 +1,184 @@
+{
+  "fullName": "Asadullah Shaikh",
+  "title": "DevOps Engineer",
+  "email": "sasadullah002@gmail.com",
+  "phone": "8669003013",
+  "location": "Pune",
+  "profiles": [],
+  "summary": "A highly motivated and skilled Full Stack Developer with proven experience in building responsive web applications and robust backend systems.  Eager to transition into a DevOps role, leveraging existing skills in scripting (Python), problem-solving, and a passion for cloud technologies to contribute to efficient and scalable infrastructure solutions.  Possesses a strong understanding of Linux and Git.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": []
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Developed ‘Club Connect,’ a platform enabling college students to explore, join, and engage with various campus clubs and events.  Utilized this project to hone skills in user interface design, database management (MongoDB), and API development (Node.js, Express).",
+            "Designed an intuitive user interface with HTML, CSS, and JavaScript, providing easy navigation and seamless club discovery.",
+            "Implemented backend features using Node.js, Express, and MongoDB to manage club profiles, event registrations, and member interactions."
+          ],
+          "name": "Club-Connect",
+          "link": "",
+          "summary": "A platform enabling college students to discover, join, and engage with various campus clubs and events."
+        },
+        {
+          "bullets": [
+            "Developed a full-stack fitness platform enabling user registration, class booking, and trainer management using Node.js, Express, and MongoDB. This project provided hands-on experience with secure authentication and scalable database design.",
+            "Implemented secure authentication and role-based access control with JWT for users, trainers, and admins.",
+            "Built a responsive frontend using HTML, CSS, and JavaScript, ensuring seamless integration with backend APIs."
+          ],
+          "name": "Go-Fit App",
+          "link": "",
+          "summary": "The ultimate sports and wellness app designed to help users and certified fitness trainers to get together and work on the fitness goal on one platform."
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "Savitribai Phule Pune University",
+          "degree": "Bachelor’s of Computer Application",
+          "field": "Computer Applications",
+          "start": "Apr 2021",
+          "end": "Apr 2024",
+          "location": "Pune",
+          "score": null
+        },
+        {
+          "school": "Crescent High School & Junior College",
+          "degree": "Matriculation",
+          "field": null,
+          "start": "Apr 2018",
+          "end": "Apr 2019",
+          "location": "Pune",
+          "score": "69.20"
+        },
+        {
+          "school": "Poona college of art science and commerce",
+          "degree": "Intermediate",
+          "field": "Intermediate",
+          "start": "Apr 2019",
+          "end": "Apr 2021",
+          "location": "Pune",
+          "score": "82"
+        }
+      ]
+    },
+    {
+      "id": "xwrk0u9",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": []
+    },
+    {
+      "id": "2dmch6y",
+      "type": "awards",
+      "title": "Awards",
+      "items": []
+    },
+    {
+      "id": "ea7vy9v",
+      "type": "publications",
+      "title": "Publications",
+      "items": []
+    },
+    {
+      "id": "m9liwh7",
+      "type": "volunteer",
+      "title": "Volunteer",
+      "items": []
+    },
+    {
+      "id": "syxjxbb",
+      "type": "courses",
+      "title": "Courses",
+      "items": []
+    },
+    {
+      "id": "m0w9ozh",
+      "type": "interests",
+      "title": "Interests",
+      "items": []
+    },
+    {
+      "id": "wvp6x6b",
+      "type": "references",
+      "title": "References",
+      "items": []
+    },
+    {
+      "id": "ylvgfjh",
+      "type": "achievements",
+      "title": "Achievements",
+      "items": []
+    },
+    {
+      "id": "jf8yfft",
+      "type": "patents",
+      "title": "Patents",
+      "items": []
+    },
+    {
+      "id": "48d6ztn",
+      "type": "talks",
+      "title": "Talks / Conferences",
+      "items": []
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "Java",
+            "Python",
+            "SQL",
+            "C++"
+          ],
+          "soft": [
+            "Communication",
+            "Problem-Solving",
+            "Time Management",
+            "Collaboration"
+          ],
+          "concepts": [
+            "OOP",
+            "Data Structures",
+            "MVC",
+            "AI Fundamentals",
+            "DevOps",
+            "CyberSecurity"
+          ],
+          "tools": [
+            "GitHub",
+            "Docker",
+            "Kubernetes"
+          ],
+          "platforms": [
+            "Linux",
+            "Android",
+            "AWS"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hq9o5p4",
+      "type": "custom",
+      "title": "Custom (freeform)",
+      "items": []
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "fullName": "SHOURY SINHA",
+  "title": "",
+  "email": "work.shousage@gmail.com",
+  "phone": "+91 99554 22038",
+  "location": "Pune, India",
+  "profiles": [
+    {
+      "label": "linkedin",
+      "url": "linkedin.com/shourysinha"
+    },
+    {
+      "label": "github",
+      "url": "github.com/WorkedUpShoury"
+    }
+  ],
+  "summary": "Highly motivated and skilled MCA candidate with experience in full-stack web development, data security, and recruitment technology.  Proficient in MERN stack, Java, Python, and various cloud technologies. Seeking a challenging role where I can leverage my skills to contribute to innovative projects.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "PROJECT EXPERIENCE",
+      "items": [
+        {
+          "bullets": [
+            "Built using MongoDB, Express, React, and Node.js with modular REST API design",
+            "Enabled real-time collaboration using Socket.IO for instant wishlist updates among users",
+            "Designed secure user authentication, wishlist privacy controls, and seamless UI/UX with React"
+          ],
+          "start": null,
+          "end": null,
+          "current": false,
+          "location": "Pune, Maharashtra",
+          "company": null,
+          "role": "Shared-Wishlist-App — MERN Stack, Socket.IO, REST API"
+        },
+        {
+          "bullets": [
+            "Encrypted 1,000+ files using AES-256 with password hashing and .cyp file format",
+            "Reduced unauthorized access attempts by 70% using IDS alerts",
+            "Integrated AWS S3 support for secure remote storage with upload/download encryption."
+          ],
+          "start": null,
+          "end": null,
+          "current": false,
+          "location": null,
+          "company": null,
+          "role": "CypherStack — Java, JCE, MySQL, AWS S3"
+        },
+        {
+          "bullets": [
+            "Developed a job board with user roles (Admin, Employer, Applicant) and session tracking",
+            "Engineered an ATS module to parse resumes and auto-match skills with 80%+ accuracy",
+            "Implemented a job board used by 100+ mock applicants with session tracking and role-specific dashboards"
+          ],
+          "start": null,
+          "end": null,
+          "current": false,
+          "location": null,
+          "company": null,
+          "role": "HireArchy — Servlets, Python, Flask, NLP, SQLite"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "EDUCATION",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications (MCA)",
+          "field": null,
+          "start": null,
+          "end": "Expected 2026",
+          "location": null,
+          "score": "9.09"
+        },
+        {
+          "school": "Patna University\nBihar National College",
+          "degree": "Bachelor of Computer Applications (BCA)",
+          "field": null,
+          "start": null,
+          "end": "Graduated May 2024",
+          "location": "Patna, Bihar",
+          "score": "8.79"
+        }
+      ]
+    },
+    {
+      "id": "xwrk0u9",
+      "type": "certifications",
+      "title": "CERTIFICATIONS",
+      "items": [
+        {
+          "name": "Full-Stack Web Development: PHP, HTML, CSS & JavaScript",
+          "authority": "Board Infinity (Coursera)",
+          "id": null,
+          "url": null,
+          "date": "Jul 2025"
+        },
+        {
+          "name": "AWS Fundamentals Specialization",
+          "authority": "AWS (Coursera)",
+          "id": null,
+          "url": null,
+          "date": "Jul 2025"
+        },
+        {
+          "name": "DevOps, Cloud, and Agile Foundations",
+          "authority": "IBM (Coursera)",
+          "id": null,
+          "url": null,
+          "date": "Jul 2025"
+        }
+      ]
+    },
+    {
+      "id": "jf8yfft",
+      "type": "patents",
+      "title": "Patents",
+      "items": []
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "TECHNICAL SKILLS",
+      "items": [
+        {
+          "languages": [
+            "JavaScript",
+            "HTML",
+            "CSS",
+            "Java",
+            "Python",
+            "MySQL",
+            "SQL"
+          ],
+          "soft": [],
+          "concepts": [
+            "OOPs",
+            "Full Stack Architecture",
+            "RESTful API Design",
+            "MVC Pattern",
+            "DSA"
+          ],
+          "tools": [
+            "Git",
+            "GitHub",
+            "Linux",
+            "WordPress",
+            "VS Code",
+            "Firebase"
+          ],
+          "platforms": []
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "ShourySinha_MIT-WPU.pdf",
+    "uploadDate": "2025-09-15T17:32:03.641922"
+  }
+}

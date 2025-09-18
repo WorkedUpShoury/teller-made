@@ -1,0 +1,203 @@
+/* src/Profile.css */
+
+/* --- ROOT & GLOBAL STYLES --- */
+:root {
+  --accent: #6c5ce7;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --surface-1: #ffffff;
+  --surface-2: #f3f4f6;
+  --surface-3: #e5e7eb;
+  --surface-4: #d1d5db;
+  --danger-text: #721c24;
+  --danger-bg: #f8d7da;
+  --success-text: #155724;
+  --success-bg: #d4edda;
+}
+
+.auth-root.register-neo {
+  padding: 2.5rem 1rem; /* More vertical space */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- CARD LAYOUT --- */
+.auth-card {
+  padding: 2rem 2.5rem; /* Increased padding for better spacing */
+  max-width: 780px;
+  border-radius: 12px; /* Softer corners */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--surface-3);
+  background: var(--surface-1);
+}
+
+/* --- HEADER & TYPOGRAPHY --- */
+.auth-head {
+  margin-bottom: 1.5rem;
+}
+.auth-title {
+  font-size: 1.75rem; /* Larger title for clear hierarchy */
+  color: var(--text-primary);
+}
+.auth-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+.panel-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* --- FORM & FIELDS --- */
+.auth-form .field {
+  margin-bottom: 1.25rem; /* Increased spacing between fields */
+}
+.field label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+input, select {
+  height: 44px; /* Slightly taller for better touch targets */
+  border: 1px solid var(--surface-4);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus-visible, select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+.field input::placeholder {
+  color: #9ca3af;
+}
+.field-help {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+.field-help.error-text {
+  color: var(--danger-text);
+  background-color: transparent; /* Remove bg for inline errors */
+  padding: 0;
+}
+
+/* --- TWO COLUMN LAYOUT --- */
+.field.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem; /* Space between columns */
+}
+
+/* --- PROFILE PICTURE SECTION --- */
+.profile-pic-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--surface-3);
+}
+.profile-pic-img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--surface-1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.btn-sm {
+  font-size: 0.85rem;
+  padding: 0.3rem 1rem;
+}
+
+/* --- CONDITIONAL PANEL --- */
+.panel {
+  background-color: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+/* --- BUTTONS & NAVIGATION --- */
+.btn {
+  transition: all 0.2s ease-in-out;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.btn.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
+}
+.btn.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.btn.btn-primary:active {
+  filter: brightness(0.95);
+  transform: translateY(0);
+}
+.btn.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--surface-4);
+}
+.btn.btn-secondary:hover {
+  background: var(--surface-2);
+  border-color: #b8b8b8;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav-actions {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* --- ALERTS --- */
+.auth-alert {
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+}
+.auth-alert.success-text {
+  color: var(--success-text);
+  background-color: var(--success-bg);
+}
+.auth-alert.error-text {
+  color: var(--danger-text);
+  background-color: var(--danger-bg);
+}
+
+/* --- DIVIDER --- */
+.divider {
+  border: none;
+  border-top: 1px solid var(--surface-3);
+  margin: 2rem 0;
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 720px) {
+  .auth-card {
+    padding: 1.5rem;
+  }
+  .field.two-col {
+    grid-template-columns: 1fr; /* Stack columns on small screens */
+    gap: 1.25rem; /* Maintain vertical gap */
+  }
+}

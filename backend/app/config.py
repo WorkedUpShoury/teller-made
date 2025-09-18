@@ -5,16 +5,18 @@ import json
 from typing import Any, List, Optional
 
 # Ensure pydantic-settings is available (you can remove this after pinning in requirements)
+
 try:
     from pydantic_settings import BaseSettings, SettingsConfigDict
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pydantic-settings"])
     from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from dotenv import load_dotenv
 from pydantic import Field, AliasChoices, field_validator, model_validator
 import urllib.parse
 
-
+load_dotenv()
 class Settings(BaseSettings):
     # --- App ---
     DEBUG: bool = False

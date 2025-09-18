@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
-from ..models import PatchRequest, PatchResponse, ResumeForm
+from ..models.schemas import PatchRequest, PatchResponse, ResumeForm
 from ..normalizers import normalize_resume
 from ..patching import apply_json_patch
 from ..rendering import render_tex, compile_pdf

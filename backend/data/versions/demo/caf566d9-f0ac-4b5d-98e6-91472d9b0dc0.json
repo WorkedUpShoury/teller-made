@@ -1,0 +1,122 @@
+{
+  "fullName": "Samruddhi Gaikwad",
+  "title": "AI Developer",
+  "email": "contactshoury@gmail.com",
+  "phone": "9955422038",
+  "location": "Pune, Maharashtra",
+  "profiles": [],
+  "summary": "Highly motivated and results-oriented AI Developer with experience in designing, developing, and deploying AI models using TensorFlow and PyTorch. Proven ability to preprocess and analyze large datasets, build secure applications, and leverage NLP techniques for efficient data processing.  Seeking a challenging role to utilize my skills in machine learning and software development to contribute to innovative projects.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Designed and developed AI models using TensorFlow and PyTorch, achieving X% accuracy in [specific task or application]",
+            "Preprocessed and analyzed large datasets (size and type) using Python libraries (Pandas, NumPy) to prepare data for model training and evaluation"
+          ],
+          "start": "Jun 2025",
+          "end": "Jul 2025",
+          "current": false,
+          "location": "remote",
+          "company": "InAmigos Foundation",
+          "role": "AI Developer"
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Developed a secure file encryption tool using AES-256 encryption with password hashing and .cyp file format",
+            "Implemented an Intrusion Detection System (IDS) to reduce unauthorized access attempts by 70%"
+          ],
+          "name": "CypherStack",
+          "link": null,
+          "summary": "A secure file encryption tool with integrated Intrusion Detection System (IDS) and modular local/cloud storage."
+        },
+        {
+          "bullets": [
+            "Developed a role-based job portal with user roles (Admin, Employer, Applicant) and session tracking using Python and relevant frameworks",
+            "Developed an Applicant Tracking System (ATS) module to parse resumes and match skills with 80%+ accuracy using NLP techniques"
+          ],
+          "name": "HireArchy",
+          "link": null,
+          "summary": "A role-based job portal with an integrated Applicant Tracking System (ATS) for employers"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications (MCA)",
+          "field": "Computer Applications",
+          "start": "Jul 2024",
+          "end": "Jul 2026",
+          "location": "Pune, Maharashtra",
+          "score": "9.02"
+        },
+        {
+          "school": "Patna University",
+          "degree": "Bachelor of Computer Applications (BCA)",
+          "field": "Computer Applications",
+          "start": "Apr 2021",
+          "end": "Jul 2024",
+          "location": "Pune, Maharashtra",
+          "score": "8.79"
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "Python",
+            "Java",
+            "C++",
+            "Kotlin"
+          ],
+          "soft": [
+            "Communication",
+            "Problem-Solving",
+            "Collaboration",
+            "Teamwork"
+          ],
+          "concepts": [
+            "OOP",
+            "ML",
+            "NLP",
+            "Deep Learning",
+            "Computer Vision"
+          ],
+          "tools": [
+            "Git",
+            "Kubernetes",
+            "Docker",
+            "TensorFlow",
+            "PyTorch",
+            "Scikit-learn"
+          ],
+          "platforms": [
+            "AWS",
+            "Linux",
+            "Android"
+          ]
+        }
+      ]
+    }
+  ]
+}

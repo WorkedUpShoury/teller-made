@@ -1,8 +1,12 @@
+# backend/app/routers/health.py
 from fastapi import APIRouter
-from ..models import HealthResponse
+from ..models.schemas import HealthResponse # <-- Corrected import
 
-router = APIRouter(tags=["health"])
+router = APIRouter()
 
-@router.get("/health", response_model=HealthResponse)
-def health():
-    return {"status": "ok"}
+@router.get("/health", response_model=HealthResponse, tags=["Health"])
+def health_check():
+    """
+    Simple health check endpoint to confirm the API is running.
+    """
+    return HealthResponse(status="ok")

@@ -20,28 +20,28 @@
   flex-direction: column;
   gap: 0.9rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.88); /* translucent for glass effect */
-  border: 2px solid rgba(99, 102, 241, 0.35); /* high-contrast border */
+  background: rgba(255, 255, 255, 0.88);
+  border: 2px solid rgba(99, 102, 241, 0.35);
   border-radius: 18px;
-  box-shadow:
-    0 0 25px rgba(168, 117, 255, 0.25); /* vibrant, layered drop shadow */
-  backdrop-filter: blur(14px) saturate(150%); /* glassmorphic blur */
+  box-shadow: 0 0 25px rgba(168, 117, 255, 0.25);
+  backdrop-filter: blur(14px) saturate(150%);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   color: var(--tm-text);
   transition: box-shadow 0.3s ease, transform 0.2s ease;
-  height: 100%; /* Fix for potential overflow issues */
+  height: 100%;
+  max-height: 95vh; /* Prevents sidebar from being taller than the viewport */
 }
 
 /* Add slight hover "pop" */
 .rvp-sidebar:hover {
-  box-shadow:
-    0 0 35px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 0 35px rgba(124, 58, 237, 0.35);
   transform: translateY(-2px);
 }
 
 /* ===== Header ===== */
 .rvp-head {
-    padding-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  flex-shrink: 0; /* Prevents header from shrinking */
 }
 .rvp-title-wrap {
   display: flex;
@@ -75,11 +75,13 @@
   background: radial-gradient(140% 140% at 100% 0%, rgba(124, 58, 237, 0.08) 0%, rgba(59, 130, 246, 0.05) 30%, transparent 65%);
   border: 1px solid var(--tm-border);
   border-radius: 14px;
-  padding: 0.6rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-shrink: 0; /* Prevents save section from shrinking */
 }
+
 .rvp-input {
   border: 1px solid var(--tm-border);
   border-radius: 10px;
@@ -87,6 +89,7 @@
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   background: var(--tm-bg);
+  width: 100%; /* Ensure inputs take full width of their container */
 }
 .rvp-input:focus {
   border-color: var(--tm-primary);
@@ -112,6 +115,7 @@
   border-color: transparent;
   color: #fff;
   box-shadow: 0 8px 22px rgba(99, 102, 241, 0.25);
+  width: 100%;
 }
 .rvp-btn-primary:hover {
   filter: brightness(1.03);
@@ -124,22 +128,11 @@
   filter: none;
 }
 
-/* ===== Modes ===== */
-.rvp-modes {
-  border: 1px dashed var(--tm-border);
-  border-radius: 14px;
-  padding: 0.6rem 0.7rem;
-  background: #fafafa;
-}
-.rvp-modes-title {
-  font-size: 0.85rem;
-  color: #374151;
-  margin-bottom: 0.35rem;
-  font-weight: 600;
-}
+/* ===== Radio Button Row ===== */
 .rvp-modes-row {
   display: flex;
-  gap: 0.9rem;
+  gap: 1rem;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 .rvp-radio {
@@ -148,19 +141,32 @@
   gap: 0.4rem;
   font-size: 0.9rem;
   color: #374151;
+  cursor: pointer;
 }
 .rvp-radio input[type="radio"] {
   accent-color: var(--tm-primary);
+  cursor: pointer;
+}
+.rvp-radio.rvp-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* ===== List ===== */
-.rvp-list {
+/* --- NEW: Search Bar --- */
+.rvp-search-container {
+  flex-shrink: 0; /* Prevents search bar from shrinking */
+}
+
+/* --- MODIFIED: List Container for Scrolling --- */
+.rvp-list-container {
+  flex-grow: 1; /* Key: Allows this container to fill available space */
+  overflow-y: auto; /* Key: Adds a scrollbar ONLY when content overflows */
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  overflow: auto;
-  flex-grow: 1; /* Allow list to fill space */
+  padding-right: 4px; /* Prevents scrollbar from touching content */
 }
+
 .rvp-item {
   display: flex;
   align-items: center;
@@ -220,6 +226,31 @@
 }
 .rvp-del:active {
   transform: translateY(1px);
+}
+
+/* This ensures the header items are aligned correctly */
+.rvp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+}
+
+/* The close button itself */
+.rvp-close-btn {
+  background: none;
+  border: none;
+  font-family: Arial, sans-serif; /* Ensures the '×' looks consistent */
+  font-size: 26px;
+  line-height: 1;
+  padding: 0 8px;
+  cursor: pointer;
+  color: var(--tm-muted);
+  transition: color 0.2s ease;
+}
+
+.rvp-close-btn:hover {
+  color: var(--tm-text);
 }
 
 .rvp-muted {

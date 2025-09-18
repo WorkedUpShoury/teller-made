@@ -1,0 +1,92 @@
+{
+  "fullName": "Asadullah Shaikh",
+  "title": "Associate System Engineer",
+  "email": "sasadullah002@gmail.com",
+  "phone": "8669003013",
+  "location": "Pune",
+  "profiles": [],
+  "summary": "Recent graduate with a strong foundation in data analysis and software development, seeking a challenging role as an Associate System Engineer. Proficient in Java, Python, SQL, and C++, with experience in full-stack development and data-driven solutions. Eager to leverage technical skills to design, develop, and maintain technology solutions, ensuring adherence to quality and security standards.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "accenture_experience",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [],
+          "start": "",
+          "end": "",
+          "current": false,
+          "location": "Pune",
+          "company": "Accenture",
+          "role": "",
+          "position": "Associate System Engineer",
+          "years": "2024-Present",
+          "description": "Assisted in the design, development, and implementation of software applications and IT solutions. Supported system integration, testing, deployment, and maintenance activities. Collaborated with cross-functional teams to analyze business requirements and propose technical solutions. Troubleshooted, debugged, and resolved technical issues across applications and infrastructure. Documented technical specifications, processes, and system configurations. Ensured adherence to security, compliance, and quality standards. Continuously learned and adapted to new technologies, methodologies, and tools."
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Developed \"Club Connect,\" a platform enabling college students to explore, join, and engage with various campus clubs and events, leveraging data analysis for insights into user engagement and club popularity.",
+            "Designed and implemented an intuitive user interface using HTML, CSS, and JavaScript, enhancing user experience and ease of navigation.",
+            "Developed backend features using Node.js, Express, and MongoDB to manage club profiles, event registrations, and member interactions, ensuring efficient data management and secure access."
+          ],
+          "name": "Club-Connect",
+          "link": null,
+          "summary": "A platform enabling college students to discover, join, and engage with various campus clubs and events, demonstrating skills in full-stack development and data integration."
+        },
+        {
+          "bullets": [
+            "Developed a full-stack fitness platform, managing user registration, class booking, and trainer profiles, incorporating data analysis to track user activity and optimize platform features.",
+            "Implemented secure authentication and role-based access control with JWT for users, trainers, and admins, ensuring data security and privacy.",
+            "Built a responsive frontend using HTML, CSS, and JavaScript, ensuring cross-platform compatibility and a seamless user experience."
+          ],
+          "name": "Go-Fit App",
+          "link": null,
+          "summary": "A full-stack fitness platform demonstrating skills in secure development, data management, and responsive design."
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "Savitribai Phule Pune University",
+          "degree": "Bachelor’s of Computer Application",
+          "field": "Computer Applications",
+          "start": "Apr 2021",
+          "end": "Apr 2024",
+          "location": "Pune",
+          "score": null
+        },
+        {
+          "school": "Crescent High School & Junior College",
+          "degree": "Matriculation",
+          "field": null,
+          "start": "Apr 2018",
+          "end": "Apr 2019",
+          "location": "Pune",
+          "score": "69.20"
+        },
+        {
+          "school": "Poona college of art science and commerce",
+          "degree": "Intermediate",
+          "field": "Intermediate",
+          "start": "Apr 2019",
+          "end": "Apr 2021",
+          "location": "Pune",
+          "score": "82"
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+# backend/app/routers/versions.py
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -5,8 +6,10 @@ from uuid import uuid4
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Body
-from pydantic import BaseModel # ✅ Import BaseModel
+from pydantic import BaseModel
 from ..normalizers import normalize_resume
+# Import the Pydantic models for version creation
+from ..models.schemas import VersionCreate, VersionInDB
 
 router = APIRouter(prefix="/versions", tags=["versions"])
 ROOT = Path("data/versions")
@@ -30,9 +33,37 @@ def _read_idx(uid: str) -> List[Dict[str, Any]]:
 def _write_idx(uid: str, rows: List[Dict[str, Any]]):
     _idx(uid).write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
 
+# --- NEW ENDPOINT TO HANDLE VERSION CREATION ---
+@router.post("", response_model=VersionInDB)
+async def create_version(version: VersionCreate, uid: str = Depends(get_user_id)):
+    """
+    Saves a new version of the resume from the optimization flow.
+    """
+    try:
+        data = normalize_resume(version.content)
+        vid = str(uuid4())
+        created = datetime.now(timezone.utc).isoformat()
+        # Use 'created_at' for consistency
+        meta = {"id": vid, "name": version.name, "created_at": created}
+
+        # Save the content of the new version to a file
+        (_udir(uid) / f"{vid}.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        
+        # Update the index with the new version's metadata
+        rows = _read_idx(uid)
+        rows.insert(0, meta)
+        _write_idx(uid, rows)
+        
+        # Return the newly created version's data, conforming to the VersionInDB model
+        return VersionInDB(id=vid, name=version.name, content=data)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/list")
 def list_versions(uid: str = Depends(get_user_id)):
-    return {"versions": _read_idx(uid)} # ✅ Return in a structured object
+    return {"versions": _read_idx(uid)}
 
 @router.get("/load/{vid}")
 def load_version(vid: str, uid: str = Depends(get_user_id)):
@@ -40,7 +71,6 @@ def load_version(vid: str, uid: str = Depends(get_user_id)):
     if not p.exists(): raise HTTPException(404, "Version not found")
     data = json.loads(p.read_text("utf-8"))
     
-    # Also load the metadata for the response
     rows = _read_idx(uid)
     meta = next((r for r in rows if r.get("id") == vid), {})
 
@@ -56,7 +86,6 @@ def save_version(
     data = normalize_resume(payload)
     vid = str(uuid4())
     created = datetime.now(timezone.utc).isoformat()
-    # Use 'created_at' for consistency with frontend
     meta = {"id": vid, "name": name or f"Resume {created[:10]}", "created_at": created}
 
     (_udir(uid) / f"{vid}.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -80,7 +109,6 @@ def overwrite_version(vid: str, payload: Dict[str, Any] = Body(...), uid: str = 
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"ok": True, "id": vid}
 
-# ✅ --- New Rename Functionality ---
 
 class VersionRenameRequest(BaseModel):
     new_name: str

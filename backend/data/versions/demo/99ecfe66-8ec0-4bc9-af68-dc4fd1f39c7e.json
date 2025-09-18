@@ -1,0 +1,156 @@
+{
+  "fullName": "SHOURY SINHA",
+  "title": "Digital Artist",
+  "email": "contactshoury@gmail.com",
+  "phone": "+91 99554 22038",
+  "location": "Pune, India",
+  "profiles": [
+    {
+      "label": "linkedin",
+      "url": "linkedin.com/shourysinha"
+    },
+    {
+      "label": "behance",
+      "url": "behance.net/WorkedUpShoury"
+    }
+  ],
+  "summary": "Highly creative and detail-oriented Graphic Designer with 3+ years of experience delivering impactful visuals for global clients.  Expertise in branding, digital content creation (including video editing and social media graphics), and UI/UX design. Proven ability to collaborate effectively with diverse teams, including creators, influencers, and startups, to achieve project goals and exceed client expectations.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Created logos, brand identities, and visual assets aligned with modern design principles",
+            "Designed social media content, video edits, thumbnails, and reels for high-engagement campaigns",
+            "Built responsive mockups and UI/UX layouts for web/mobile using Figma and Adobe XD"
+          ],
+          "start": "2021",
+          "end": null,
+          "current": true,
+          "location": "Pune, Maharashtra",
+          "company": "Freelance Digital Creator and Designer",
+          "role": "Freelance Digital Creator and Designer"
+        },
+        {
+          "bullets": [
+            "Designed print-ready apparel artwork for European streetwear collections; ensured brand consistency while reducing design delivery cycles by 30%."
+          ],
+          "start": "2023",
+          "end": "2024",
+          "current": false,
+          "location": "Remote (Germany)",
+          "company": "Yumero",
+          "role": "Apparel Graphic Designer"
+        },
+        {
+          "bullets": [
+            "Created and illustrated 50+ digital NFT collectibles on Ethereum blockchain. Managed full creative production from character design to metadata delivery."
+          ],
+          "start": "2021",
+          "end": "2022",
+          "current": false,
+          "location": "Remote (Australia)",
+          "company": "CryptoBlokes",
+          "role": "NFT Artist"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications (MCA)",
+          "field": null,
+          "start": null,
+          "end": "Expected 2026",
+          "location": null,
+          "score": "9.09"
+        }
+      ]
+    },
+    {
+      "id": "xwrk0u9",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": [
+        {
+          "name": "Adobe Content Creator Professional Certificate",
+          "authority": "Adobe",
+          "id": "",
+          "url": "View Certificate",
+          "date": "Jul 2025"
+        },
+        {
+          "name": "Adobe Graphic Designer Professional Certificate",
+          "authority": "Adobe",
+          "id": "",
+          "url": "View Certificate",
+          "date": "Jul 2025"
+        },
+        {
+          "name": "Graphic Design Essentials",
+          "authority": "Canva",
+          "id": "",
+          "url": "View Certificate",
+          "date": "Jul 2025"
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [],
+          "soft": [],
+          "concepts": [
+            "Logo Design",
+            "Branding",
+            "Banners",
+            "Thumbnails",
+            "Reels",
+            "Video Editing",
+            "UI/UX Design",
+            "Social Media Graphics",
+            "Product Mockups",
+            "Motion Graphics"
+          ],
+          "tools": [
+            "Adobe Photoshop",
+            "Illustrator",
+            "InDesign",
+            "Premiere Pro",
+            "After Effects",
+            "Lightroom",
+            "XD",
+            "CorelDRAW",
+            "Canva",
+            "Figma"
+          ],
+          "platforms": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Python",
+            "MySQL",
+            "Git",
+            "GitHub",
+            "WordPress"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "ShourySinhaDesign.pdf",
+    "uploadDate": "2025-09-16T07:49:50.302635"
+  }
+}

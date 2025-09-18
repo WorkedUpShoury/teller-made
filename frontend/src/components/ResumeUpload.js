@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
+import { useNavigate } from "react-router-dom";
 import "./ResumeUploadPage.css";
 import ResumeVersionsSidebar from "./ResumeVersionsSidebar";
 
@@ -25,9 +25,7 @@ export default function ResumeUploadPage() {
   const [pulseDrop, setPulseDrop] = useState(false);
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate(); // Initialize the navigate function
-
-  // Base JSON shown in versions sidebar (optional)
+  const navigate = useNavigate();
   const [baseJson, setBaseJson] = useState(null);
 
   const step = !resumeFile ? 1 : jobDesc.trim() ? 3 : 2;
@@ -47,7 +45,8 @@ export default function ResumeUploadPage() {
     if (!file) return "No file selected.";
     if (!ACCEPTED.includes(file.type))
       return "Please upload a PDF or Word document (.pdf, .doc, .docx).";
-    if (file.size > MAX_MB * 1024 * 1024) return `File is too large (max ${MAX_MB}MB).`;
+    if (file.size > MAX_MB * 1024 * 1024)
+      return `File is too large (max ${MAX_MB}MB).`;
     return "";
   };
 
@@ -59,7 +58,7 @@ export default function ResumeUploadPage() {
       setResumeFile(null);
     } else {
       setResumeFile(file);
-      setBaseJson(null); // Clear any selection from sidebar
+      setBaseJson(null);
       setSuccess("");
       setPulseDrop(true);
       setTimeout(() => setPulseDrop(false), 900);
@@ -76,15 +75,13 @@ export default function ResumeUploadPage() {
       setResumeFile(null);
     } else {
       setResumeFile(file);
-      setBaseJson(null); // Clear any selection from sidebar
+      setBaseJson(null);
       setSuccess("");
       setPulseDrop(true);
       setTimeout(() => setPulseDrop(false), 900);
     }
   };
 
-  // This handler is now just for showing a success message when selecting from the sidebar.
-  // The optimization flow requires an actual file upload.
   const handleVersionSelect = (json) => {
     setBaseJson(json);
     setResumeFile({
@@ -93,24 +90,21 @@ export default function ResumeUploadPage() {
       isVirtual: true,
     });
     setError("");
-    setSuccess(`Selected "${json.meta?.fileName || 'resume'}" from your versions.`);
+    setSuccess(`Selected "${json.meta?.fileName || "resume"}" from your versions.`);
     setPulseDrop(true);
     setTimeout(() => setPulseDrop(false), 900);
   };
 
-  /**
-   * Post data with progress tracking.
-   * Resolves with the JSON response from the server.
-   */
   const postAndOptimize = ({ url, formData, fileSize }) =>
     new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let fakeTimer = null;
 
-      const setPct = (n) => setProgress((p) => (n > p ? Math.min(100, Math.round(n)) : p));
+      const setPct = (n) =>
+        setProgress((p) => (n > p ? Math.min(100, Math.round(n)) : p));
 
       xhr.open("POST", url, true);
-      xhr.responseType = "text"; // Expect text to manually parse as JSON
+      xhr.responseType = "text";
 
       if (xhr.upload) {
         xhr.upload.onprogress = (e) => {
@@ -153,7 +147,7 @@ export default function ResumeUploadPage() {
             setPct(100);
             try {
               const jsonResponse = JSON.parse(xhr.responseText);
-              resolve(jsonResponse); // Resolve with the parsed JSON
+              resolve(jsonResponse);
             } catch (e) {
               reject(new Error("Failed to parse the server's response."));
             }
@@ -171,6 +165,35 @@ export default function ResumeUploadPage() {
       xhr.send(formData);
     });
 
+  const saveResumeVersion = (versionData) =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${API_BASE}/versions`, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.responseType = "json";
+
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.response);
+          } else {
+            try {
+              const errJson = JSON.parse(xhr.responseText);
+              reject(new Error(errJson?.detail || `Server error: ${xhr.status}`));
+            } catch {
+              reject(new Error(`HTTP error! Status: ${xhr.status}`));
+            }
+          }
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Network error during version saving."));
+      };
+
+      xhr.send(JSON.stringify(versionData));
+    });
+
   const handleSubmit = async () => {
     setSuccess("");
     setError("");
@@ -179,10 +202,11 @@ export default function ResumeUploadPage() {
       return;
     }
 
-    // The optimization flow requires a real file, not a virtual one from the sidebar.
     if (resumeFile.isVirtual) {
-        setError("This feature requires a file upload (PDF/DOCX) to parse and optimize. Please select a file from your computer.");
-        return;
+      setError(
+        "This feature requires a file upload (PDF/DOCX) to parse and optimize. Please select a file from your computer."
+      );
+      return;
     }
 
     setLoading(true);
@@ -193,25 +217,30 @@ export default function ResumeUploadPage() {
       formData.append("file", resumeFile);
       formData.append("jd", jobDesc);
 
-      // This function now returns the optimized resume JSON directly
-      await postAndOptimize({
+      // 1. Get the structured JSON from the backend
+      const optimizedResume = await postAndOptimize({
         url: `${API_BASE}/resumes/upload-and-optimize`,
         formData,
         fileSize: resumeFile.size,
       });
 
-      setSuccess("Resume optimized! Redirecting to the editor...");
+      // 2. Save the new JSON as a version
+      const versionData = {
+        name: resumeFile.name,
+        content: optimizedResume,
+      };
+      await saveResumeVersion(versionData);
 
-      // The backend has already saved the new version and updated the workspace.
-      // We just need to navigate to the editor, which will load the latest version.
+      setSuccess("Resume optimized and saved! Redirecting to the editor...");
+
+      // 3. Navigate to the editor, passing the new resume data in the state
       setTimeout(() => {
-        navigate("/editor");
+        navigate("/smart-editor", { state: { resumeData: optimizedResume } });
       }, 1500);
-
     } catch (err) {
       console.error("Error optimizing resume:", err);
       setError(`Optimization failed: ${err.message}`);
-      setLoading(false); // Only stop loading on error
+      setLoading(false);
       setProgress(0);
     }
   };
@@ -222,13 +251,10 @@ export default function ResumeUploadPage() {
     setSuccess("");
   };
 
-  // --- The rest of the component's JSX remains unchanged ---
   return (
     <div className={`ru-root ${mounted ? "is-mounted" : ""}`}>
-      {/* Subtle gradient background */}
       <div className="ru-background" aria-hidden />
 
-      {/* Header */}
       <header className="ru-header">
         <div className="ru-header-content">
           <h1 className="ru-title">
@@ -241,7 +267,6 @@ export default function ResumeUploadPage() {
       </header>
 
       <div className="ru-layout">
-        {/* Main content */}
         <main className="ru-main">
           <div className="ru-card">
             <div className="ru-card-header">
@@ -249,9 +274,11 @@ export default function ResumeUploadPage() {
               <p>Upload your resume and job description to get started</p>
             </div>
 
-            {/* Stepper */}
             <div className="ru-stepper">
-              <div className="ru-stepper-progress" style={{ width: `${(step - 1) * 50}%` }} />
+              <div
+                className="ru-stepper-progress"
+                style={{ width: `${(step - 1) * 50}%` }}
+              />
               <div className={`ru-stepper-step ${step >= 1 ? "is-active" : ""}`}>
                 <div className="ru-stepper-number">1</div>
                 <span>Upload Resume</span>
@@ -269,7 +296,11 @@ export default function ResumeUploadPage() {
             {error && (
               <div className="ru-alert ru-alert-error" role="alert">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>{error}</span>
               </div>
@@ -278,24 +309,37 @@ export default function ResumeUploadPage() {
             {success && (
               <div className="ru-alert ru-alert-success" role="status">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>{success}</span>
               </div>
             )}
 
-            {/* File upload area */}
             <div className="ru-upload-section">
               <div
-                className={`ru-dropzone ${dragActive ? "is-dragover" : ""} ${resumeFile ? "has-file" : ""} ${pulseDrop ? "is-pulse" : ""}`}
+                className={`ru-dropzone ${dragActive ? "is-dragover" : ""} ${
+                  resumeFile ? "has-file" : ""
+                } ${pulseDrop ? "is-pulse" : ""}`}
                 onClick={clickFilePicker}
-                onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
                 onDragOver={(e) => e.preventDefault()}
-                onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                }}
                 onDrop={handleDrop}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && clickFilePicker()}
+                onKeyDown={(e) =>
+                  (e.key === "Enter" || e.key === " ") && clickFilePicker()
+                }
                 aria-label="Upload resume"
               >
                 <input
@@ -309,33 +353,85 @@ export default function ResumeUploadPage() {
                 {!resumeFile ? (
                   <div className="ru-dropzone-content">
                     <div className="ru-dropzone-icon">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 4V16M12 16L9 13M12 16L15 13" stroke="var(--c3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M20 16V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V16" stroke="var(--c3)" strokeWidth="2" strokeLinecap="round" />
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4V16M12 16L9 13M12 16L15 13"
+                          stroke="var(--c3)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M20 16V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V16"
+                          stroke="var(--c3)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
                       </svg>
                     </div>
                     <div className="ru-dropzone-text">
                       <h3>Drag & drop your resume</h3>
-                      <p>or <span className="ru-link">browse files</span></p>
+                      <p>
+                        or <span className="ru-link">browse files</span>
+                      </p>
                     </div>
-                    <div className="ru-dropzone-hint">Supports PDF, DOC, DOCX (max {MAX_MB}MB)</div>
+                    <div className="ru-dropzone-hint">
+                      Supports PDF, DOC, DOCX (max {MAX_MB}MB)
+                    </div>
                   </div>
                 ) : (
-                  <div className="ru-file-preview" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="ru-file-preview"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="ru-file-icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="var(--c3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M14 2V8H20" stroke="var(--c3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
+                          stroke="var(--c3)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M14 2V8H20"
+                          stroke="var(--c3)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     </div>
                     <div className="ru-file-info">
                       <div className="ru-file-name">{resumeFile.name}</div>
                       <div className="ru-file-size">
-                        {!resumeFile.isVirtual && `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB`}
+                        {!resumeFile.isVirtual &&
+                          `${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB`}
                       </div>
                     </div>
-                    <button className="ru-file-remove" onClick={removeFile} aria-label="Remove file">
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <button
+                      className="ru-file-remove"
+                      onClick={removeFile}
+                      aria-label="Remove file"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                      >
                         <path d="M3.646 3.646a.5.5 0 01.708 0L8 7.293l3.646-3.647a.5.5 0 01.708.708L8.707 8l3.647 3.646a.5.5 0 01-.708.708L8 8.707l-3.646 3.647a.5.5 0 01-.708-.708L7.293 8 3.646 4.354a.5.5 0 010-.708z" />
                       </svg>
                     </button>
@@ -344,9 +440,10 @@ export default function ResumeUploadPage() {
               </div>
             </div>
 
-            {/* Job description input */}
             <div className="ru-input-section">
-              <label htmlFor="jobDescription" className="ru-input-label">Job Description</label>
+              <label htmlFor="jobDescription" className="ru-input-label">
+                Job Description
+              </label>
               <textarea
                 id="jobDescription"
                 rows={6}
@@ -367,10 +464,25 @@ export default function ResumeUploadPage() {
             >
               {loading ? (
                 <>
-                  <svg className="ru-button-spinner" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+                  <svg
+                    className="ru-button-spinner"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                      opacity=".25"
+                    />
                     <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
-                      <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite" />
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        dur="0.75s"
+                        values="0 12 12;360 12 12"
+                        repeatCount="indefinite"
+                      />
                     </path>
                   </svg>
                   Optimizing...
@@ -381,32 +493,72 @@ export default function ResumeUploadPage() {
             </button>
           </div>
 
-          {/* Features section */}
           <div className="ru-features">
-            <h3 className="ru-features-title">Why use our Resume Optimizer?</h3>
+            <h3 className="ru-features-title">
+              Why use our Resume Optimizer?
+            </h3>
             <div className="ru-features-grid">
               <div className="ru-feature-card">
                 <div className="ru-feature-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="var(--c1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                      stroke="var(--c1)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <h4>ATS Optimization</h4>
-                <p>Formatting and keywords that pass Applicant Tracking Systems</p>
+                <p>
+                  Formatting and keywords that pass Applicant Tracking Systems
+                </p>
               </div>
               <div className="ru-feature-card">
                 <div className="ru-feature-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9.66317 17H4.66296C3.55839 17 2.66296 16.1046 2.66296 15V5C2.66296 3.89543 3.55839 3 4.66296 3H14.6632C15.7677 3 16.6632 3.89543 16.6632 5V10M16.6632 13V11.5C16.6632 10.1193 17.7825 9 19.1632 9C20.5439 9 21.6632 10.1193 21.6632 11.5V13M16.6632 13H21.6632M16.6632 13V17M21.6632 13V17M6.66296 7H12.6632M6.66296 11H10.6632" stroke="var(--c2)" strokeWidth="2" strokeLinecap="round" />
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9.66317 17H4.66296C3.55839 17 2.66296 16.1046 2.66296 15V5C2.66296 3.89543 3.55839 3 4.66296 3H14.6632C15.7677 3 16.6632 3.89543 16.6632 5V10M16.6632 13V11.5C16.6632 10.1193 17.7825 9 19.1632 9C20.5439 9 21.6632 10.1193 21.6632 11.5V13M16.6632 13H21.6632M16.6632 13V17M21.6632 13V17M6.66296 7H12.6632M6.66296 11H10.6632"
+                      stroke="var(--c2)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </div>
                 <h4>Keyword Matching</h4>
-                <p>Align your resume with job requirements using AI analysis</p>
+                <p>
+                  Align your resume with job requirements using AI analysis
+                </p>
               </div>
               <div className="ru-feature-card">
                 <div className="ru-feature-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="var(--c4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                      stroke="var(--c4)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <h4>Fast Results</h4>
@@ -416,17 +568,15 @@ export default function ResumeUploadPage() {
           </div>
         </main>
 
-        {/* Right rail: Versions Sidebar */}
         <aside className="ru-sidebar">
           <ResumeVersionsSidebar
             currentJson={baseJson}
             onSelect={handleVersionSelect}
-            showModeControls={false} // Hiding mode controls as they are less relevant here
+            showModeControls={false}
           />
         </aside>
       </div>
 
-      {/* Progress overlay */}
       {loading && (
         <div className="ru-overlay" role="status" aria-live="polite">
           <div className="ru-progress-modal">
@@ -440,10 +590,18 @@ export default function ResumeUploadPage() {
                 />
               </div>
               <div className="ru-progress-steps">
-                <span className={progress > 10 ? "is-complete" : ""}>Uploading</span>
-                <span className={progress > 40 ? "is-complete" : ""}>Analyzing</span>
-                <span className={progress > 70 ? "is-complete" : ""}>Optimizing</span>
-                <span className={progress >= 100 ? "is-complete" : ""}>Finalizing</span>
+                <span className={progress > 10 ? "is-complete" : ""}>
+                  Uploading
+                </span>
+                <span className={progress > 40 ? "is-complete" : ""}>
+                  Analyzing
+                </span>
+                <span className={progress > 70 ? "is-complete" : ""}>
+                  Optimizing
+                </span>
+                <span className={progress >= 100 ? "is-complete" : ""}>
+                  Finalizing
+                </span>
               </div>
             </div>
           </div>

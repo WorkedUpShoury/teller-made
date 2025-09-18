@@ -4,16 +4,21 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 from google import generativeai as genai
-
+from dotenv import load_dotenv
 # Configure API Key once
+load_dotenv()
 try:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 except KeyError:
     print("⚠️ GEMINI_API_KEY environment variable not set.")
 
+# Initialize json_string to None
+json_string = None
+
 try:
-    project_root = Path(__file__).parent.parent.parent
-    json_file_path = project_root / "json_template.json"
+    # Correctly locate the json_template.json file
+    project_root = Path(__file__).parent.parent
+    json_file_path = project_root / "templates" / "json_template.json"
     with open(json_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     json_string = json.dumps(data, indent=2)
@@ -36,18 +41,23 @@ chat_model = genai.GenerativeModel(
         "If you propose specific edits, return them as JSON Patch operations inside a ```json block."
     ]
 )
-def load_json_content_as_string() -> str | None:
-    """
-    Finds and loads the 'json_template.json' file from the project root,
-    returning its content as a formatted string.
-    """
 
-    
 def extract_resume_info(raw_text: str) -> Dict[str, Any]:
-    """Extracts structured JSON from resume text."""
+    """Extracts structured JSON from resume text using a template."""
+    if not json_string:
+        raise ValueError("JSON template not loaded. Cannot process resume.")
+
     prompt = f"""
     Based on the following resume text, extract a structured JSON object.
-    Use this format: {json_string}
+    You MUST follow the structure defined in the JSON template provided below.
+
+    **CRITICAL RULES:**
+    1.  **Only include sections and fields if you find corresponding information in the resume text.**
+    2.  **DO NOT include a section (e.g., "awards", "publications") if it is not in the text.**
+    3.  **DO NOT include fields with `null` values, empty strings (`""`), or empty lists (`[]`). Omit them entirely.**
+
+    === JSON STRUCTURE TEMPLATE ===
+    {json_string}
     
     === RESUME TEXT ===
     {raw_text}
@@ -60,21 +70,23 @@ def extract_resume_info(raw_text: str) -> Dict[str, Any]:
         return {}
 
 def optimize_resume_json_with_jd(resume_json: Dict[str, Any], jd: str) -> Dict[str, Any]:
-    """Optimizes resume JSON against a job description."""
+    """Optimizes resume JSON against a job description, maintaining the structure."""
+    if not json_string:
+        raise ValueError("JSON template not loaded. Cannot optimize resume.")
+        
     resume_text = json.dumps(resume_json, indent=2)
     prompt = f"""
     Act as an expert career coach. Rewrite the summary and experience bullets in the
     following resume JSON to better align with the provided job description.
-    Return only the updated, valid JSON object with the exact same structure.
+    Return only the updated, valid JSON object.
+
+    **CRITICAL RULE:** Maintain the exact same structure as the original resume. Do not add or remove sections.
 
     === JOB DESCRIPTION ===
     {jd}
 
     === ORIGINAL RESUME JSON ===
     {resume_text}
-
-    === JSON STRUCTURE ===
-    {json_string}
     """
     try:
         resp = json_model.generate_content(prompt)

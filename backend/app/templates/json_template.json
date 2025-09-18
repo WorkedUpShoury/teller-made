@@ -1,289 +1,222 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Resume Builder Form Data",
-  "description": "A comprehensive schema for the JSON data structure used by the ResumeBuilder component.",
-  "type": "object",
-  "required": [
-    "fullName",
-    "email",
-    "phone"
-  ],
-  "properties": {
-    "fullName": {
-      "type": "string",
-      "description": "The full name of the individual. Required."
-    },
-    "title": {
-      "type": "string",
-      "description": "The professional title or role (e.g., 'Senior Software Engineer')."
-    },
-    "email": {
-      "type": "string",
-      "description": "The primary contact email address. Required.",
-      "format": "email"
-    },
-    "phone": {
-      "type": "string",
-      "description": "The primary contact phone number. Required."
-    },
-    "location": {
-      "type": "string",
-      "description": "The physical location (e.g., 'San Francisco, CA')."
-    },
-    "summary": {
-      "type": "string",
-      "description": "A professional summary or objective statement."
-    },
-    "profiles": {
-      "type": "array",
-      "description": "A list of online profiles or links (e.g., LinkedIn, GitHub, portfolio).",
-      "items": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string",
-            "description": "The display text for the link (e.g., 'LinkedIn')."
-          },
-          "url": {
-            "type": "string",
-            "description": "The full URL of the profile.",
-            "format": "uri"
-          }
+  "fullName": "",
+  "title": "",
+  "email": "",
+  "phone": "",
+  "location": "",
+  "profiles": [{
+      "label": "",
+      "url": ""
+    }],
+  "summary": "",
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [],
+          "start": "",
+          "end": "",
+          "current": false,
+          "location": "",
+          "company": "",
+          "role": ""
         }
-      }
+      ]
     },
-    "skills": {
-      "type": "array",
-      "description": "A simple, flat list of skills. Note: It's generally better to use the 'skillsets' section for a categorized list, as this is a fallback.",
-      "items": {
-        "type": "string"
-      }
-    },
-    "sections": {
-      "type": "array",
-      "description": "The main content of the resume, organized into distinct sections.",
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "type",
-          "title",
-          "items"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "A unique client-side identifier for the section."
-          },
-          "type": {
-            "type": "string",
-            "description": "The template type for this section.",
-            "enum": [
-              "experience",
-              "projects",
-              "education",
-              "certifications",
-              "awards",
-              "publications",
-              "volunteer",
-              "courses",
-              "languages",
-              "interests",
-              "references",
-              "achievements",
-              "patents",
-              "talks",
-              "custom",
-              "skillsets"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "The user-customizable title of the section (e.g., 'Work Experience')."
-          },
-          "items": {
-            "type": "array",
-            "description": "A list of entries within this section.",
-            "items": {
-              "oneOf": [
-                { "$ref": "#/$defs/experienceItem" },
-                { "$ref": "#/$defs/projectItem" },
-                { "$ref": "#/$defs/educationItem" },
-                { "$ref": "#/$defs/certificationItem" },
-                { "$ref": "#/$defs/awardItem" },
-                { "$ref": "#/$defs/publicationItem" },
-                { "$ref": "#/$defs/volunteerItem" },
-                { "$ref": "#/$defs/courseItem" },
-                { "$ref": "#/$defs/languageItem" },
-                { "$ref": "#/$defs/interestItem" },
-                { "$ref": "#/$defs/referenceItem" },
-                { "$ref": "#/$defs/achievementItem" },
-                { "$ref": "#/$defs/patentItem" },
-                { "$ref": "#/$defs/talkItem" },
-                { "$ref": "#/$defs/customItem" },
-                { "$ref": "#/$defs/skillsetItem" }
-              ]
-            }
-          }
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [],
+          "name": "",
+          "link": "",
+          "summary": ""
         }
-      }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "",
+          "degree": "",
+          "field": "",
+          "start": "",
+          "end": "",
+          "location": "",
+          "score": ""
+        }
+      ]
+    },
+    {
+      "id": "xwrk0u9",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": [
+        {
+          "name": "",
+          "authority": "",
+          "id": "",
+          "url": "",
+          "date": ""
+        }
+      ]
+    },
+    {
+      "id": "2dmch6y",
+      "type": "awards",
+      "title": "Awards",
+      "items": [
+        {
+          "bullets": [],
+          "name": "",
+          "issuer": "",
+          "date": "",
+          "location": "",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "id": "ea7vy9v",
+      "type": "publications",
+      "title": "Publications",
+      "items": [
+        {
+          "bullets": [],
+          "title": "",
+          "venue": "",
+          "authors": "",
+          "date": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "m9liwh7",
+      "type": "volunteer",
+      "title": "Volunteer",
+      "items": [
+        {
+          "bullets": [],
+          "start": "",
+          "end": "",
+          "current": false,
+          "location": "",
+          "organization": "",
+          "role": ""
+        }
+      ]
+    },
+    {
+      "id": "syxjxbb",
+      "type": "courses",
+      "title": "Courses",
+      "items": [
+        {
+          "name": "",
+          "provider": "",
+          "date": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "m0w9ozh",
+      "type": "interests",
+      "title": "Interests",
+      "items": [
+        {
+          "name": "",
+          "details": ""
+        }
+      ]
+    },
+    {
+      "id": "wvp6x6b",
+      "type": "references",
+      "title": "References",
+      "items": [
+        {
+          "name": "",
+          "relation": "",
+          "email": "",
+          "phone": ""
+        }
+      ]
+    },
+    {
+      "id": "ylvgfjh",
+      "type": "achievements",
+      "title": "Achievements",
+      "items": [
+        {
+          "bullets": [],
+          "title": "",
+          "date": "",
+          "summary": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "jf8yfft",
+      "type": "patents",
+      "title": "Patents",
+      "items": [
+        {
+          "title": "",
+          "number": "",
+          "date": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "48d6ztn",
+      "type": "talks",
+      "title": "Talks / Conferences",
+      "items": [
+        {
+          "bullets": [],
+          "title": "",
+          "event": "",
+          "location": "",
+          "date": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [],
+          "soft": [],
+          "concepts": [],
+          "tools": [],
+          "platforms": []
+        }
+      ]
+    },
+    {
+      "id": "hq9o5p4",
+      "type": "custom",
+      "title": "Custom (freeform)",
+      "items": [
+        {
+          "content": ""
+        }
+      ]
     }
-  },
-  "$defs": {
-    "experienceItem": {
-      "type": "object",
-      "properties": {
-        "company": { "type": "string" },
-        "role": { "type": "string" },
-        "location": { "type": "string" },
-        "start": { "type": "string", "description": "YYYY-MM format" },
-        "end": { "type": "string", "description": "YYYY-MM format" },
-        "current": { "type": "boolean" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "projectItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "link": { "type": "string", "format": "uri" },
-        "summary": { "type": "string" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "educationItem": {
-      "type": "object",
-      "properties": {
-        "school": { "type": "string" },
-        "degree": { "type": "string" },
-        "field": { "type": "string" },
-        "start": { "type": "string", "description": "YYYY-MM format" },
-        "end": { "type": "string", "description": "YYYY-MM format" },
-        "location": { "type": "string" },
-        "score": { "type": "string" }
-      }
-    },
-    "certificationItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "authority": { "type": "string" },
-        "id": { "type": "string" },
-        "url": { "type": "string", "format": "uri" },
-        "date": { "type": "string", "description": "YYYY-MM format" }
-      }
-    },
-    "awardItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "issuer": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "location": { "type": "string" },
-        "url": { "type": "string", "format": "uri" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "publicationItem": {
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "venue": { "type": "string" },
-        "authors": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "link": { "type": "string", "format": "uri" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "volunteerItem": {
-      "type": "object",
-      "properties": {
-        "organization": { "type": "string" },
-        "role": { "type": "string" },
-        "location": { "type": "string" },
-        "start": { "type": "string", "description": "YYYY-MM format" },
-        "end": { "type": "string", "description": "YYYY-MM format" },
-        "current": { "type": "boolean" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "courseItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "provider": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "link": { "type": "string", "format": "uri" }
-      }
-    },
-    "languageItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "proficiency": { "type": "string" }
-      }
-    },
-    "interestItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "details": { "type": "string" }
-      }
-    },
-    "referenceItem": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "relation": { "type": "string" },
-        "email": { "type": "string" },
-        "phone": { "type": "string" }
-      }
-    },
-    "achievementItem": {
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "summary": { "type": "string" },
-        "link": { "type": "string", "format": "uri" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "patentItem": {
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "number": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "link": { "type": "string", "format": "uri" }
-      }
-    },
-    "talkItem": {
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "event": { "type": "string" },
-        "location": { "type": "string" },
-        "date": { "type": "string", "description": "YYYY-MM format" },
-        "link": { "type": "string", "format": "uri" },
-        "bullets": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "customItem": {
-      "type": "object",
-      "properties": {
-        "content": { "type": "string" }
-      }
-    },
-    "skillsetItem": {
-      "type": "object",
-      "properties": {
-        "languages": { "type": "array", "items": { "type": "string" } },
-        "soft": { "type": "array", "items": { "type": "string" } },
-        "concepts": { "type": "array", "items": { "type": "string" } },
-        "tools": { "type": "array", "items": { "type": "string" } },
-        "platforms": { "type": "array", "items": { "type": "string" } }
-      }
-    }
-  }
+  ]
 }

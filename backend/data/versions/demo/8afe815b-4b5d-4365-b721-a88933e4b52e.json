@@ -1,0 +1,126 @@
+{
+  "fullName": "KAYUM AHMED SHAIKH",
+  "title": "Software Development Intern",
+  "email": "shaikhkayum1911@gmail.com",
+  "phone": "+91-8421967576",
+  "location": "Pune, Maharashtra, India",
+  "profiles": [
+    {
+      "label": "linkedin",
+      "url": "linkedin.com/in/shaikhkayum"
+    },
+    {
+      "label": "github",
+      "url": "github.com/shaikhkayum"
+    }
+  ],
+  "summary": "",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Developed a secure, lightweight banking system from the ground up using Java, JDBC, and SQL, focusing on\ncore transaction logic and data integrity.",
+            "Implemented key features including user authentication, account creation, balance inquiry, and fund transfers,\nsuccessfully handling over 1,000+ simulated transactions during testing.",
+            "Designed and integrated a transaction history module that improved data retrieval times by 20% through\noptimized SQL queries and indexing strategies."
+          ],
+          "start": "Mar 2023",
+          "end": "May 2023",
+          "current": false,
+          "location": "Remote",
+          "company": "Spark Foundation",
+          "role": "Software Development Intern"
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Engineered a full-stack web application connecting farmers with equipment providers, featuring role-based access\nfor Admins, Owners, and Farmers to ensure secure and distinct functionality.",
+            "Built a real-time booking and equipment management module using Java and AJAX, reducing manual coor-\ndination efforts by an estimated 50%.",
+            "Created a normalized SQL database to manage equipment listings, user profiles, and rental histories, ensuring\nefficient and reliable data access for all user roles."
+          ],
+          "name": "AgriRend: Agriculture Equipment Rental Application",
+          "link": null,
+          "summary": "Tech Stack: Java, SQL, HTML, CSS\nCompleted May 2024"
+        },
+        {
+          "bullets": [
+            "Constructed a functional e-commerce platform enabling users to browse products, manage a shopping cart, and\nsimulate a checkout process using Java Servlets and JSP.",
+            "Developed the backend logic to handle inventory management and order processing, capable of supporting a\ncatalog of over 500+ items within a robust SQL database.",
+            "Enhanced user experience by implementing dynamic product pages and a persistent shopping cart using session\nmanagement, leading to a 15% increase in user engagement metrics during testing."
+          ],
+          "name": "E-Commerce Web Application",
+          "link": null,
+          "summary": "Tech Stack: Java Servlets, JSP, SQL, HTML, CSS\nJan 2024 – Apr 2024"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications",
+          "field": null,
+          "start": "2024-04",
+          "end": "2026-04",
+          "location": "Pune, India",
+          "score": "CGPA: 5.60/ 10.00"
+        },
+        {
+          "school": "MIT ACSC",
+          "degree": "Bachelor of Computer Applications",
+          "field": null,
+          "start": "2021-04",
+          "end": "2024-07",
+          "location": "Pune, India",
+          "score": "CGPA: 7.35/ 10.00"
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "Java",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS"
+          ],
+          "soft": [],
+          "concepts": [],
+          "tools": [
+            "VS Code",
+            "IntelliJ IDEA",
+            "Git",
+            "GitHub"
+          ],
+          "platforms": [
+            "Java Servlets",
+            "JDBC",
+            "REST APIs"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "Kayum Resume.pdf",
+    "uploadDate": "2025-09-17T21:22:48.557271"
+  }
+}
