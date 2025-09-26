@@ -13,8 +13,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ChatAssistant from './components/ChatAssistant';
 import Profile from './components/profile';
-
-<Route path="/editor" element={<SmartResumeEditor />} />
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 function HomePage() {
   return (
@@ -41,6 +40,7 @@ function App() {
           <Route path="/smart-editor" element={<SmartResumeEditor />} />
           <Route path="/chat-assistant" element={<ChatAssistant />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/analytics" element={<AnalyticsDashboard />} />
         </Routes>
       </main>
       <Footer />

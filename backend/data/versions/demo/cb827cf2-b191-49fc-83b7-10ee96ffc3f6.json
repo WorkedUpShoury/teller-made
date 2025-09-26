@@ -1,0 +1,107 @@
+{
+  "fullName": "Akash Singh",
+  "title": "Aspiring AI Data Intern",
+  "email": "akash.singh@mitwpu.edu.in",
+  "phone": "+91 7080188617",
+  "location": "Pune",
+  "profiles": [],
+  "summary": "Enthusiastic and detail-oriented professional with a strong foundation in computer applications (MCA, BCA) and experience in web development, eager to contribute to AI data creation and validation. Proven ability to quickly learn and apply new technologies, demonstrated through developing AI-powered solutions like Converso.Ai. Possessing a keen eye for data quality, accuracy, and consistency, with foundational knowledge in Python, I am ready to collaborate with data scientists and engineers to curate and annotate high-quality datasets for machine learning models.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Assisted in the development and maintenance of responsive web applications, applying meticulous attention to detail to ensure system reliability and optimal user data interaction.",
+            "Implemented interactive UI components using HTML, CSS, and JavaScript, demonstrating precision in adhering to specifications and contributing to high-quality user experiences.",
+            "Collaborated effectively within a team of 3 developers to deliver project milestones on schedule, fostering a strong teamwork environment aligned with data collaboration needs."
+          ],
+          "start": "Sep 2023",
+          "end": "Feb 2024",
+          "current": false,
+          "location": "Pune",
+          "company": "Cooperate Culture",
+          "role": "Assistant Web Developer"
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [],
+          "name": "Converso.Ai",
+          "link": "",
+          "summary": "An AI-powered web application built using Next.js, aimed at facilitating conversational interactions."
+        },
+        {
+          "bullets": [],
+          "name": "Hire_Archy",
+          "link": "",
+          "summary": "A dynamic, role-based job portal built with JSP, Servlets, and MySQL, designed for streamlined recruitment and applicant management"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT WPU",
+          "degree": "MCA",
+          "field": "Computer Applications",
+          "start": "Jul 2024",
+          "end": "Jun 2026",
+          "location": "",
+          "score": "4.41"
+        },
+        {
+          "school": "Hierank Business School",
+          "degree": "BCA",
+          "field": "Computer Applications",
+          "start": "Jul 2021",
+          "end": "Apr 2024",
+          "location": "Noida",
+          "score": "6.85"
+        }
+      ]
+    },
+    {
+      "id": "ylvgfjh",
+      "type": "achievements",
+      "title": "Achievements",
+      "items": [
+        {
+          "bullets": [
+            "Participated in Hack MIT-WPU’25 Ideathon, where a team of 4 developed an innovative solution for optimizing urban logistics.",
+            "Presented a compelling project proposal to a panel of judges, leveraging problem-solving and presentation skills to articulate a feasible and impactful idea."
+          ],
+          "title": "Ideathon | Hack MIT-WPU’25",
+          "date": "Mar 2025",
+          "summary": "",
+          "link": ""
+        },
+        {
+          "bullets": [
+            "Completed 194 topics, 4 projects, and solved 762 problems (including 11 problem of the day) over 67 days, showing consistency and strong problem-solving skills.",
+            "Actively contributed to the community with 6 comments, 49 hints, and 60 solutions, highlighting collaboration and knowledge sharing."
+          ],
+          "title": "HyperSkill Projects",
+          "date": "Jul 2021",
+          "summary": "",
+          "link": ""
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "Akash Singh.pdf",
+    "uploadDate": "2025-09-26T19:50:55.614361"
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "fullName": "SAMRUDDHI GAIKWAD",
+  "title": "",
+  "email": "gaikwadsamruddhi820@gmail.com",
+  "phone": "+91-8830390291",
+  "location": "Pune, India",
+  "profiles": [
+    {
+      "label": "LinkedIn",
+      "url": "https://linkedin.com/in/samruddhi-gaikwad1806"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/Samruddhi180"
+    }
+  ],
+  "summary": "",
+  "skills": [],
+  "sections": [
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications",
+          "field": "Computer Applications",
+          "start": "",
+          "end": "2026",
+          "location": "Pune",
+          "score": "8.43 / 10.0 CGPA"
+        },
+        {
+          "school": "Sanjay Ghodawat University",
+          "degree": "Bachelor of Computer Applications",
+          "field": "Computer Applications",
+          "start": "2021",
+          "end": "2024",
+          "location": "Kolhapur",
+          "score": "8.8 / 10.0 CGPA"
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "Java",
+            "HTML",
+            "CSS",
+            "Python",
+            "SQL",
+            "JavaScript"
+          ],
+          "soft": [],
+          "concepts": [
+            "Object-Oriented Programming (OOPS)",
+            "DBMS",
+            "Computer Network",
+            "OS"
+          ],
+          "tools": [
+            "Java Servlet",
+            "JSP",
+            "GitHub",
+            "VS Code",
+            "MySQL Workbench",
+            "Git",
+            "Eclipse"
+          ],
+          "platforms": []
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Designed and developed a fully responsive and dynamic e-commerce user interface using HTML, CSS, and JavaScript, enhancing user engagement and aligning with visual and functional requirements.",
+            "Constructed a robust server-side application with Advanced Java and integrated it with MySQL, demonstrating strong programming skills in managing products, users, and inventory modules."
+          ],
+          "name": "Chocolux E-commerce Website",
+          "link": "",
+          "summary": "Academic Project (Jan 2024)"
+        },
+        {
+          "bullets": [
+            "Designed and implemented a modern, responsive UI using ReactJS, collaborating effectively on backend integration with Python Flask for AI-powered resume analysis and innovative suggestions."
+          ],
+          "name": "Tellermade - Resume Optimization tool",
+          "link": "",
+          "summary": "Full Stack Academic Project (August 2025 - Expected)"
+        },
+        {
+          "bullets": [
+            "Designed and deployed a responsive coffee shop website featuring interactive elements and a functional contact form, improving online inquiries and meeting client-specific functional requirements."
+          ],
+          "name": "Coffee Shop Website",
+          "link": "",
+          "summary": "Mini Project (Nov 2023)"
+        }
+      ]
+    },
+    {
+      "id": "2dmch6y",
+      "type": "awards",
+      "title": "Awards",
+      "items": [
+        {
+          "bullets": [
+            "Leading a team of five to victory."
+          ],
+          "name": "Winner of Inter-college Coding Quiz Competition",
+          "issuer": "Vibrant Annual Tech and Cultural Fest",
+          "date": "2023",
+          "location": "",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "id": "ylvgfjh",
+      "type": "achievements",
+      "title": "Achievements",
+      "items": [
+        {
+          "bullets": [],
+          "title": "Secured First Rank in Bachelor of Computer Applications",
+          "date": "2024",
+          "summary": "Achieved the highest academic standing in a cohort of over 100 students at Sanjay Ghodawat University.",
+          "link": ""
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "Samruddhi_Gaikwad_3 (4).pdf",
+    "uploadDate": "2025-09-26T19:44:58.274185"
+  }
+}

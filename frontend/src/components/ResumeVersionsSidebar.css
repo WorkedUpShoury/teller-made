@@ -1,260 +1,262 @@
 :root {
+  /* --- Color Palette --- */
   --tm-primary-start: #7C3AED;
-  --tm-primary-end: #3B82F6;
+  --tm-primary-end: #4F46E5; /* Slightly adjusted for a richer gradient */
   --tm-primary: #6366F1;
-  --tm-ring: rgba(99, 102, 241, 0.25);
+  --tm-ring: rgba(99, 102, 241, 0.3); /* Softer ring color */
   --tm-danger: #EF4444;
 
-  --tm-bg: #FFFFFF;
-  --tm-card: #FFFFFF;
-  --tm-border: #E5E7EB;
+  /* --- UI Colors (Modern & Soft) --- */
+  --tm-bg: #F9FAFB;      /* A very light gray for the app background */
+  --tm-card: #FFFFFF;    /* Pure white for cards to stand out */
+  --tm-border: #E5E7EB;  /* Softer border color */
+  --tm-border-hover: #D1D5DB;
 
-  --tm-text: #111827;
-  --tm-muted: #6B7280;
+  /* --- Text Colors --- */
+  --tm-text: #1F2937;      /* Darker, less harsh than pure black */
+  --tm-muted: #6B7280;     /* Muted text for subtitles and hints */
+  --tm-light: #9CA3AF;     /* Lighter text for non-interactive elements */
 }
 
-/* ===== Container ===== */
+/* ===== Custom Scrollbar (for a cleaner look) ===== */
+.rvp-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+.rvp-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rvp-list-container::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 20px;
+}
+.rvp-list-container::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* ===== Main Container ===== */
 .rvp-sidebar {
   width: 320px;
+  height: clamp(500px, 95vh, 800px); /* Responsive height */
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.88);
-  border: 2px solid rgba(99, 102, 241, 0.35);
-  border-radius: 18px;
-  box-shadow: 0 0 25px rgba(168, 117, 255, 0.25);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  background-color: var(--tm-card);
+  border: 1px solid var(--tm-border);
+  border-radius: 16px; /* Slightly softer radius */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   color: var(--tm-text);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-  height: 100%;
-  max-height: 95vh; /* Prevents sidebar from being taller than the viewport */
-}
-
-/* Add slight hover "pop" */
-.rvp-sidebar:hover {
-  box-shadow: 0 0 35px rgba(124, 58, 237, 0.35);
-  transform: translateY(-2px);
+  transition: box-shadow 0.2s ease-in-out;
 }
 
 /* ===== Header ===== */
 .rvp-head {
-  padding-bottom: 0.5rem;
-  flex-shrink: 0; /* Prevents header from shrinking */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--tm-border);
+  flex-shrink: 0;
 }
 .rvp-title-wrap {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 .rvp-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9999px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   background: linear-gradient(135deg, var(--tm-primary-start), var(--tm-primary-end));
   color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 .rvp-title {
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.2px;
 }
 .rvp-subtle {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--tm-muted);
 }
+.rvp-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  padding: 0;
+  margin-right: -4px;
+  cursor: pointer;
+  color: var(--tm-light);
+  transition: color 0.2s ease;
+}
+.rvp-close-btn:hover {
+  color: var(--tm-text);
+}
 
-/* ===== Save Row ===== */
-.rvp-save {
-  background: radial-gradient(140% 140% at 100% 0%, rgba(124, 58, 237, 0.08) 0%, rgba(59, 130, 246, 0.05) 30%, transparent 65%);
-  border: 1px solid var(--tm-border);
-  border-radius: 14px;
-  padding: 0.8rem;
+/* ===== Save & Search Sections ===== */
+.rvp-save, .rvp-search-container {
+  padding-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  flex-shrink: 0; /* Prevents save section from shrinking */
+  flex-shrink: 0;
+}
+.rvp-search-container {
+  padding-bottom: 0.5rem;
 }
 
-.rvp-input {
+/* ===== Inputs & Buttons ===== */
+.rvp-input, .rvp-edit-input {
   border: 1px solid var(--tm-border);
-  border-radius: 10px;
-  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  background: var(--tm-bg);
-  width: 100%; /* Ensure inputs take full width of their container */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: var(--tm-bg);
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
 }
-.rvp-input:focus {
+.rvp-input:focus, .rvp-edit-input:focus {
   border-color: var(--tm-primary);
   box-shadow: 0 0 0 3px var(--tm-ring);
 }
-
 .rvp-btn {
-  border: 1px solid var(--tm-border);
-  border-radius: 10px;
-  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
   cursor: pointer;
-  background: var(--tm-bg);
-  transition: transform 0.04s ease, box-shadow 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
+  transition: transform 0.1s ease, box-shadow 0.2s, background-color 0.2s, color 0.2s, border-color 0.2s;
+  font-weight: 500;
   white-space: nowrap;
-  font-weight: 600;
 }
 .rvp-btn:active {
   transform: translateY(1px);
 }
-
 .rvp-btn-primary {
-  background: linear-gradient(90deg, var(--tm-primary-start), var(--tm-primary-end));
-  border-color: transparent;
+  background: var(--tm-primary);
+  border: 1px solid var(--tm-primary);
   color: #fff;
-  box-shadow: 0 8px 22px rgba(99, 102, 241, 0.25);
-  width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .rvp-btn-primary:hover {
-  filter: brightness(1.03);
-  box-shadow: 0 10px 26px rgba(99, 102, 241, 0.3);
+  background-color: var(--tm-primary-end);
+  border-color: var(--tm-primary-end);
 }
 .rvp-btn-primary:disabled {
-  opacity: 0.6;
+  background-color: #D1D5DB; /* A neutral disabled color */
+  border-color: #D1D5DB;
+  color: #9CA3AF;
   cursor: not-allowed;
   box-shadow: none;
-  filter: none;
 }
 
-/* ===== Radio Button Row ===== */
+/* ===== Radio Buttons ===== */
 .rvp-modes-row {
   display: flex;
   gap: 1rem;
-  justify-content: flex-start;
-  flex-wrap: wrap;
 }
 .rvp-radio {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.9rem;
-  color: #374151;
+  font-size: 0.875rem;
+  color: var(--tm-text);
   cursor: pointer;
 }
 .rvp-radio input[type="radio"] {
   accent-color: var(--tm-primary);
   cursor: pointer;
+  width: 1em;
+  height: 1em;
 }
 .rvp-radio.rvp-disabled {
-  opacity: 0.5;
+  color: var(--tm-light);
   cursor: not-allowed;
 }
 
-/* --- NEW: Search Bar --- */
-.rvp-search-container {
-  flex-shrink: 0; /* Prevents search bar from shrinking */
-}
-
-/* --- MODIFIED: List Container for Scrolling --- */
+/* ===== Versions List ===== */
 .rvp-list-container {
-  flex-grow: 1; /* Key: Allows this container to fill available space */
-  overflow-y: auto; /* Key: Adds a scrollbar ONLY when content overflows */
+  flex-grow: 1; /* This is key for layout */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding-right: 4px; /* Prevents scrollbar from touching content */
+  gap: 0.5rem;
+  padding-right: 4px; /* Space for the scrollbar */
 }
-
 .rvp-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.rvp-item:hover {
+  background-color: var(--tm-bg);
+}
+.rvp-item.rvp-selected {
+  background-color: #EFF6FF; /* A light blue for selected state */
+  border-color: #BFDBFE;
 }
 .rvp-item-main {
-  flex: 1;
-  text-align: left;
-  cursor: pointer;
-  border: 1px solid var(--tm-border);
-  background: var(--tm-bg);
-  border-radius: 12px;
-  padding: 0.6rem 0.7rem;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.04s;
-}
-.rvp-item-main:hover {
-  border-color: var(--tm-primary);
-  box-shadow: 0 0 0 3px var(--tm-ring);
-}
-.rvp-selected .rvp-item-main {
-  border-color: var(--tm-primary);
-  box-shadow: 0 0 0 3px var(--tm-ring);
+  flex-grow: 1;
 }
 .rvp-item-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  gap: 0.6rem;
+  font-weight: 500;
 }
 .rvp-dot {
   width: 8px;
   height: 8px;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, var(--tm-primary-start), var(--tm-primary-end));
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-radius: 50%;
+  background-color: var(--tm-light);
+}
+.rvp-item.rvp-selected .rvp-dot {
+  background-color: var(--tm-primary);
 }
 .rvp-sub {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--tm-muted);
-  margin-top: 0.1rem;
+  margin-top: 2px;
 }
-
 .rvp-del {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #9CA3AF;
-  font-size: 1rem;
-  padding: 0.2rem 0.25rem;
-  border-radius: 8px;
-  transition: color 0.15s, background 0.15s, transform 0.04s;
+  color: var(--tm-light);
+  font-size: 1.1rem; /* Slightly larger for easier clicking */
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background-color 0.2s;
 }
 .rvp-del:hover {
   color: var(--tm-danger);
-  background: rgba(239, 68, 68, 0.08);
-}
-.rvp-del:active {
-  transform: translateY(1px);
+  background-color: #FEF2F2; /* Light red background on hover */
 }
 
-/* This ensures the header items are aligned correctly */
-.rvp-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 0.5rem;
-}
-
-/* The close button itself */
-.rvp-close-btn {
-  background: none;
-  border: none;
-  font-family: Arial, sans-serif; /* Ensures the '×' looks consistent */
-  font-size: 26px;
-  line-height: 1;
-  padding: 0 8px;
-  cursor: pointer;
+/* ===== Helper/Status Text ===== */
+.rvp-muted, .rvp-error {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
   color: var(--tm-muted);
-  transition: color 0.2s ease;
 }
-
-.rvp-close-btn:hover {
-  color: var(--tm-text);
-}
-
-.rvp-muted {
-  color: var(--tm-muted);
-  font-size: 0.92rem;
-  padding: 0.3rem 0;
+.rvp-error {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border-radius: 8px;
 }

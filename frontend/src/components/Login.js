@@ -15,33 +15,37 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  /* ------------------ Email/Password Login ------------------ */
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (loading) return;
-    setLoading(true);
-    setError("");
+/* ------------------ Email/Password Login ------------------ */
+const handleLogin = async (e) => {
+  e.preventDefault();
+  if (loading) return;
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await fetch("http://localhost:5001/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5001/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login failed");
 
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/");
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      setError("Failed to log in. Please check your credentials.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // --- ✅ ADD THIS LINE ---
+    localStorage.setItem("token", data.token);
+    // -------------------------
+
+    localStorage.setItem("user", JSON.stringify(data.user));
+    navigate("/");
+    window.location.reload();
+  } catch (err) {
+    console.error(err);
+    setError("Failed to log in. Please check your credentials.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ------------------ Google Login ------------------ */
   const handleGoogleSuccess = (credentialResponse) => {

@@ -1,24 +1,41 @@
-# app/services/ai_service.py
 import os
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from google import generativeai as genai
 from dotenv import load_dotenv
-# Configure API Key once
+
+# Securely load the API key from the .env file
 load_dotenv()
-try:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-except KeyError:
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
     print("⚠️ GEMINI_API_KEY environment variable not set.")
+    json_model = None
+    chat_model = None
+else:
+    genai.configure(api_key=GEMINI_API_KEY)
 
-# Initialize json_string to None
-json_string = None
+    # --- Model for JSON Extraction (using the correct model name) ---
+    json_model = genai.GenerativeModel(
+        "gemini-2.5-flash",
+        generation_config=genai.GenerationConfig(response_mime_type="application/json")
+    )
+    # --- Model for Chat (using the correct model name) ---
+    chat_model = genai.GenerativeModel(
+        "gemini-2.5-flash",
+        system_instruction=[
+            "You are a helpful and concise resume assistant.",
+            "If you propose specific edits, return them as JSON Patch operations inside a ```json block."
+        ]
+    )
 
+# Load JSON template
+json_string: Optional[str] = None
+# Assumes this script is in a subdirectory like 'app/services/'
+project_root = Path(__file__).parent.parent.resolve()
+json_file_path = project_root / "templates" / "json_template.json"
 try:
-    # Correctly locate the json_template.json file
-    project_root = Path(__file__).parent.parent
-    json_file_path = project_root / "templates" / "json_template.json"
     with open(json_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     json_string = json.dumps(data, indent=2)
@@ -27,25 +44,10 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     print("Error: The file is not a valid JSON.")
 
-# --- Model for JSON Extraction ---
-json_model = genai.GenerativeModel(
-    "gemini-1.5-flash-latest",
-    generation_config=genai.GenerationConfig(response_mime_type="application/json")
-)
-
-# --- Model for Chat ---
-chat_model = genai.GenerativeModel(
-    "gemini-1.5-flash-latest",
-    system_instruction=[
-        "You are a helpful and concise resume assistant.",
-        "If you propose specific edits, return them as JSON Patch operations inside a ```json block."
-    ]
-)
-
 def extract_resume_info(raw_text: str) -> Dict[str, Any]:
     """Extracts structured JSON from resume text using a template."""
-    if not json_string:
-        raise ValueError("JSON template not loaded. Cannot process resume.")
+    if not json_string or not json_model:
+        raise ValueError("JSON template or Gemini model not loaded. Cannot process resume.")
 
     prompt = f"""
     Based on the following resume text, extract a structured JSON object.
@@ -71,8 +73,8 @@ def extract_resume_info(raw_text: str) -> Dict[str, Any]:
 
 def optimize_resume_json_with_jd(resume_json: Dict[str, Any], jd: str) -> Dict[str, Any]:
     """Optimizes resume JSON against a job description, maintaining the structure."""
-    if not json_string:
-        raise ValueError("JSON template not loaded. Cannot optimize resume.")
+    if not json_string or not json_model:
+        raise ValueError("JSON template or Gemini model not loaded. Cannot optimize resume.")
         
     resume_text = json.dumps(resume_json, indent=2)
     prompt = f"""
@@ -97,6 +99,8 @@ def optimize_resume_json_with_jd(resume_json: Dict[str, Any], jd: str) -> Dict[s
 
 def generate_chat_reply(prompt: str) -> str:
     """Generates a conversational reply."""
+    if not chat_model:
+        return "⚠️ Gemini model not loaded."
     try:
         resp = chat_model.generate_content(prompt)
         return resp.text.strip()

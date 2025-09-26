@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import logo from '../styles/logo.png';
 import '../styles/Navbar.css';
+import DefaultProfileIcon from '../styles/icons/profile.png';
 
 function AppNavbar() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ function AppNavbar() {
         <Navbar.Collapse id="main-navbar">
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
+            <Nav.Link as={Link} to="/analytics">Dashboard</Nav.Link>
             <Nav.Link as={Link} to="/upload">Resume</Nav.Link>
             <Nav.Link as={Link} to="/chat-assistant">AI Assist</Nav.Link>
             <Nav.Link as={Link} to="/smart-editor">Editor</Nav.Link>
@@ -41,16 +43,17 @@ function AppNavbar() {
                 title={
                   <span className="d-flex align-items-center">
                     <img
-                      src={user.img_url}
-                      alt="Profile"
-                      className="rounded-circle me-2"
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        objectFit: "cover",
-                        border: "1px solid #ddd"
-                      }}
-                    />
+                        // --- ✅ FIX: Use the correct property and add a fallback ---
+                        src={user.profile_pic_url || user.img_url || DefaultProfileIcon}
+                        alt="Profile"
+                        className="rounded-circle me-2"
+                        style={{
+                          width: "30px",
+                          height: "30px",
+                          objectFit: "cover",
+                          border: "1px solid #ddd"
+                        }}
+                      />
                     {user.full_name}
                   </span>
                 }
