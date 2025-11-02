@@ -14,7 +14,7 @@
       "url": "github.com/pankajkrg21"
     }
   ],
-  "summary": "Driven and detail-oriented Master's student with a strong foundation in AI/ML, cybersecurity, and full-stack development. Proven ability to architect and implement robust solutions, including an AI-powered mock interview platform, a desktop file security application with AES-256 encryption, and a dynamic job portal. Proficient in Python, React, SQL, and AWS, with a keen interest in leveraging technology for secure and intelligent system design.",
+  "summary": "Driven Master's student with a strong foundation in AI/ML, cybersecurity, and full-stack development, adept at architecting and implementing robust, precise solutions. Proven ability to deliver impactful projects, including an intelligent virtual interview simulator, a secure desktop-based file protection system featuring AES-256 encryption, and a feature-rich job portal. Proficient in Python, React, SQL, and AWS, with a keen interest in leveraging technology for secure and intelligent system design.",
   "skills": [],
   "sections": [
     {
@@ -49,7 +49,7 @@
       "items": [
         {
           "bullets": [
-            "Developed an AI-powered mock interview platform facilitating realistic, role-specific job interview simulations via voice, video, or text responses.",
+            "Created an automated interview preparation platform leveraging AI, facilitating realistic, role-specific job interview simulations via voice, video, or text responses.",
             "Leveraged advanced NLP, Speech Analysis, and Computer Vision to evaluate over 7 key verbal and non-verbal cues (e.g., fluency, tone, facial expressions, confidence).",
             "Engineered with React, Python (FastAPI/Flask), Whisper, GPT-4, and MediaPipe for scalable performance."
           ],
@@ -60,9 +60,9 @@
         },
         {
           "bullets": [
-            "Engineered a desktop file security application with robust AES-256 encryption, validating a 100% data protection rate in compliance with data security policies and audit requirements.",
+            "Built a local encryption solution offering robust AES-256 encryption, validating a 100% data protection rate in compliance with data security policies and audit requirements.",
             "Developed a real-time Intrusion Detection System (IDS) to monitor file access patterns, effectively detecting and logging 98% of simulated malicious activities, serving as critical evidence for security assurance assessments.",
-            "Integrated a MySQL database to securely manage over 500 user credentials and file metadata, ensuring data integrity and establishing comprehensive audit trails for system governance."
+            "Integrated a MySQL database to securely manage over 500 user credentials and file metadata, maintaining reliable data validation and consistency, and establishing comprehensive audit trails for system governance."
           ],
           "name": "CypherStack",
           "link": "",
@@ -71,8 +71,8 @@
         },
         {
           "bullets": [
-            "Architected and deployed a dynamic job portal, implementing secure user authentication and role-based access control for multiple user types in adherence to IT policy and compliance standards.",
-            "Managed the MySQL database schema for over 200 active job postings and applications, ensuring data integrity and detailed record-keeping for over 1,000 application records, critical for audit evidencing.",
+            "Architected and deployed an interactive job portal, implementing secure user authentication and role-based access control for multiple user types in adherence to IT policy and compliance standards.",
+            "Managed the MySQL database schema for over 200 active job postings and applications, implementing mechanisms to preserve data accuracy and detailed record-keeping for over 1,000 application records, critical for audit evidencing.",
             "Spearheaded system design and functionality, emphasizing robust data handling and secure architecture, demonstrating a foundational understanding of IT governance and assurance principles."
           ],
           "name": "Job Portal",
@@ -207,8 +207,7 @@
             "Problem-Solving",
             "Analytical Thinking",
             "Collaboration",
-            "Project Leadership",
-            "Attention to Detail"
+            "Project Leadership"
           ]
         }
       ]

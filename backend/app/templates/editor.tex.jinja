@@ -10,6 +10,9 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{enumitem}
 \usepackage{hyperref}
+\usepackage[scaled]{helvet}
+\usepackage{setspace}
+\usepackage{titlesec} % MODIFICATION: Added for section spacing control
 
 \hypersetup{
   colorlinks=true,
@@ -21,14 +24,18 @@
 
 \setlist[itemize]{nosep,leftmargin=1.2em}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.25em}
+\setlength{\parskip}{0.1em}     % MODIFICATION: Reduced paragraph skip for tighter item spacing
+\setstretch{0.90}               % MODIFICATION: Reduced line spacing globally
+
+% MODIFICATION: Control spacing for \section* headings
+% Syntax: \titlespacing*{<command>}{<left>}{<before-sep>}{<after-sep>}
+% <before-sep> is space above the title, <after-sep> is space below.
+\titlespacing*{\section}{0pt}{0.8em}{0.3em}
 
 \newcommand{\dotsep}{\ensuremath{\cdot}}
 \newcommand{\sep}{\hspace{0.5em}{\small$\vcenter{\hbox{\dotsep}}$}\hspace{0.5em}}
 \newcommand{\tighthrule}{\vspace{0.35em}\hrule\vspace{0.35em}}
-\usepackage[scaled]{helvet}
 \renewcommand\familydefault{\sfdefault} % Switches everything to Helvetica
-
 
 \begin{document}
 
@@ -125,7 +132,7 @@
   {% if it.summary %}{% set line = line ~ ' --- ' ~ (it.summary|tex) %}{% endif %}
   \noindent {{ line }}\\
   {{ bullets(it.bullets) }}
-  \vspace{0.8em}    % <-- Adds space between projects
+  \vspace{0.3em}    % MODIFICATION: Reduced space between projects
 {%- endmacro %}
 
 
@@ -265,8 +272,7 @@
 {% macro render_section(sec) -%}
   {% set t = sec.type %}
   
-  % Reduce the gap between sections
-  \vspace{-1.0em} 
+  % MODIFICATION: Removed \vspace{-1.0em} as titlesec now handles this cleanly.
 
   \section*{ {{ (sec.title or (t|capitalize))|tex }} }
   \tighthrule

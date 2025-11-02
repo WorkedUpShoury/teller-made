@@ -1,0 +1,132 @@
+{
+  "fullName": "Kayum Ahmed Shaikh",
+  "title": "Aspiring Salesforce & AI Developer",
+  "email": "shaikhkayum1911@gmail.com",
+  "phone": "+91-8421967576",
+  "location": "Pune, Maharashtra, India",
+  "profiles": [],
+  "summary": "Highly motivated and aspiring professional eager to join Infoglen's Salesforce Development & AI program. Bringing a solid foundation in Java, SQL, and full-stack development, coupled with practical experience in data management and a strong interest in AI/ML. Committed to excelling through comprehensive training and internship phases to build a career in Salesforce and AI.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Managed and ensured data integrity for a transactional banking system using SQL, establishing foundational understanding in structured data handling and reliability crucial for AI datasets.",
+            "Executed rigorous testing with over 1,000+ simulated transactions, demonstrating strong attention to detail and precision in validating data processes and system outputs, mirroring requirements for AI data quality.",
+            "Optimized data retrieval and consistency for transaction history through advanced SQL queries and indexing, directly applicable to curating and ensuring reliability of large datasets for machine learning."
+          ],
+          "start": "Mar 2023",
+          "end": "May 2023",
+          "current": false,
+          "location": "Remote",
+          "company": "Spark Foundation",
+          "role": "Software Development Intern"
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Engineered a full-stack web application connecting farmers with equipment providers, featuring role-based access for Admins, Owners, and Farmers to ensure secure and distinct functionality.",
+            "Built a real-time booking and equipment management module using Java and AJAX, reducing manual coordination efforts by an estimated 50%.",
+            "Created a normalized SQL database to manage equipment listings, user profiles, and rental histories, ensuring efficient and reliable data access for all user roles."
+          ],
+          "name": "AgriRend: Agriculture Equipment Rental Application",
+          "link": "",
+          "summary": "Tech Stack: Java, SQL, HTML, CSS. Completed May 2024"
+        },
+        {
+          "bullets": [
+            "Constructed a functional e-commerce platform enabling users to browse products, manage a shopping cart, and simulate a checkout process using Java Servlets and JSP.",
+            "Developed the backend logic to handle inventory management and order processing, capable of supporting a catalog of over 500+ items within a robust SQL database.",
+            "Enhanced user experience by implementing dynamic product pages and a persistent shopping cart using session management, leading to a 15% increase in user engagement metrics during testing."
+          ],
+          "name": "E-Commerce Web Application",
+          "link": "",
+          "summary": "Tech Stack: Java Servlets, JSP, SQL, HTML, CSS. Jan 2024 – Apr 2024"
+        }
+      ]
+    },
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MIT World Peace University",
+          "degree": "Master of Computer Applications",
+          "field": "",
+          "start": "Apr 2024",
+          "end": "Apr 2026",
+          "location": "Pune, India",
+          "score": "CGPA: 5.60/ 10.00"
+        },
+        {
+          "school": "MIT ACSC",
+          "degree": "Bachelor of Computer Applications",
+          "field": "",
+          "start": "Apr 2021",
+          "end": "Jul 2024",
+          "location": "Pune, India",
+          "score": "CGPA: 7.35/ 10.00"
+        }
+      ]
+    },
+    {
+      "id": "mn3kejy",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "Java",
+            "Python",
+            "SQL",
+            "HTML",
+            "CSS"
+          ],
+          "soft": [
+            "Analytical Skills"
+          ],
+          "concepts": [
+            "Session Management",
+            "Database Normalization",
+            "Data Retrieval",
+            "Indexing",
+            "Testing",
+            "AI/ML",
+            "Data Management",
+            "Full-stack Development",
+            "Data Integrity"
+          ],
+          "tools": [
+            "VS Code",
+            "IntelliJ IDEA",
+            "Git",
+            "GitHub"
+          ],
+          "platforms": [
+            "Salesforce",
+            "JSP",
+            "AJAX",
+            "Java Servlets",
+            "JDBC",
+            "REST APIs"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "Kayum Shaikh Accenture.pdf",
+    "uploadDate": "2025-09-26T20:13:00.275896"
+  }
+}

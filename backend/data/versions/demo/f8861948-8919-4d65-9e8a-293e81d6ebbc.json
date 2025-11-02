@@ -1,0 +1,145 @@
+{
+  "fullName": "TASNIM ASIF CHAUGULE",
+  "title": "",
+  "email": "tasnimchaugule9@gmail.com",
+  "phone": "7387402407",
+  "location": "",
+  "profiles": [
+    {
+      "label": "LinkedIn",
+      "url": "https://linkedin.com/in/tasnim-chaugule-564390331"
+    }
+  ],
+  "summary": "Aspiring Backend Developer and Computer Engineering student with a solid foundation in Java and an understanding of server-side application principles. Passionate about designing and implementing efficient, scalable, and secure systems, leveraging cloud fundamentals (AWS) and strong problem-solving skills to contribute to robust backend architectures.",
+  "skills": [],
+  "sections": [
+    {
+      "id": "hg4pezw",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "PVPIT Bavdhan, Pune – Savitribai Phule Pune University (SPPU)",
+          "degree": "B.E.",
+          "field": "Computer Engineering",
+          "start": "",
+          "end": "",
+          "location": "Pune",
+          "score": "9.84"
+        }
+      ]
+    },
+    {
+      "id": "a1mwsvz",
+      "type": "experience",
+      "title": "Work Experience",
+      "items": [
+        {
+          "bullets": [
+            "Utilized version control systems (e.g., Git) and agile methodologies to manage development workflows and facilitate continuous integration and deployment.",
+            "Developed and maintained APIs for seamless communication between robotic components, ensuring data integrity and real-time operational feedback."
+          ],
+          "start": "",
+          "end": "",
+          "current": true,
+          "location": "",
+          "company": "Robotics Team",
+          "role": "Member"
+        }
+      ]
+    },
+    {
+      "id": "gtguegv",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Developed a sustainable piezoelectric generator converting ambient sound energy into electricity.",
+            "Collaborated with senior mentorship to design and implement hardware, demonstrating practical application of physics principles."
+          ],
+          "name": "Sound to Electricity Conversion (Piezoelectric Generator)",
+          "link": "",
+          "summary": ""
+        },
+        {
+          "bullets": [
+            "Designed and developed an AI-powered career guidance website to assist students in exploring career paths.",
+            "Integrated machine learning algorithms to provide personalized recommendations based on user skills and interests."
+          ],
+          "name": "AI Career Guidance Website",
+          "link": "",
+          "summary": "Software"
+        }
+      ]
+    },
+    {
+      "id": "2dmch6y",
+      "type": "awards",
+      "title": "Awards",
+      "items": [
+        {
+          "bullets": [],
+          "name": "3rd Prize – Smart India Hackathon (Internal Round)",
+          "issuer": "SPPU",
+          "date": "2025",
+          "location": "",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "id": "ylvgfjh",
+      "type": "achievements",
+      "title": "Achievements",
+      "items": [
+        {
+          "bullets": [
+            "Developed an innovative solution that secured 3rd prize in the Smart India Hackathon (Internal Round).",
+            "Secured 3rd prize for developing an innovative solution during the internal round of Smart India Hackathon."
+          ],
+          "title": "Recognized for leadership and academic excellence",
+          "date": "",
+          "summary": "Skilled chess player, award-winning in arts & essays",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "xwrk0u9",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": [
+        {
+          "name": "AWS Fundamentals: Your First Steps into the Amazon Cloud",
+          "authority": "AWS",
+          "id": "",
+          "url": "",
+          "date": "",
+          "bullets": [
+            "Awarded for exceptional skill in chess competitions.",
+            "Received multiple awards for achievements in arts and essay writing."
+          ]
+        },
+        {
+          "name": "Google AI Essentials",
+          "authority": "Google",
+          "id": "",
+          "url": "",
+          "date": ""
+        },
+        {
+          "name": "Google Cybersecurity",
+          "authority": "Google",
+          "id": "",
+          "url": "",
+          "date": ""
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "fileName": "Tasnim resume.pdf",
+    "uploadDate": "2025-10-22T10:39:48.837318"
+  }
+}

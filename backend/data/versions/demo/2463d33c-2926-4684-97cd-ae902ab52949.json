@@ -1,0 +1,146 @@
+{
+  "fullName": "Abhijeet Kumar",
+  "title": "Assistant Web Devloper",
+  "email": "abhijeet.as1010@gmail.com",
+  "phone": "9572508395",
+  "location": "Pune",
+  "profiles": [
+    {
+      "label": "LinkedIn/Abhijeet Kumar",
+      "url": "https://www.linkedin.com/in/abhijeet-kumar-3b81152b2?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
+    },
+    {
+      "label": "GitHub/ Abhijeetkumar003",
+      "url": "https://github.com/AbhijeetKumar003"
+    }
+  ],
+  "summary": "",
+  "skills": [],
+  "sections": [
+    {
+      "id": "7x237wg",
+      "type": "experience",
+      "title": "Experience",
+      "items": [
+        {
+          "bullets": [
+            "Assisted in debugging and resolving issues, gaining practical experience in software development lifecycle.",
+            "Collaborated with a team to implement new features and optimize existing code for improved performance.",
+            "Developed and maintained web applications, contributing to front-end and back-end functionalities."
+          ],
+          "start": "2025-04",
+          "end": "2025-07",
+          "current": false,
+          "location": "Pune",
+          "company": "UNIFIED MENTOR",
+          "role": "Web Development Intern"
+        }
+      ]
+    },
+    {
+      "id": "ymyaqnu",
+      "type": "projects",
+      "title": "Projects",
+      "items": [
+        {
+          "bullets": [
+            "Utilized Python for backend logic and data analysis, with a focus on delivering actionable market insights.",
+            "Designed and developed a user-friendly interface for portfolio tracking, including transaction management and performance metrics.",
+            "Implemented real-time stock data retrieval and visualization features."
+          ],
+          "name": "StockFolio",
+          "link": "https://github.com/AbhijeetKumar003/StockFolio",
+          "summary": "A comprehensive platform for Stock Market Analysis and Portfolio Management, enabling users to track real-time data, analyze trends, and manage investments."
+        },
+        {
+          "bullets": [
+            "Designed and managed the MySQL database schema for efficient storage and retrieval of job listings, user profiles, and application data.",
+            "Implemented secure user authentication and authorization mechanisms for role-based access control.",
+            "Developed distinct user interfaces and functionalities for job seekers (profile creation, application submission) and employers (job posting, applicant screening)."
+          ],
+          "name": "HireArchy",
+          "link": "https://github.com/WorkedUpShoury/Hire_Archy",
+          "summary": "Engineered 'HireArchy,' a dynamic, role-based job portal built with JSP, Servlets, and MySQL, designed for streamlined recruitment and applicant management."
+        }
+      ]
+    },
+    {
+      "id": "7s1vawq",
+      "type": "education",
+      "title": "Education",
+      "items": [
+        {
+          "school": "MITWPU",
+          "degree": "MCA Science",
+          "field": "Computer Application",
+          "start": "2024-08",
+          "end": "2026-08",
+          "location": "Pune",
+          "score": "5.89"
+        },
+        {
+          "school": "MITWPU",
+          "degree": "BCA",
+          "field": "Computer Application",
+          "start": "2021-06",
+          "end": "2024-05",
+          "location": "Pune",
+          "score": "8.58"
+        }
+      ]
+    },
+    {
+      "id": "gsa48jc",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": [
+        {
+          "name": "Deep Learning Fundamentals With Keras",
+          "authority": "IBM",
+          "id": "bed2fc557a164d35883867e5cd9e809b",
+          "url": "https://courses.edx.org/certificates/bed2fc557a164d35883867e5cd9e809b",
+          "date": "2024-04"
+        },
+        {
+          "name": "Data Science Tools",
+          "authority": "IBM",
+          "id": "7cc69b9ec0ee4599852d6151c1a10523",
+          "url": "https://courses.edx.org/certificates/7cc69b9ec0ee4599852d6151c1a10523",
+          "date": "2022-09"
+        }
+      ]
+    },
+    {
+      "id": "rvyn83y",
+      "type": "skillsets",
+      "title": "Skills",
+      "items": [
+        {
+          "languages": [
+            "HTML",
+            "CSS",
+            "SQL",
+            "Python"
+          ],
+          "soft": [],
+          "concepts": [
+            "OOP",
+            "ML",
+            "Data Structure Algorithm"
+          ],
+          "tools": [
+            "Git",
+            "Docker",
+            "GitHub"
+          ],
+          "platforms": [
+            "AWS",
+            "iOS",
+            "Android",
+            "Linux"
+          ]
+        }
+      ]
+    }
+  ]
+}

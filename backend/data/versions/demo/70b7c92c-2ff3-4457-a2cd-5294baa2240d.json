@@ -1,38 +1,36 @@
 {
   "fullName": "Asadullah Shaikh",
-  "title": "Associate System Engineer",
+  "title": "AI Developer",
   "email": "sasadullah002@gmail.com",
   "phone": "8669003013",
   "location": "Pune",
   "profiles": [],
-  "summary": "Recent Computer Applications graduate with a strong foundation in software development and data-driven solutions, seeking an Associate System Engineer position. Proficient in Java, Python, SQL, and C++, with experience in full-stack development. Eager to leverage technical skills in designing, developing, and maintaining robust technology solutions for business transformation.",
+  "summary": "Recent Computer Applications graduate with a strong foundation in data-driven solutions and a passion for Artificial Intelligence and Machine Learning. Proficient in Python, SQL, and C++, with a solid grasp of algorithms, data structures, and statistical concepts crucial for AI development. Eager to leverage technical skills to design, develop, and implement innovative AI/ML models and solutions that drive business value.",
   "skills": [
     "Algorithms",
+    "API Development",
     "AWS",
     "Azure",
-    "C++",
     "Collaboration",
     "Communication",
-    "CSS",
+    "Data Analysis",
     "Data Structures",
-    "Database Management",
-    "Excel",
-    "Express.js",
-    "HTML",
-    "Java",
-    "JavaScript",
+    "Deep Learning",
+    "Git",
     "Linux",
-    "MongoDB",
-    "Node.js",
+    "Machine Learning",
+    "Natural Language Processing (NLP)",
+    "NumPy",
     "Object-Oriented Programming (OOP)",
-    "Power BI",
+    "Pandas",
     "Problem-Solving",
     "Python",
-    "Secure Authentication (JWT)",
+    "PyTorch",
+    "Scikit-learn",
     "SQL",
+    "Statistical Modeling",
     "System Design",
-    "Tableau",
-    "Time Management"
+    "TensorFlow"
   ],
   "sections": [
     {
@@ -103,7 +101,6 @@
       "items": [
         {
           "languages": [
-            "Java",
             "Python",
             "SQL",
             "C++"
@@ -115,19 +112,34 @@
             "Collaboration"
           ],
           "concepts": [
+            "Machine Learning",
+            "Deep Learning",
+            "NLP",
             "Statistics & Probability",
             "OOP",
-            "ML"
+            "Algorithms",
+            "Data Structures"
           ],
           "tools": [
             "Power BI",
-            "Tableau",
-            "Excel"
+            "Tableau"
           ],
           "platforms": [
             "AWS",
             "Azure",
             "Linux"
+          ],
+          "ml_frameworks": [
+            "TensorFlow",
+            "PyTorch",
+            "Scikit-learn"
+          ],
+          "libraries": [
+            "Pandas",
+            "NumPy"
+          ],
+          "version_control": [
+            "Git"
           ]
         }
       ]

@@ -120,6 +120,7 @@ SectionType = Literal[
     "experience", "projects", "education", "certifications", "awards",
     "publications", "volunteer", "courses", "languages", "interests",
     "references", "achievements", "patents", "talks", "custom", "skillsets",
+    "skills",
 ]
 
 ITEMS_MAP: Dict[str, Type[BaseModel]] = {
@@ -128,6 +129,7 @@ ITEMS_MAP: Dict[str, Type[BaseModel]] = {
     "volunteer": VolunteerItem, "courses": CourseItem, "languages": LanguageItem,
     "interests": InterestItem, "references": ReferenceItem, "achievements": AchievementItem,
     "patents": PatentItem, "talks": TalkItem, "custom": CustomItem, "skillsets": SkillsetsItem,
+    "skills": ItemBase,
 }
 
 class Section(BaseModel):

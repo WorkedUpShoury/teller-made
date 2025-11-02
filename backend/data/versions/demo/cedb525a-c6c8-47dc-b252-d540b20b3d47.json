@@ -4,7 +4,16 @@
   "email": "akash.singh@mitwpu.edu.in",
   "phone": "+91 7080188617",
   "location": "Pune",
-  "profiles": [],
+  "profiles": [
+    {
+      "label": "",
+      "url": ""
+    },
+    {
+      "label": "",
+      "url": ""
+    }
+  ],
   "summary": "",
   "skills": [],
   "sections": [
@@ -39,7 +48,7 @@
           ],
           "name": "Converso.Ai",
           "link": "https://github.com/Akash708018/Converso_AI",
-          "summary": "An AI-powered web application built using Next.js, aimed at facilitating conversational interactions."
+          "summary": "An AI-powered web app built using Next.js, aimed at facilitating conversational interactions."
         },
         {
           "bullets": [
@@ -136,6 +145,27 @@
           "date": "2021-07",
           "summary": "",
           "link": "https://hyperskill.org/my-learning/95138039"
+        }
+      ]
+    },
+    {
+      "id": "6hoh4pp",
+      "type": "certifications",
+      "title": "Certifications",
+      "items": [
+        {
+          "name": "Foundations of NIST Cybersecurity Frameworks",
+          "authority": "Coursera",
+          "id": "YY1FO4U4EZ4H",
+          "url": "https://coursera.org/verify/YY1FO4U4EZ4H",
+          "date": "2025-09"
+        },
+        {
+          "name": "Incident Response and Risk Management",
+          "authority": "Coursera",
+          "id": "6XKQVK9M2EXZ",
+          "url": "https://coursera.org/verify/6XKQVK9M2EXZ",
+          "date": "2025-09"
         }
       ]
     }

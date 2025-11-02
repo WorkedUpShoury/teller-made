@@ -1,6 +1,6 @@
 {
   "fullName": "PANKAJ KUMAR GUPTA",
-  "title": "AI/Security-Focused Software Engineer | Full Stack Developer",
+  "title": "Full Stack Developer",
   "email": "pankajkrg2016@gmail.com",
   "phone": "+91-8083762133",
   "location": "Pune, Maharashtra",
@@ -104,112 +104,6 @@
             "GitHub"
           ],
           "platforms": []
-        }
-      ]
-    },
-    {
-      "id": "xwrk0u9",
-      "type": "certifications",
-      "title": "Certifications",
-      "items": [
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Programming Languages",
-          "skills": [
-            "Python",
-            "JavaScript",
-            "Java",
-            "SQL"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Web Frameworks & Libraries",
-          "skills": [
-            "React",
-            "FastAPI",
-            "Flask"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Databases",
-          "skills": [
-            "MySQL"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Cloud & DevOps",
-          "skills": [
-            "AWS (Cloud Essentials)",
-            "Git",
-            "GitHub"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "AI/ML & Security",
-          "skills": [
-            "GPT-4",
-            "Whisper",
-            "NLP",
-            "Computer Vision",
-            "Speech Analysis",
-            "AES-256 Encryption",
-            "Intrusion Detection Systems (IDS)",
-            "Data Security"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Core Concepts",
-          "skills": [
-            "Data Structures & Algorithms",
-            "Object-Oriented Programming (OOP)",
-            "Networking",
-            "System Design",
-            "IT Governance"
-          ]
-        },
-        {
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": "",
-          "category": "Soft Skills",
-          "skills": [
-            "Problem-Solving",
-            "Analytical Thinking",
-            "Collaboration",
-            "Project Leadership",
-            "Attention to Detail"
-          ]
         }
       ]
     },

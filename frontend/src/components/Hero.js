@@ -34,6 +34,7 @@ const Hero = () => {
                 size="lg" 
                 className="btn-animate"
                 onClick={() => navigate('/upload')}
+                style={{ backgroundColor: '#6a11cb', borderColor: '#6a11cb' }}
               >
                 Try it Now
               </Button>
