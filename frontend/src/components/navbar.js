@@ -26,7 +26,7 @@ function AppNavbar() {
           <img
             src={logo}
             alt="TellerMade Logo"
-            className="brand-logo d-inline-block align-top"
+            className="brand-logo d-inline-block align-top "
           />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar" />

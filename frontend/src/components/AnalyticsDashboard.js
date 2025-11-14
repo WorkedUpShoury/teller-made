@@ -24,7 +24,7 @@ async function fetchJSON(path, init = {}) {
 }
 
 /* =========================
-   ATS heuristics (client-side)
+   ATS heuristics (All fixes included)
    ========================= */
 const asText = (obj) => {
   if (obj == null) return "";
@@ -33,32 +33,104 @@ const asText = (obj) => {
   if (typeof obj === "object") return Object.entries(obj).map(([k, v]) => `${k} ${asText(v)}`).join(" ");
   return String(obj);
 };
-const sentencesCount = (t) => Math.max(1, (t.match(/[.!?]/g) || []).length);
+
 const wordsCount = (t) => Math.max(1, t.trim().split(/\s+/).filter(Boolean).length);
-const syllablesApprox = (t) => Math.max(1, (t.match(/[aeiouy]/gi) || []).length);
-const flesch = (t) => {
-  const S = sentencesCount(t), W = wordsCount(t), Y = syllablesApprox(t);
-  return Math.max(0, Math.min(100, 206.835 - 1.015 * (W / S) - 84.6 * (Y / W)));
+
+const lenientReadability = (t) => {
+  const W = wordsCount(t);
+  const score = (W / 500) * 100;
+  return Math.max(0, Math.min(100, score));
 };
+
 const sectionScore = (rec) => {
-  const keys = new Set(Object.keys(rec || {}).map((k) => k.toLowerCase()));
-  const expected = ["summary","experience","work","education","projects","skills","achievements"];
-  const hits = expected.filter((k) => keys.has(k)).length;
-  return (hits / expected.length) * 100;
+  if (!rec) return 0;
+  const found = new Set();
+  
+  if (rec.summary) found.add("summary");
+  if (rec.skills && rec.skills.length > 0) found.add("skills");
+
+  (rec.sections || []).forEach(sec => {
+    if (sec.type) found.add(sec.type.toLowerCase());
+  });
+
+  const coreExpected = ["summary", "education", "skills"];
+  let hits = coreExpected.filter((k) => found.has(k)).length;
+
+  const expLike = ["experience", "projects", "volunteer", "work"];
+  if (expLike.some(k => found.has(k))) {
+    hits += 1;
+  }
+  
+  const bonusExpected = ["achievements", "certifications"];
+  hits += bonusExpected.filter((k) => found.has(k)).length;
+  
+  const totalExpected = 6;
+  return (hits / totalExpected) * 100;
 };
+
 const skillsScore = (rec) => {
-  let skills = rec?.skills || rec?.Skills || [];
-  if (typeof skills === "string") skills = skills.split(",").map((s) => s.trim()).filter(Boolean);
-  if (!Array.isArray(skills)) skills = [];
-  return Math.min(100, skills.length * 4);
+  let allSkills = [];
+
+  let topSkills = rec?.skills || rec?.Skills || [];
+  if (typeof topSkills === "string") {
+    allSkills = allSkills.concat(topSkills.split(",").map((s) => s.trim()).filter(Boolean));
+  } else if (Array.isArray(topSkills)) {
+    allSkills = allSkills.concat(topSkills);
+  }
+
+  const skillsetsSection = (rec?.sections || []).find(s => s.type === "skillsets");
+  if (skillsetsSection && Array.isArray(skillsetsSection.items)) {
+    skillsetsSection.items.forEach(item => {
+      if (item) {
+        if (Array.isArray(item.languages)) allSkills = allSkills.concat(item.languages);
+        if (Array.isArray(item.soft)) allSkills = allSkills.concat(item.soft);
+        if (Array.isArray(item.concepts)) allSkills = allSkills.concat(item.concepts);
+        if (Array.isArray(item.tools)) allSkills = allSkills.concat(item.tools);
+        if (Array.isArray(item.platforms)) allSkills = allSkills.concat(item.platforms);
+      }
+    });
+  }
+  
+  const skillsSection = (rec?.sections || []).find(s => s.type === "skills");
+  if (skillsSection && Array.isArray(skillsSection.items)) {
+     skillsSection.items.forEach(item => {
+        if (typeof item === 'string') allSkills.push(item);
+        else if (item && typeof item.name === 'string') allSkills.push(item.name);
+     });
+  }
+
+  const uniqueSkills = [...new Set(allSkills.filter(Boolean))];
+  return Math.min(100, uniqueSkills.length * 4);
 };
+
 const experienceScore = (rec) => {
-  let exp = rec?.experience || rec?.work || rec?.Work || [];
-  if (!Array.isArray(exp)) exp = exp ? [exp] : [];
-  const roles = exp.length;
-  const bullets = exp.reduce((n, r) => n + ((r && Array.isArray(r.bullets)) ? r.bullets.length : 0), 0);
-  return Math.min(100, roles * 12 + bullets * 2);
+  const expSection = (rec?.sections || []).find(s => s.type === "experience");
+  let expItems = expSection?.items || rec?.experience || rec?.work || rec?.Work || [];
+  if (!Array.isArray(expItems)) expItems = expItems ? [expItems] : [];
+
+  const projSection = (rec?.sections || []).find(s => s.type === "projects");
+  let projItems = projSection?.items || [];
+  if (!Array.isArray(projItems)) projItems = projItems ? [projItems] : [];
+
+  const volSection = (rec?.sections || []).find(s => s.type === "volunteer");
+  let volItems = volSection?.items || [];
+  if (!Array.isArray(volItems)) volItems = volItems ? [volItems] : [];
+
+  const roles = expItems.length;
+  const roleBullets = expItems.reduce((n, r) => n + ((r && Array.isArray(r.bullets)) ? r.bullets.length : 0), 0);
+  const roleScore = roles * 12 + roleBullets * 2;
+
+  const projects = projItems.length;
+  const projectBullets = projItems.reduce((n, r) => n + ((r && Array.isArray(r.bullets)) ? r.bullets.length : 0), 0);
+  const projectScore = projects * 10 + projectBullets * 2;
+
+  const volunteer = volItems.length;
+  const volunteerBullets = volItems.reduce((n, r) => n + ((r && Array.isArray(r.bullets)) ? r.bullets.length : 0), 0);
+  const volunteerScore = volunteer * 8 + volunteerBullets * 2;
+  
+  return Math.min(100, roleScore + projectScore + volunteerScore);
 };
+
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const keywordCoverage = (text, jdKeywords) => {
   if (!jdKeywords || !jdKeywords.length) return 0;
@@ -72,9 +144,6 @@ const keywordCoverage = (text, jdKeywords) => {
 const overallScore = ({ formatting, skills, experience, readability, coverage }) =>
   formatting * 0.20 + skills * 0.25 + experience * 0.25 + readability * 0.15 + coverage * 0.15;
 
-/* =========================
-   Keywords (JD / fallback)
-   ========================= */
 async function tryLoadJDKeywords() {
   try {
     const jd = await fetchJSON("/api/versions/load/current");
@@ -98,9 +167,6 @@ function deriveKeywordsFromText(text, k = 30) {
   return [...count.entries()].sort((a,b)=>b[1]-a[1]).slice(0,k).map(([w])=>w);
 }
 
-/* =========================
-   Profile helper
-   ========================= */
 async function fetchProfile() {
   try {
     return await fetchJSON("/api/profile");
@@ -110,66 +176,67 @@ async function fetchProfile() {
 }
 
 /* =========================
-   UI atoms
+   New UI Components
    ========================= */
-function Card({ className = "", children }) {
-  return <div className={`card card-float ${className}`}>{children}</div>;
+
+function Header({ profile, searchQuery, setSearchQuery }) {
+  return (
+    <header className="ad-header">
+      <h1>Analytics</h1>
+      <div className="ad-header-right">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="ad-search-bar"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {profile && (
+          <div className="ad-profile">
+            <div className="ad-profile-name">{profile.name || "User"}</div>
+            <img
+              src={profile.avatar_url || "/default-avatar.png"}
+              alt="Profile"
+              className="ad-profile-img"
+            />
+          </div>
+        )}
+      </div>
+    </header>
+  );
 }
-function ScoreCard({ title, value, suffix = "%", caption }) {
+
+function KpiCard({ title, value, caption }) {
   const show = Number.isFinite(value);
   return (
-    <Card className="kpi-card hover-lift">
-      <div className="kpi-title">
-        {title}
-        {caption ? <span className="badge-delta up">{caption}</span> : null}
-      </div>
-      <div className="kpi-value">{show ? Math.round(value) : "—"}{suffix}</div>
-    </Card>
-  );
-}
-function MetricTile({ title, value, suffix = "%" }) {
-  const pct = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
-  return (
-    <Card className="metric-tile">
-      <div className="text-sm text-slate-500">{title}</div>
-      <div className="mt-2">
-        <div className="text-2xl font-semibold">
-          {Number.isFinite(value) ? Math.round(value) : "—"}{suffix}
-        </div>
-        <div className="metric-bar mt-3">
-          <div className="metric-bar-fill" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-    </Card>
-  );
-}
-function BreakdownBar({ items }) {
-  const total = Math.max(1, items.reduce((s, i) => s + (i.value || 0), 0));
-  return (
-    <div className="w-full">
-      <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-100">
-        {items.map((i, idx) => (
-          <div
-            key={i.label}
-            className={`grow bg-indigo-500/80 ${idx === 0 ? "rounded-l-full" : ""} ${idx === items.length - 1 ? "rounded-r-full" : ""}`}
-            style={{ width: `${(100 * (i.value || 0)) / total}%` }}
-            title={`${i.label}: ${Math.round(i.value || 0)}%`}
-          />
-        ))}
-      </div>
-      <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-slate-600">
-        {items.map((i) => (
-          <div key={i.label} className="flex items-center justify-between">
-            <span>{i.label}</span>
-            <span className="font-medium">{Math.round(i.value || 0)}%</span>
-          </div>
-        ))}
-      </div>
+    <div className="kpi-card">
+      <div className="kpi-title">{title}</div>
+      <div className="kpi-value">{show ? Math.round(value) : "—"}%</div>
+      {caption && <div className="kpi-caption">{caption}</div>}
     </div>
   );
 }
 
-/* ========= Polished TrendsChart ========= */
+function BreakdownLegend({ breakdown }) {
+  const items = [
+    { label: "Formatting", value: Math.round(breakdown?.formatting || 0) },
+    { label: "Skills", value: Math.round(breakdown?.skills || 0) },
+    { label: "Experience", value: Math.round(breakdown?.experience || 0) },
+    { label: "Readability", value: Math.round(breakdown?.readability || 0) },
+  ];
+  
+  return (
+    <div className="breakdown-legend">
+      {items.map((i) => (
+        <div key={i.label} className="breakdown-legend-item">
+          <span>{i.label}</span>
+          <span>{i.value}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function TrendsChart({ labels = [], datasets = [] }) {
   const ref = useRef(null);
   
@@ -178,34 +245,37 @@ function TrendsChart({ labels = [], datasets = [] }) {
 
     const css = getComputedStyle(document.documentElement);
     const palette = [
-      css.getPropertyValue("--tm-series-ats").trim() || "#6366F1",
-      css.getPropertyValue("--tm-series-skills").trim() || "#8B5CF6",
-      css.getPropertyValue("--tm-series-coverage").trim() || "#22C55E",
+      css.getPropertyValue("--primary-purple").trim() || "#7C3AED",
+      css.getPropertyValue("--primary-pink").trim() || "#EC4899",
+      "#22C55E", // Fallback green
     ];
-    const border = css.getPropertyValue("--tm-border").trim() || "#E5E7EB";
-    const muted = css.getPropertyValue("--tm-muted").trim() || "#6B7280";
+    const border = css.getPropertyValue("--border-color").trim() || "#E2E8F0";
+    const muted = css.getPropertyValue("--text-secondary").trim() || "#6B7280";
+    const primaryText = css.getPropertyValue("--text-primary").trim() || "#1E1A3F";
 
     const ctx = ref.current.getContext("2d");
     const mkFill = (hex) => {
       const g = ctx.createLinearGradient(0, 0, 0, ref.current.height || 300);
-      g.addColorStop(0, hex + "2A");
-      g.addColorStop(1, hex + "08");
+      g.addColorStop(0, hex + "33");
+      g.addColorStop(1, hex + "00");
       return g;
     };
+    
     const styled = (datasets || []).map((d, i) => {
       const color = palette[i % palette.length];
       return {
         ...d,
         borderColor: color,
         backgroundColor: mkFill(color),
-        borderWidth: 2,
+        borderWidth: 2.5,
         pointRadius: 0,
         pointHitRadius: 10,
-        pointHoverRadius: 4,
-        tension: 0.35,
-        cubicInterpolationMode: "monotone",
+        pointHoverRadius: 5,
+        pointHoverBorderWidth: 3,
+        pointHoverBackgroundColor: color,
+        pointHoverBorderColor: "#FFFFFF",
+        tension: 0.4,
         fill: true,
-        spanGaps: true,
       };
     });
 
@@ -221,28 +291,35 @@ function TrendsChart({ labels = [], datasets = [] }) {
           legend: {
             display: true,
             position: "top",
-            labels: { color: muted, boxWidth: 12, boxHeight: 12, usePointStyle: true, padding: 16 },
+            align: "end",
+            labels: { 
+              color: muted, 
+              boxWidth: 12, 
+              boxHeight: 12, 
+              usePointStyle: true, 
+              padding: 20,
+              font: { weight: '500' }
+            },
           },
           tooltip: {
-            backgroundColor: "#111827",
-            titleColor: "#fff",
-            bodyColor: "#E5E7EB",
-            padding: 10,
-            cornerRadius: 8,
-            displayColors: false,
+            backgroundColor: "#FFFFFF",
+            titleColor: primaryText,
+            bodyColor: muted,
+            padding: 12,
+            cornerRadius: 10,
+            borderColor: border,
+            borderWidth: 1,
+            displayColors: true,
             callbacks: { 
-              title: (tooltipItems) => labels[tooltipItems[0].dataIndex], // Show full label on hover
-              label: (c) => `${c.dataset.label}: ${c.parsed.y}%` 
+              title: (tooltipItems) => labels[tooltipItems[0].dataIndex],
+              label: (c) => ` ${c.dataset.label}: ${c.parsed.y}%`
             },
           },
         },
         scales: {
           x: { 
             grid: { display: false }, 
-            ticks: { 
-              color: muted, 
-              display: false, // <-- Hides the x-axis labels
-            } 
+            ticks: { display: false } 
           },
           y: {
             beginAtZero: true,
@@ -251,7 +328,6 @@ function TrendsChart({ labels = [], datasets = [] }) {
             grid: { color: border, drawBorder: false }
           },
         },
-        animations: { tension: { duration: 600, easing: "easeOutCubic", from: 0.1, to: 0.35 } }
       },
     });
 
@@ -261,32 +337,50 @@ function TrendsChart({ labels = [], datasets = [] }) {
   return <canvas ref={ref} />;
 }
 
+/* --- NEW VersionCard with POPUP --- */
 function VersionCard({ v }) {
   const score = Math.round(v?.score_overall ?? 0);
+  const b = v?.score_breakdown || {};
+
   return (
-    <div className="version-card card-float hover-lift">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm font-medium text-slate-700">{v?.name || v?.id}</div>
-          <div className="text-[11px] text-slate-500">{v?.created_at || "—"}</div>
+    <div className="version-card">
+      
+      {/* Front (Small Square) */}
+      <div className="version-card-front">
+        <div className="version-card-front-header">
+          <div className="version-card-front-title">{v?.name || v?.id}</div>
+          <div className="version-card-front-score">{Number.isFinite(score) ? score : "—"}%</div>
         </div>
-        <div className="text-lg font-semibold">{Number.isFinite(score) ? score : "—"}%</div>
+        
+        <div className="version-card-chips">
+          <div className="version-chip-small">Skills: {Math.round(b.skills ?? 0)}%</div>
+          <div className="version-chip-small">Exp: {Math.round(b.experience ?? 0)}%</div>
+          <div className="version-chip-small">Format: {Math.round(b.formatting ?? 0)}%</div>
+          <div className="version-chip-small">Cover: {Math.round(b.keyword_coverage ?? 0)}%</div>
+        </div>
       </div>
-      <div className="mt-2 text-xs text-slate-500 line-clamp-2">
-        {v?.summary || "No summary available."}
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-        <div className="version-chip series-skills">Skills: {Math.round(v?.score_breakdown?.skills ?? 0)}%</div>
-        <div className="version-chip">Experience: {Math.round(v?.score_breakdown?.experience ?? 0)}%</div>
-        <div className="version-chip">Formatting: {Math.round(v?.score_breakdown?.formatting ?? 0)}%</div>
-        <div className="version-chip series-coverage">Coverage: {Math.round(v?.score_breakdown?.keyword_coverage ?? 0)}%</div>
+
+      {/* Back (The Popup) */}
+      <div className="version-card-popup">
+        <div className="version-title">{v?.name || v?.id}</div>
+        <div className="version-summary">
+          {v?.summary || "No summary available."}
+        </div>
+        <div className="details-title">Detailed Score Breakdown</div>
+        <ul>
+          <li><span>Skills Match:</span> <span>{Math.round(b.skills ?? 0)}%</span></li>
+          <li><span>Experience:</span> <span>{Math.round(b.experience ?? 0)}%</span></li>
+          <li><span>Formatting:</span> <span>{Math.round(b.formatting ?? 0)}%</span></li>
+          <li><span>Readability:</span> <span>{Math.round(b.readability ?? 0)}%</span></li>
+          <li><span>Keyword Coverage:</span> <span>{Math.round(b.keyword_coverage ?? 0)}%</span></li>
+        </ul>
       </div>
     </div>
   );
 }
 
 /* =========================
-   Main page
+   Main Dashboard Component
    ========================= */
 export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
@@ -296,7 +390,7 @@ export default function AnalyticsDashboard() {
   const [trend, setTrend] = useState(null);
   const [breakdown, setBreakdown] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // State for the search bar
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -329,7 +423,7 @@ export default function AnalyticsDashboard() {
           const sFormatting = sectionScore(data);
           const sSkills = skillsScore(data);
           const sExperience = experienceScore(data);
-          const sReadability = flesch(text);
+          const sReadability = lenientReadability(text); 
           const sCoverage = keywordCoverage(text, jdKeywords);
           const overall = overallScore({
             formatting: sFormatting,
@@ -382,6 +476,8 @@ export default function AnalyticsDashboard() {
           readability: avg(computed.map((v) => v.score_breakdown.readability)),
         };
 
+        br.formatting_readability = (br.formatting + br.readability) / 2;
+
         setVersions(computed);
         setOverview(ov);
         setTrend(tr);
@@ -416,7 +512,6 @@ export default function AnalyticsDashboard() {
     URL.revokeObjectURL(url);
   };
   
-  // Filter versions based on search query
   const filteredVersions = versions.filter(v => 
     v.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -424,21 +519,11 @@ export default function AnalyticsDashboard() {
   if (loading) {
     return (
       <div className="analytics-container">
-        <div className="dashboard-shell space-y-6">
-          <div className="skeleton h-10 w-64 rounded-lg" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="skeleton h-28 rounded-2xl" />
-            <div className="skeleton h-28 rounded-2xl" />
-            <div className="skeleton h-28 rounded-2xl" />
-          </div>
-          <div className="skeleton h-72 rounded-2xl" />
-          <div className="skeleton h-56 rounded-2xl" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="skeleton h-32 rounded-xl" />
-            <div className="skeleton h-32 rounded-xl" />
-            <div className="skeleton h-32 rounded-xl" />
-          </div>
-        </div>
+        <main className="ad-main-content">
+          <Header profile={profile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <div>Loading...</div>
+          {/* Add Skeleton Loaders here */}
+        </main>
       </div>
     );
   }
@@ -446,158 +531,92 @@ export default function AnalyticsDashboard() {
   if (error) {
     return (
       <div className="analytics-container">
-        <div className="dashboard-shell">
-          <div className="rounded-xl bg-rose-50 text-rose-700 p-4 shadow-sm">
-            <div className="font-semibold">Couldn’t load dashboard</div>
-            <div className="text-sm mt-1">{error}</div>
+        <main className="ad-main-content">
+          <Header profile={profile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <div className="ad-card">
+            <h2 className="ad-card-title" style={{color: 'var(--danger)'}}>Couldn’t load dashboard</h2>
+            <p>{error}</p>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="analytics-container">
-      <div className="dashboard-shell space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-            <p className="text-xs text-slate-500 mt-1">Data source: your saved versions</p>
-          </div>
-          {profile && (
-            <div className="flex items-center gap-3">
-              <img
-                src={profile.avatar_url || "/default-avatar.png"}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover border"
-              />
-              <div className="text-right">
-                <div className="text-sm font-medium text-slate-700">{profile.name || "User"}</div>
-                <div className="text-xs text-slate-500">{profile.email || ""}</div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* KPI row */}
+      <main className="ad-main-content">
+        <Header profile={profile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        
         <div className="kpi-grid">
-          <ScoreCard title="Average ATS Score" value={overview?.avg_score} />
-          <ScoreCard title="Best Version" value={overview?.best_score} caption={overview?.best_version} />
-          <ScoreCard title="Avg. Keyword Coverage" value={overview?.avg_keyword_coverage} />
+          <KpiCard title="Average ATS Score" value={overview?.avg_score} />
+          <KpiCard title="Best Version" value={overview?.best_score} caption={overview?.best_version} />
+          <KpiCard title="Avg. Keyword Coverage" value={overview?.avg_keyword_coverage} />
         </div>
 
-        {/* Main overview + list */}
-        <div className="compact-grid">
-          <Card className="chart-card is-active">
-            <div className="card-head">
-              <div className="card-title">Score Overview</div>
-              <div className="toolbar">
-                <button className="btn-icon">Weekly</button>
-                <button className="btn-icon">Filter</button>
-                <button className="btn-icon">⋯</button>
-              </div>
+        <div className="ad-card">
+          <div className="ad-card-header">
+            <div className="ad-card-title">Score Overview</div>
+            <div className="ad-card-toolbar">
+              <button className="ad-button">Weekly</button>
             </div>
-            <div className="chart-container">
-              <TrendsChart
-                labels={trend?.labels || []}
-                datasets={(trend?.series || []).map((s) => ({ label: s.label, data: s.data }))}
-              />
-            </div>
-            <div className="card-foot">
-              <span className="legend-note">Smoothed lines; values in %</span>
-              <span className="legend-note">Updated just now</span>
-            </div>
-          </Card>
-
-          <Card>
-            <div className="card-head">
-              <div className="card-title">Versions Snapshot</div>
-              <div className="toolbar">
-                <button className="btn-icon" onClick={exportCSV}>Export</button>
-              </div>
-            </div>
-            {!versions.length ? (
-              <div className="text-sm text-slate-500">No versions found.</div>
-            ) : (
-              <table className="mini-table">
-                <thead>
-                  <tr>
-                    <th>Version</th>
-                    <th>ATS</th>
-                    <th>Coverage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {versions.slice(0, 7).map((v) => (
-                    <tr key={v.id}>
-                      <td style={{ maxWidth: 240, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {v.name}
-                      </td>
-                      <td>{Math.round(v.score_overall)}%</td>
-                      <td>{Math.round(v.score_breakdown.keyword_coverage)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Card>
-        </div>
-
-        {/* Breakdown tiles */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <MetricTile title="Experience Alignment" value={breakdown?.experience} />
-          <MetricTile title="Skills Match" value={breakdown?.skills} />
-          <MetricTile title="Formatting & Readability" value={breakdown?.readability} />
-        </div>
-
-        {/* Component breakdown */}
-        <Card>
-          <div className="card-title">Component Breakdown</div>
-          <div className="mt-4">
-            <BreakdownBar
-              items={[
-                { label: "Formatting", value: Math.round(breakdown?.formatting || 0) },
-                { label: "Skills", value: Math.round(breakdown?.skills || 0) },
-                { label: "Experience", value: Math.round(breakdown?.experience || 0) },
-                { label: "Readability", value: Math.round(breakdown?.readability || 0) },
-              ]}
+          </div>
+          <div className="chart-container">
+            <TrendsChart
+              labels={trend?.labels || []}
+              datasets={(trend?.series || []).map((s) => ({ label: s.label, data: s.data }))}
             />
           </div>
-        </Card>
+        </div>
 
-        {/* Detailed versions */}
-        <Card>
-          <div className="card-head">
-            <div className="card-title">Versions</div>
-            <div className="toolbar">
-              <input
-                type="text"
-                placeholder="Search versions..."
-                className="btn-icon" /* Reusing btn-icon style for consistency */
-                style={{ width: '200px', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        <div className="ad-bottom-grid">
+          <div className="ad-card">
+            <div className="ad-card-title">Component Breakdown</div>
+            <div className="metric-bar" style={{marginTop: '1.5rem'}}>
+              <div className="metric-bar-fill" style={{ width: `${overview?.avg_score || 0}%` }} />
             </div>
+            <BreakdownLegend breakdown={breakdown} />
+          </div>
+
+          <div className="ad-card">
+            <div className="ad-card-header">
+              <div className="ad-card-title">Versions Snapshot</div>
+              <div className="ad-card-toolbar">
+                <button className="ad-button" onClick={exportCSV}>Export</button>
+              </div>
+            </div>
+            <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
+              {versions.slice(0, 5).map((v) => (
+                <li key={v.id} style={{display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)'}}>
+                  <span>{v.name}</span>
+                  <span style={{fontWeight: 600, color: 'var(--text-primary)'}}>{Math.round(v.score_overall)}%</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="ad-card">
+          <div className="ad-card-header">
+            <div className="ad-card-title">All Versions</div>
           </div>
           {!filteredVersions.length ? (
-            <div className="text-sm text-slate-500">
+            <div style={{color: 'var(--text-secondary)'}}>
               {versions.length > 0 ? "No versions match your search." : "No versions found."}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="version-grid">
               {filteredVersions.map((v) => <VersionCard key={v.id || v.name} v={v} />)}
             </div>
           )}
-        </Card>
-      </div>
+        </div>
+
+      </main>
     </div>
   );
 }
 
-/* utils */
 function avg(arr) {
   if (!arr || !arr.length) return 0;
   return arr.reduce((a, b) => a + (Number.isFinite(b) ? b : 0), 0) / arr.length;
 }
+

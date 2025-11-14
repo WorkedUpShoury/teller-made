@@ -15,7 +15,32 @@
     }
   ],
   "summary": "Driven and detail-oriented Master's student with a strong foundation in AI/ML, cybersecurity, and full-stack development. Proven ability to architect and implement robust solutions, including an AI-powered mock interview platform, a desktop file security application with AES-256 encryption, and a dynamic job portal. Proficient in Python, React, SQL, and AWS, with a keen interest in leveraging technology for secure and intelligent system design.",
-  "skills": [],
+  "skills": [
+    "AES-256 Encryption",
+    "AI/ML",
+    "AWS",
+    "Computer Vision",
+    "Cybersecurity",
+    "Data Structures & Algorithms",
+    "FastAPI",
+    "Flask",
+    "Full Stack Development",
+    "Git",
+    "GitHub",
+    "GPT-4",
+    "Intrusion Detection Systems (IDS)",
+    "Java",
+    "MediaPipe",
+    "MySQL",
+    "Networking",
+    "NLP",
+    "Object-Oriented Programming (OOP)",
+    "Python",
+    "React",
+    "Speech Analysis",
+    "SQL",
+    "Whisper"
+  ],
   "sections": [
     {
       "id": "hg4pezw",
@@ -67,7 +92,7 @@
           "name": "CypherStack",
           "link": "",
           "summary": "",
-          "end": "Dec 2024"
+          "end": "Dec 2023"
         },
         {
           "bullets": [
@@ -78,7 +103,7 @@
           "name": "Job Portal",
           "link": "",
           "summary": "",
-          "end": "April 2025"
+          "end": "Apr 2024"
         }
       ]
     },
@@ -114,8 +139,8 @@
       "items": [
         {
           "bullets": [],
-          "name": "Appreciation Prize",
-          "issuer": "Hack MIT-WPU’25 Ideathon : for conceptualizing SecuScan, an innovative AI-powered security scanner designed for proactive threat prevention.",
+          "name": "Appreciation Prize (SecuScan Concept)",
+          "issuer": "Hack MIT-WPU’25 Ideathon",
           "date": "",
           "location": "",
           "url": ""

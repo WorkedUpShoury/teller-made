@@ -10,7 +10,7 @@
       "url": "https://github.com/vishalkumar0911"
     }
   ],
-  "summary": "Highly motivated Full Stack Developer with hands-on experience in Java, Python, and SQL, eager to contribute strong problem-solving and analytical skills to a dynamic team embracing DevOps culture. Proficient in Unix commands and version control systems (Git), with a foundational understanding of servers, virtualization, and networking. Committed to continuous learning and applying coding skills in Core Java and Spring Boot, demonstrating enthusiasm and an open mind to new ideas to deliver quality output.",
+  "summary": "Results-oriented Full Stack Developer proficient in Java, Python, SQL, Spring Boot, and React. Eager to build robust applications and contribute to a dynamic DevOps-focused environment. Experienced with Unix, Git, and foundational server/networking concepts.",
   "skills": [],
   "sections": [
     {
@@ -109,8 +109,8 @@
       "items": [
         {
           "bullets": [
-            "Architected a full-stack AI interview coaching platform using Python (FastAPI) for the RESTful API backend and MongoDB, demonstrating hands-on Python development and database management skills.",
-            "Integrated advanced AI APIs (OpenAI GPT-4, Whisper) to analyze video/audio data, showcasing strong analytical and problem-solving abilities."
+            "Architected a full-stack AI interview coaching platform using Python (FastAPI) for the backend and MongoDB.",
+            "Integrated advanced AI APIs (OpenAI GPT-4, Whisper) for video/audio data analysis."
           ],
           "name": "Intervue.ai – AI-Powered Mock Interview Platform",
           "link": null,
@@ -118,8 +118,8 @@
         },
         {
           "bullets": [
-            "Engineered a full-stack job portal leveraging Core Java (JSP, Servlets) for the backend and MySQL for database management, demonstrating hands-on Java coding and SQL proficiency.",
-            "Developed and integrated a Resume Optimizer and ATS, significantly improving candidate-job match accuracy by 40% through analytical problem-solving."
+            "Engineered a full-stack job portal leveraging Core Java (JSP, Servlets) and MySQL.",
+            "Developed and integrated a Resume Optimizer and ATS, improving candidate-job match accuracy by 40%."
           ],
           "name": "Hirearchy – Role-Based Job Portal",
           "link": null,
@@ -127,8 +127,8 @@
         },
         {
           "bullets": [
-            "Developed a Python GUI application incorporating Random Forest and rule-based models for phishing detection, showcasing hands-on Python development and analytical skills.",
-            "Achieved over 90% detection accuracy on real-world datasets and managed the complete application lifecycle, from design to testing, demonstrating problem-solving and foundational release planning awareness."
+            "Developed a Python GUI application incorporating Random Forest and rule-based models for phishing detection.",
+            "Achieved over 90% detection accuracy on real-world datasets and managed the complete application lifecycle."
           ],
           "name": "Phishing URL Detector (ML-based)",
           "link": null,
@@ -145,21 +145,21 @@
           "bullets": [],
           "title": "Winner, HackMITWPU Ideathon 2025",
           "date": "2025",
-          "summary": "Pitched AI-based Threat Scanner; recognized for innovation.",
+          "summary": "Pitched and recognized for innovative AI-based Threat Scanner.",
           "link": null
         },
         {
           "bullets": [],
           "title": "Google Cybersecurity Certified",
           "date": null,
-          "summary": "Trained in web, network, and data protection fundamentals.",
+          "summary": "Certified in web, network, and data protection fundamentals.",
           "link": null
         },
         {
           "bullets": [],
           "title": "1st Prize, IT Conclave (BCA)",
           "date": null,
-          "summary": "Built automatic street lamp prototype using LDR and microcontroller.",
+          "summary": "Built and presented an automatic street lamp prototype.",
           "link": null
         }
       ]

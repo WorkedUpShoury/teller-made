@@ -5,8 +5,45 @@
   "phone": "+91 6204518249",
   "location": "Kothrud, PUNE",
   "profiles": [],
-  "summary": "Highly motivated MCA student with hands-on experience in full-stack development, AI/ML integration, and robust security systems. Proficient in Python, JavaScript, Java, and SQL, with a strong foundation in software engineering principles, microservices architecture, and database management. Proven ability to develop and deploy high-performance applications, integrate advanced APIs, and implement secure solutions. Eager to leverage technical expertise to contribute to innovative software projects and grow within a dynamic technology environment.",
-  "skills": [],
+  "summary": "Highly motivated MCA student with practical experience in Full-Stack Development, AI/ML Integration, and Robust Security Systems. Proficient in Python, JavaScript, Java, and SQL, with expertise in Software Engineering Principles, Microservices Architecture, and Database Management. Proven ability to develop and deploy High-Performance Applications, integrate Advanced APIs, and implement Secure Solutions. Seeking to leverage technical expertise to contribute to innovative software projects and drive technological growth.",
+  "skills": [
+    "AES-256 Encryption",
+    "AI/ML Integration",
+    "API Integration",
+    "AWS",
+    "Communication",
+    "Data Structures and Algorithms (DSA)",
+    "Database Management",
+    "Docker",
+    "FastAPI",
+    "Full-Stack Development",
+    "Git",
+    "GitHub",
+    "Intrusion Detection Systems (IDS)",
+    "Java",
+    "JavaFX",
+    "JavaScript",
+    "JWT",
+    "Linux",
+    "Microservices Architecture",
+    "Multi-threading",
+    "MySQL",
+    "Next.js",
+    "Node.js",
+    "Object-Oriented Programming (OOP)",
+    "OpenAI API",
+    "Problem-Solving",
+    "Prompt Engineering",
+    "Python",
+    "RAG Architecture",
+    "React.js",
+    "Secure Solutions",
+    "Security Systems",
+    "Software Engineering Principles",
+    "SQL",
+    "Time Management",
+    "Vector Databases"
+  ],
   "sections": [
     {
       "id": "gtguegv",
@@ -82,49 +119,6 @@
           "id": "",
           "url": "",
           "date": "jun 2025 – Aug 2025"
-        }
-      ]
-    },
-    {
-      "id": "uocurxj",
-      "type": "skillsets",
-      "title": "Skills",
-      "items": [
-        {
-          "languages": [],
-          "soft": [],
-          "concepts": [],
-          "tools": [],
-          "platforms": [],
-          "name": "",
-          "authority": "",
-          "id": "",
-          "url": "",
-          "date": ""
-        },
-        {
-          "languages": [
-            "Python",
-            "Java",
-            "MySQL"
-          ],
-          "soft": [
-            "Communication",
-            "Problem-Solving",
-            "Time Management"
-          ],
-          "concepts": [
-            "OOP",
-            "DSA"
-          ],
-          "tools": [
-            "Git",
-            "GitHub"
-          ],
-          "platforms": [
-            "AWS",
-            "Linux"
-          ]
         }
       ]
     }
